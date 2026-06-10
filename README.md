@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cauce v2
 
-## Getting Started
+Agencia productizada de **automatización con IA para negocios** (Bahía Blanca, opera remoto).
+Promesa: *"Cualquier empresa, cualquier proceso, resuelto con mínimos clicks."*
 
-First, run the development server:
+## Arranque rápido (desarrollo)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run db:dev      # terminal 1: Postgres embebido (puerto 5433)
+npm run db:push     # primera vez: aplica el schema
+npm run db:seed     # primera vez: recetas, pricing, usuarios
+npm run dev         # terminal 2: la app en http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Usuarios del seed:** admin `fran` / `cauce2026` · cliente demo `vespa` / `vespa2026` (¡cambialas!).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Las tres superficies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Superficie | Ruta | Qué es |
+|---|---|---|
+| Sitio público | `/` | Landing, doble puerta (intake `/intake` + consultoría `/consultoria`), precios, casos |
+| Portal cliente | `/portal` | Sus automatizaciones, contenido del bot, canal, uso, reportes, facturación |
+| Admin (Fran) | `/admin` | Pipeline kanban, leads+diagnóstico IA, clientes, recetario, consultorías+roadmap IA, pricing |
+| Cauce OS | `/os/[slug]` | El software propio de cada cliente (multi-tenant): CRM + Turnos (+ stock/RRHH/caja en F7) |
 
-## Learn More
+## Producción
 
-To learn more about Next.js, take a look at the following resources:
+1. Crear proyecto **nuevo** en Neon → `DATABASE_URL` en Vercel (no usar la DB del v1).
+2. Variables: `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `ENCRYPTION_KEY` (hex 32 bytes), `ANTHROPIC_API_KEY`, `CAUCE_WEBHOOK_SECRET`.
+3. Opcionales por feature: `N8N_URL`+`N8N_API_KEY` (motor), `NEXT_PUBLIC_CAL_URL` (booking), `WHATSAPP_*` (canal), `TENANT_BASE_DOMAIN` (subdominios `cliente.cauce.app`).
+4. `npx prisma db push && npm run db:seed` contra Neon la primera vez.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentos de trabajo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `DEFINITION_OF_DONE.md` — el estándar de calidad de toda pantalla.
+- `PEDIDOS.md` — criterios de aceptación vivos + decisiones tomadas + credenciales pendientes.
 
-## Deploy on Vercel
+## Seguridad (no negociable)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Credenciales de clientes cifradas **AES-256-GCM** (`src/lib/crypto.ts`), jamás en claro.
+- Toda automatización nace en `TEST`, jamás directo a `ACTIVE`.
+- Multi-tenant: toda query de módulos OS scopeada por `clientId`; un cliente jamás ve datos de otro.
+- Rate-limit + zod en endpoints públicos; APIs devuelven JSON 401 (no redirect).
+- Mercado Pago: **diferido (F8)** — modelos `Subscription`/`Invoice` listos, sin integración.
