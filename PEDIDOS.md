@@ -6,9 +6,16 @@ Cada pedido de Francisco se anota como criterio verificable. Estados: ⏳ pendie
 
 | # | Pedido | Estado | Notas |
 |---|---|---|---|
-| 1 | Crear la empresa completa del kit en carpeta nueva | ⏳ | En curso, fases F0→F6 |
+| 1 | Crear la empresa completa del kit en carpeta nueva | ✅ | F0→F6 construidas; build verde; F7 (módulos restantes OS) y F8 (MP) diferidas según el kit |
 | 2 | **Design tokens diferidos** — "los design tokens dejalos para más tarde" | ✅ | Set neutro centralizado en `globals.css`; cuando Fran pegue los tokens del v1 se reemplazan ahí y toda la app los toma |
-| 3 | Empresa funcional, "que no le erre", lista para rendir al 100% | ⏳ | Verificación end-to-end al cierre |
+| 3 | Empresa funcional, "que no le erre", lista para rendir al 100% | 🔍 | Verificado: build + typecheck verdes, login en las 3 superficies, 31 screenshots en `evidencia/` |
+| 4 | Preview corriendo | ✅ | `npm run dev` → http://localhost:3000 (el panel de preview de Claude.app está roto en esta instalación — binario `disclaimer` faltante) |
+| 5 | Manual de uso | ✅ | `MANUAL.md` |
+| 6 | 20 mejoras aplicables, iniciar las posibles | ✅ | `MEJORAS.md` — 10 implementadas hoy |
+| 7 | 10 leads de complejidad variada con resolución completa | ✅ | `npm run demo` (idempotente): N1→N4, 6 áreas, blueprints, todos aprobados, 27 automatizaciones en TEST con config, QA corrido, usuarios de portal, suscripciones, uso del mes y reportes. 3 con roadmap de consultoría. 4 con Cauce OS activo (módulos + branding) |
+| 8 | Lo que traba n8n/WhatsApp dejarlo para después | ✅ | Automatizaciones quedan en TEST listas para provisionar; proyectos en QA con nota |
+
+⚠️ **Importante:** las DOS API keys de Anthropic (CAUCE-NUEVO y la del bot de Vespa) están **sin créditos** ("credit balance too low"). Los 10 blueprints/roadmaps de la demo salieron del **fallback curado** del script (calidad cuidada a mano). Con créditos cargados, todo lead nuevo se diagnostica con IA real automáticamente — el código ya está y se probó el camino de error.
 
 ## Decisiones técnicas tomadas en autonomía (revisar)
 
