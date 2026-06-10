@@ -10,7 +10,8 @@
     "db:dev": "tsx scripts/devdb.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "demo": "tsx scripts/demo-leads.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -22,7 +22,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({ pathname, onNavigate, newLeads }: { pathname: string; onNavigate?: () => void; newLeads?: number }) {
   return (
     <nav className="flex flex-col gap-1">
       {NAV.map((item) => {
@@ -40,6 +40,11 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
           >
             <span aria-hidden>{item.icon}</span>
             {item.label}
+            {item.href === "/admin/leads" && newLeads ? (
+              <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground">
+                {newLeads}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -58,10 +63,12 @@ function EngineBadge({ connected }: { connected: boolean }) {
 export function AdminShell({
   adminName,
   n8nConnected,
+  newLeads = 0,
   children,
 }: {
   adminName: string;
   n8nConnected: boolean;
+  newLeads?: number;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -97,7 +104,7 @@ export function AdminShell({
           <span className="text-xs font-medium text-muted-foreground">admin</span>
         </Link>
         <div className="flex-1 overflow-y-auto">
-          <NavLinks pathname={pathname} />
+          <NavLinks pathname={pathname} newLeads={newLeads} />
         </div>
         {userBlock}
       </aside>
@@ -122,7 +129,7 @@ export function AdminShell({
       </header>
       {menuOpen ? (
         <div className="border-b bg-card p-4 lg:hidden">
-          <NavLinks pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+          <NavLinks pathname={pathname} newLeads={newLeads} onNavigate={() => setMenuOpen(false)} />
           <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
             <div>
               <p className="text-sm font-medium">{adminName}</p>

@@ -43,5 +43,14 @@ export async function generateMonthlyReport(clientId: string, period?: string): 
     create: { clientId, period: p, content },
     update: { content },
   });
+
+  // El costo variable estimado del cliente se actualiza con el uso real
+  // → el dashboard muestra margen (MRR vs costo) de verdad.
+  if (usage?.costUsd) {
+    await db.client.update({
+      where: { id: clientId },
+      data: { costEstUsd: Math.round(usage.costUsd * 100) / 100 },
+    });
+  }
   return { reportId: report.id };
 }
