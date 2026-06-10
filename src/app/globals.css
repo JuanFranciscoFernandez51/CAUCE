@@ -3,52 +3,55 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ════════════════════════════════════════════════════════════
-   DESIGN TOKENS DE CAUCE — punto único de theming.
-   Los tokens definitivos del brand (v1) están DIFERIDOS:
-   cuando lleguen, se reemplazan SOLO estas variables y toda
-   la app los toma. Ninguna pantalla usa colores ad-hoc.
+   DESIGN TOKENS DE CAUCE — dirección "Corriente" (v1, handoff).
+   Fuente: Cauce - Design Tokens.html
+   Paleta: ink/surface/line · blue #2E6BFF (acción) · cyan #7FE8FF
+   (señal/énfasis) · dark-first con modo claro sobre --fog.
+   Punto único de theming: NINGUNA pantalla usa colores ad-hoc.
    ════════════════════════════════════════════════════════════ */
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  /* modo claro — derivado del brand sobre --fog */
+  --background: #f4f6fa; /* fog */
+  --foreground: #0b0f16; /* ink */
   --card: #ffffff;
-  --card-foreground: #1c1917;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  --border: #e7e5e4;
-  --input: #e7e5e4;
-  --primary: #0f766e;
+  --card-foreground: #0b0f16;
+  --muted: #e7ebf2;
+  --muted-foreground: #6b7689; /* faint */
+  --border: #d9dfea;
+  --input: #c9d2e0;
+  --primary: #2e6bff; /* blue — acción/CTA */
   --primary-foreground: #ffffff;
-  --primary-soft: #ccfbf1;
-  --accent: #f59e0b;
-  --accent-foreground: #1c1917;
-  --destructive: #dc2626;
+  --primary-soft: #e0e9ff;
+  --accent: #7fe8ff; /* cyan — señal/énfasis */
+  --accent-foreground: #0b0f16;
+  --destructive: #e03e3e;
   --destructive-foreground: #ffffff;
-  --success: #16a34a;
-  --warning: #d97706;
-  --ring: #0f766e;
-  --radius: 0.75rem;
+  --success: #189d58;
+  --warning: #b26205;
+  --ring: #2e6bff;
+  --radius: 0.875rem; /* 14px */
 }
 
 .dark {
-  --background: #0c0a09;
-  --foreground: #f5f5f4;
-  --card: #1c1917;
-  --card-foreground: #f5f5f4;
-  --muted: #292524;
-  --muted-foreground: #a8a29e;
-  --border: #292524;
-  --input: #44403c;
-  --primary: #2dd4bf;
-  --primary-foreground: #042f2e;
-  --primary-soft: #134e4a;
-  --accent: #fbbf24;
-  --accent-foreground: #1c1917;
-  --destructive: #ef4444;
+  /* modo oscuro — valores exactos del brand */
+  --background: #0b0f16; /* ink */
+  --foreground: #ffffff;
+  --card: #121a28; /* surface */
+  --card-foreground: #ffffff;
+  --muted: #19243a; /* surface-2 */
+  --muted-foreground: #aeb9cc; /* muted */
+  --border: #243047; /* line */
+  --input: #2c3a55;
+  --primary: #2e6bff; /* blue */
+  --primary-foreground: #ffffff;
+  --primary-soft: #16264a;
+  --accent: #7fe8ff; /* cyan */
+  --accent-foreground: #0b0f16;
+  --destructive: #ff4d4d; /* error */
   --destructive-foreground: #ffffff;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --ring: #2dd4bf;
+  --success: #2bd576;
+  --warning: #ffb020;
+  --ring: #5e8cff; /* blue-400 */
 }
 
 @theme inline {
@@ -70,11 +73,19 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-ring: var(--ring);
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 0.25rem);
-  --radius-sm: calc(var(--radius) - 0.5rem);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* radios del brand: sm 8 · md 14 · lg 22 · xl 30 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  /* sombras del brand */
+  --shadow-sm: 0 1px 2px rgb(11 15 22 / 0.1), 0 16px 40px -28px rgb(11 15 22 / 0.35);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 24px 60px -32px rgba(0, 0, 0, 0.7);
+  --shadow-blue: 0 12px 40px -12px rgba(46, 107, 255, 0.5);
+  /* tipografía: Space Grotesk (display) · IBM Plex Sans (UI) · IBM Plex Mono (datos) */
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
 }
 
 body {
@@ -85,4 +96,20 @@ body {
 
 * {
   border-color: var(--border);
+}
+
+/* Display del brand en los encabezados, con tracking apretado */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Gradiente "flow" del brand (realce) */
+.text-flow {
+  background: linear-gradient(100deg, #2e6bff, #7fe8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

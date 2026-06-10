@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {/* Brand "Corriente" es dark-first: oscuro por defecto, toggle siempre visible */}
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         {children}
       </ThemeProvider>
     </SessionProvider>

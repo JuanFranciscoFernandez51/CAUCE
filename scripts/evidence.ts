@@ -24,9 +24,9 @@ async function login(ctx: BrowserContext, username: string, password: string) {
 
 async function snap(ctx: BrowserContext, path: string, name: string, dark: boolean) {
   const page = await ctx.newPage();
-  await page.emulateMedia({ colorScheme: dark ? "dark" : "light" });
+  // next-themes (defaultTheme dark, sin system): el tema vive en localStorage
+  await page.addInitScript(`window.localStorage.setItem("theme", "${dark ? "dark" : "light"}")`);
   await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
-  // next-themes con defaultTheme system sigue prefers-color-scheme emulado
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${OUT}/${name}${dark ? "-dark" : ""}.png`, fullPage: false });
   await page.close();

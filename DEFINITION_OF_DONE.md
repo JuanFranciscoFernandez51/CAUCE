@@ -6,9 +6,9 @@ Nada se reporta "listo" si no cumple TODO:
 - [ ] **Responsive** verificado: 375px / tablet / desktop
 - [ ] **Estados completos:** vacío (sin datos), cargando, error, éxito — todos diseñados
 - [ ] **Design tokens de Cauce** aplicados (cero estilos ad-hoc, cero pantallas "crudas")
-  - *Nota temporal:* los tokens definitivos del brand están DIFERIDOS por decisión de Francisco (2026-06-10).
-    Mientras tanto rige el set neutro de `globals.css` (variables CSS centralizadas). Cuando lleguen los
-    tokens del v1, se pegan en `globals.css` y toda la app los toma — ninguna pantalla usa colores ad-hoc.
+  - Brand **"Corriente"** aplicado el 10/06 desde `Cauce - Design Tokens.html`: ink/surface/blue/cyan,
+    Space Grotesk (display) + IBM Plex Sans/Mono, radios 8/14/22px, dark-first. Todo vive en
+    `globals.css` — ninguna pantalla usa colores ad-hoc; no salirse de estos tokens.
 - [ ] **Datos reales** de la DB (cero lorem ipsum, cero hardcodeo)
 - [ ] **Todo botón/acción funciona** (nada decorativo muerto)
 - [ ] Build verde, typecheck limpio, consola sin errores

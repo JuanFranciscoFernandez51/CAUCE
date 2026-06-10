@@ -7,7 +7,7 @@ Cada pedido de Francisco se anota como criterio verificable. Estados: ⏳ pendie
 | # | Pedido | Estado | Notas |
 |---|---|---|---|
 | 1 | Crear la empresa completa del kit en carpeta nueva | ✅ | F0→F6 construidas; build verde; F7 (módulos restantes OS) y F8 (MP) diferidas según el kit |
-| 2 | **Design tokens diferidos** — "los design tokens dejalos para más tarde" | ✅ | Set neutro centralizado en `globals.css`; cuando Fran pegue los tokens del v1 se reemplazan ahí y toda la app los toma |
+| 2 | **Design tokens del brand "Corriente" APLICADOS** (10/06, pedido de Fran: "no te salgas de eso") | 🔍 | Tomados de `Cauce - Design Tokens.html`: ink/surface/line, blue #2E6BFF, cyan #7FE8FF, Space Grotesk + IBM Plex Sans/Mono, radios 8/14/22, dark-first (modo claro sobre --fog). Evidencia regenerada con el brand |
 | 3 | Empresa funcional, "que no le erre", lista para rendir al 100% | 🔍 | Verificado: build + typecheck verdes, login en las 3 superficies, 31 screenshots en `evidencia/` |
 | 4 | Preview corriendo | ✅ | `npm run dev` → http://localhost:3000 (el panel de preview de Claude.app está roto en esta instalación — binario `disclaimer` faltante) |
 | 5 | Manual de uso | ✅ | `MANUAL.md` |
