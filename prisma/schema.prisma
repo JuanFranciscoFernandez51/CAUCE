@@ -1,0 +1,531 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ════════════════════════════════════════════════
+// USUARIOS Y AUTH
+// ════════════════════════════════════════════════
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String?  @unique
+  passwordHash String
+  name         String
+  role         Role     @default(CLIENT)
+  clientId     String? // tenant al que pertenece (si role=CLIENT)
+  client       Client?  @relation(fields: [clientId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ════════════════════════════════════════════════
+// CLIENTE = TENANT DE CAUCE OS
+// ════════════════════════════════════════════════
+
+enum Pack {
+  NONE
+  STARTER
+  PRO
+  SCALE
+  CUSTOM
+}
+
+enum ClientStatus {
+  PROSPECT
+  ONBOARDING
+  ACTIVE
+  PAUSED
+  CHURNED
+}
+
+model Client {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique // subdominio: slug.cauce.app
+  rubro       String? // libre: "taller de motos", "consultorio", etc.
+  pack        Pack         @default(NONE)
+  status      ClientStatus @default(PROSPECT)
+  mrr         Float        @default(0) // USD mensual
+  setupPaid   Float        @default(0) // USD setup cobrado
+  costEstUsd  Float        @default(0) // costo variable estimado/mes
+  health      Int          @default(100) // 0-100 salud de la cuenta
+  // Cauce OS — personalización por configuración, JAMÁS fork
+  branding    Json? // { logo, colors:{primary,...}, font }
+  modules     String[]     @default([]) // ["crm","turnos","catalogo","rrhh","caja"]
+  customFields Json? // { contact:[{key,label,type}], appointment:[...], product:[...] }
+  domain      String? // dominio propio opcional
+  settings    Json? // horarios, datos del negocio, FAQs del bot, etc.
+  contactName String?
+  email       String?
+  phone       String?
+  whatsapp    String?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  users        User[]
+  leads        Lead[]
+  projects     Project[]
+  automations  Automation[]
+  usages       Usage[]
+  subscriptions Subscription[]
+  invoices     Invoice[]
+  reports      Report[]
+  credentials  Credential[]
+  contacts     Contact[]
+  appointments Appointment[]
+  availability Availability[]
+  tasks        CrmTask[]
+  products     Product[]
+  employees    Employee[]
+  timeEntries  TimeEntry[]
+  cashMovements CashMovement[]
+}
+
+// Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
+model Credential {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  kind      String // "whatsapp" | "instagram" | "sheets" | "other"
+  label     String
+  dataEnc   String // payload JSON cifrado AES-256-GCM (iv:tag:cipher base64)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ════════════════════════════════════════════════
+// ENTRADA: LEADS, INTAKE, CONSULTORÍA
+// ════════════════════════════════════════════════
+
+enum LeadSource {
+  INTAKE
+  CONSULTORIA
+  MANUAL
+  BOT
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  source    LeadSource
+  status    LeadStatus @default(NEW)
+  name      String
+  business  String?
+  rubro     String?
+  email     String?
+  phone     String?
+  whatsapp  String?
+  score     Int        @default(0) // 0-100
+  intake    Json? // respuestas del scorecard: dolor, frecuencia, apps, urgencia, presupuesto
+  clientId  String? // si se convirtió
+  client    Client?    @relation(fields: [clientId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  projects     Project[]
+  blueprints   Blueprint[]
+  consultNotes ConsultNote[]
+}
+
+enum ConsultStatus {
+  SCHEDULED
+  DONE
+  ROADMAP_SENT
+  CANCELLED
+}
+
+model ConsultNote {
+  id          String        @id @default(cuid())
+  leadId      String
+  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime?
+  status      ConsultStatus @default(SCHEDULED)
+  callNotes   String? // notas de la llamada
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  roadmap     Roadmap?
+}
+
+model Roadmap {
+  id            String      @id @default(cuid())
+  consultNoteId String      @unique
+  consultNote   ConsultNote @relation(fields: [consultNoteId], references: [id], onDelete: Cascade)
+  content       Json // { fases:[{titulo, items:[{receta, area, nivel, impacto}], precioEstimado}] }
+  priceUsd      Float? // precio del roadmap si es pago
+  status        String      @default("draft") // draft | sent | accepted
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// ════════════════════════════════════════════════
+// DELIVERY: PROYECTOS, BLUEPRINTS, RECETAS, AUTOMATIZACIONES
+// ════════════════════════════════════════════════
+
+enum Stage {
+  LEAD
+  DIAGNOSTICO
+  APROBACION
+  BUILD
+  QA
+  ONBOARDING
+  ACTIVO
+}
+
+enum Level {
+  N1
+  N2
+  N3
+  N4
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  title     String
+  stage     Stage    @default(LEAD)
+  level     Level    @default(N1)
+  setupFee  Float    @default(0)
+  order     Int      @default(0) // posición en la columna del kanban
+  notes     String?
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blueprints Blueprint[]
+}
+
+enum BlueprintStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
+model Blueprint {
+  id               String          @id @default(cuid())
+  leadId           String?
+  lead             Lead?           @relation(fields: [leadId], references: [id])
+  projectId        String?
+  project          Project?        @relation(fields: [projectId], references: [id])
+  status           BlueprintStatus @default(DRAFT)
+  level            Level
+  summary          String // diagnóstico en lenguaje claro
+  flow             Json // flujo propuesto paso a paso
+  recipeIds        String[]        @default([])
+  suggestedPack    Pack
+  suggestedSetup   Float
+  suggestedMonthly Float
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+enum BizArea {
+  ATENCION
+  VENTAS_CRM
+  MARKETING
+  OPERACIONES
+  TURNOS
+  RRHH
+  FINANZAS
+}
+
+model Recipe {
+  id          String   @id @default(cuid())
+  name        String
+  area        BizArea
+  level       Level
+  apps        String[] @default([]) // ["whatsapp","sheets","calendar",...]
+  solves      String // qué resuelve
+  variables   Json // [{key,label,type,required,help}]
+  template    Json? // plantilla de flujo / referencia a workflow template n8n
+  n8nTemplateId String? // id del workflow plantilla en n8n
+  buildHours  Float    @default(2)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  automations Automation[]
+}
+
+enum AutomationStatus {
+  TEST
+  ACTIVE
+  PAUSED
+  ERROR
+}
+
+enum HealthStatus {
+  UNKNOWN
+  OK
+  WARN
+  DOWN
+}
+
+model Automation {
+  id            String           @id @default(cuid())
+  clientId      String
+  client        Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  recipeId      String?
+  recipe        Recipe?          @relation(fields: [recipeId], references: [id])
+  name          String
+  status        AutomationStatus @default(TEST) // TODA automatización nace en TEST
+  health        HealthStatus     @default(UNKNOWN)
+  n8nWorkflowId String?
+  config        Json? // valores de las variables de la receta
+  lastRunAt     DateTime?
+  lastError     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  qaChecks QACheck[]
+}
+
+model QACheck {
+  id           String     @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  name         String
+  passed       Boolean
+  detail       String?
+  runAt        DateTime   @default(now())
+}
+
+// ════════════════════════════════════════════════
+// USO, BILLING, REPORTES
+// ════════════════════════════════════════════════
+
+model Usage {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  period    String // "2026-06"
+  messages  Int      @default(0)
+  tokensIn  Int      @default(0)
+  tokensOut Int      @default(0)
+  costUsd   Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientId, period])
+}
+
+enum SubStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model Subscription {
+  id             String    @id @default(cuid())
+  clientId       String
+  client         Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  pack           Pack
+  monthlyUsd     Float
+  status         SubStatus @default(ACTIVE)
+  mpPreapprovalId String? // Mercado Pago — F8 (diferido)
+  startedAt      DateTime  @default(now())
+  cancelledAt    DateTime?
+}
+
+enum InvoiceType {
+  A
+  B
+}
+
+model Invoice {
+  id        String      @id @default(cuid())
+  clientId  String
+  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  type      InvoiceType @default(A)
+  concept   String
+  amountUsd Float
+  amountArs Float?
+  status    String      @default("pending") // pending | paid | overdue
+  dueDate   DateTime?
+  paidAt    DateTime?
+  createdAt DateTime    @default(now())
+}
+
+model Report {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  period    String // "2026-06"
+  content   Json // métricas + resumen generado
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([clientId, period])
+}
+
+// PricingConfig — singleton editable, NADA hardcodeado
+model PricingConfig {
+  id              String   @id @default("singleton")
+  dolarArs        Float    @default(1200) // valor del dólar editable
+  ivaPct          Float    @default(21)
+  packs           Json // { starter:{setupUsd,monthlyUsd,fairUseMsgs}, pro:{...}, scale:{...}, custom:{...} }
+  modulePricing   Json // { crm:{monthlyUsd}, turnos:{...}, catalogo:{...}, rrhh:{...}, caja:{...} }
+  roadmapPriceUsd Float    @default(0) // 0 = consultoría con roadmap gratis
+  roadmapCredit   Boolean  @default(true) // roadmap pago se acredita al setup
+  updatedAt       DateTime @updatedAt
+}
+
+// ════════════════════════════════════════════════
+// CAUCE OS — MÓDULOS (todo scopeado por clientId = tenantId)
+// ════════════════════════════════════════════════
+
+// Módulo CRM
+model Contact {
+  id          String   @id @default(cuid())
+  clientId    String // tenant
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String?
+  email       String?
+  stage       String   @default("nuevo") // pipeline simple configurable
+  source      String? // bot | manual | web
+  notes       String?
+  custom      Json? // campos custom del tenant
+  lastTouchAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appointments Appointment[]
+  tasks        CrmTask[]
+
+  @@index([clientId])
+}
+
+model CrmTask {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title     String
+  dueAt     DateTime?
+  done      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([clientId])
+}
+
+// Módulo Turnos & Agenda
+enum ApptStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  DONE
+}
+
+model Appointment {
+  id        String     @id @default(cuid())
+  clientId  String // tenant
+  client    Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact   Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title     String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    ApptStatus @default(PENDING)
+  source    String     @default("manual") // bot | manual | web
+  notes     String?
+  custom    Json?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([clientId, startsAt])
+}
+
+model Availability {
+  id          String @id @default(cuid())
+  clientId    String
+  client      Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  weekday     Int // 0=domingo .. 6=sábado
+  startTime   String // "09:00"
+  endTime     String // "18:00"
+  slotMinutes Int    @default(30)
+
+  @@index([clientId])
+}
+
+// Módulo Catálogo & Stock (F7 — modelo listo)
+model Product {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String
+  priceUsd  Float?
+  priceArs  Float?
+  stock     Int      @default(0)
+  minStock  Int      @default(0)
+  photo     String?
+  active    Boolean  @default(true)
+  custom    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+}
+
+// Módulo RRHH (F7 — modelo listo)
+model Employee {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  role      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  timeEntries TimeEntry[]
+
+  @@index([clientId])
+}
+
+model TimeEntry {
+  id         String    @id @default(cuid())
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  clockIn    DateTime
+  clockOut   DateTime?
+  source     String    @default("web") // web | whatsapp
+  createdAt  DateTime  @default(now())
+
+  @@index([clientId])
+}
+
+// Módulo Caja & Reportes (F7 — modelo listo)
+model CashMovement {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  kind      String // venta | gasto | ajuste
+  concept   String
+  amountArs Float
+  method    String? // efectivo | mp | transferencia
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+}
