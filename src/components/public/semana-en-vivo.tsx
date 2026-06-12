@@ -90,7 +90,7 @@ export async function SemanaEnVivo() {
       <div className="mt-4 grid grid-cols-2 gap-3">
         {stats.map((s) => (
           <div key={s.etiqueta} className="rounded-md border bg-muted/40 p-3.5">
-            <p className={`font-display text-2xl font-bold ${s.accent ? "text-accent" : ""}`}>{s.valor}</p>
+            <p className={`font-display text-2xl font-bold ${s.accent ? "text-primary dark:text-accent" : ""}`}>{s.valor}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{s.etiqueta}</p>
           </div>
         ))}
