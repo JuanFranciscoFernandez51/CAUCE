@@ -113,6 +113,10 @@ export async function provisionar(automationId: string): Promise<{ ok: boolean; 
   for (const [k, v] of Object.entries(config)) variables[k] = String(v ?? "");
   variables["cliente_id"] = auto.clientId;
   variables["cliente_nombre"] = auto.client.name;
+  // Cableado a los hooks de sinergia de Cauce OS (book/slots/lead)
+  variables["cliente_slug"] = auto.client.slug;
+  variables["cauce_url"] = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  variables["cauce_secret"] = process.env.CAUCE_WEBHOOK_SECRET ?? "";
 
   const { workflowId } = await instantiateRecipe({
     templateWorkflowId: auto.recipe.n8nTemplateId,

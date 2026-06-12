@@ -15,6 +15,19 @@ Cada pedido de Francisco se anota como criterio verificable. Estados: ⏳ pendie
 | 7 | 10 leads de complejidad variada con resolución completa | ✅ | `npm run demo` (idempotente): N1→N4, 6 áreas, blueprints, todos aprobados, 27 automatizaciones en TEST con config, QA corrido, usuarios de portal, suscripciones, uso del mes y reportes. 3 con roadmap de consultoría. 4 con Cauce OS activo (módulos + branding) |
 | 8 | Lo que traba n8n/WhatsApp dejarlo para después | ✅ | Automatizaciones quedan en TEST listas para provisionar; proyectos en QA con nota |
 
+## Entrega n8n + softwares a medida (12/06, pedido de Fran)
+
+| Qué | Estado |
+|---|---|
+| n8n de Railway conectado y **limpiado** (5 workflows viejos borrados con su OK) | ✅ |
+| **20 workflows plantilla** (uno por receta del recetario) con triggers reales, lógica en Code, integración real a los hooks de Cauce OS y pasos de canal marcados "(pendiente credencial Meta/MP/AFIP)" | ✅ `scripts/n8n-templates.ts` |
+| **28 instancias por cliente** clonadas con sus variables, QA pasado, ACTIVAS en n8n | ✅ `scripts/provision-all.ts` |
+| **Software a medida para los 10 clientes**: módulos por rubro, branding propio, campos custom de su operación (CUIT/obra social/patente/talle/etc.), disponibilidad y datos de muestra | ✅ `scripts/os-a-medida.ts` |
+| Sinergia bot→OS **verificada end-to-end**: hook `slots` devolvió huecos reales y `book` agendó un turno que apareció en la agenda de la peluquería (capturas 44-48 en `evidencia/`) | ✅ |
+| Pipeline: 10 proyectos en **Activo**, clientes en ACTIVE, dashboard con MRR completo | ✅ |
+
+Notas: (1) los hooks de los workflows apuntan a `NEXT_PUBLIC_APP_URL` (localhost) — al deployar a Vercel hay que re-provisionar (borrar workflowId y correr `provision-all`) para que apunten al dominio real; (2) los nodos "(pendiente credencial)" se reemplazan por los conectores reales (Meta/MP/Sheets) en el onboarding de cada cliente; (3) contratos de hooks: `lead {nombre, telefono, consulta}` · `book {nombre, telefono, fecha, hora, servicio}`.
+
 ⚠️ **Importante:** las DOS API keys de Anthropic (CAUCE-NUEVO y la del bot de Vespa) están **sin créditos** ("credit balance too low"). Los 10 blueprints/roadmaps de la demo salieron del **fallback curado** del script (calidad cuidada a mano). Con créditos cargados, todo lead nuevo se diagnostica con IA real automáticamente — el código ya está y se probó el camino de error.
 
 ## Decisiones técnicas tomadas en autonomía (revisar)
