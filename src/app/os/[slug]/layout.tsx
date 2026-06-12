@@ -13,7 +13,7 @@ import {
 import { ThemeToggle } from "@/components/theme";
 
 /** Módulos con UI lista en esta versión de Cauce OS. */
-const READY_MODULES: OsModule[] = ["crm", "turnos"];
+const READY_MODULES: OsModule[] = ["crm", "turnos", "catalogo", "rrhh", "caja"];
 
 export default async function OsLayout({
   children,
