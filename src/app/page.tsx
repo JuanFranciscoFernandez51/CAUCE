@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getPricing, usdToArs, fmtUsd, fmtArs, type PackKey } from "@/lib/pricing";
 import { AREA_LABELS, CASOS } from "@/lib/casos";
 import { PublicShell } from "@/components/public/shell";
+import { CurrentLines } from "@/components/public/cauce-mark";
+import { SemanaEnVivo } from "@/components/public/semana-en-vivo";
 import { Doors } from "@/components/public/doors";
 import { Card, Badge, ButtonLink } from "@/components/ui";
 import Link from "next/link";
@@ -90,20 +92,26 @@ export default async function LandingPage() {
   return (
     <PublicShell>
       {/* ── Hero ── */}
-      <section className="mx-auto max-w-6xl px-4 pb-12 pt-16 sm:px-6 sm:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <Badge variant="primary">Automatización con IA — Bahía Blanca, Argentina</Badge>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-            Cualquier empresa, cualquier proceso,{" "}
-            <span className="text-primary">resuelto con mínimos clicks</span>
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            No vendemos horas. Vendemos procesos que se manejan solos: mensajes,
-            ventas, turnos, stock, cobranzas — corriendo sin vos.
-          </p>
-        </div>
-        <div className="mx-auto mt-10 max-w-4xl">
-          <Doors />
+      <section className="relative overflow-hidden">
+        <CurrentLines />
+        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-16 sm:px-6 sm:pt-20">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div className="text-center lg:text-left">
+              <Badge variant="primary">Automatización con IA — Bahía Blanca, Argentina</Badge>
+              <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                Cualquier empresa, cualquier proceso,{" "}
+                <span className="text-primary">resuelto con mínimos clicks</span>
+              </h1>
+              <p className="mt-4 text-lg text-muted-foreground">
+                No vendemos horas. Vendemos procesos que se manejan solos: mensajes,
+                ventas, turnos, stock, cobranzas — corriendo sin vos.
+              </p>
+            </div>
+            <SemanaEnVivo />
+          </div>
+          <div className="mx-auto mt-12 max-w-4xl">
+            <Doors />
+          </div>
         </div>
       </section>
 

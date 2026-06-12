@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme";
 import { ButtonLink } from "@/components/ui";
+import { CauceMark } from "@/components/public/cauce-mark";
 
 const NAV = [
   { href: "/#como-funciona", label: "Cómo funciona" },
@@ -18,8 +19,13 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="text-xl font-bold text-primary" onClick={() => setOpen(false)}>
-          Cauce
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 text-xl font-bold"
+          onClick={() => setOpen(false)}
+        >
+          <CauceMark className="h-8 w-8" />
+          <span className="font-display tracking-tight">Cauce</span>
         </Link>
 
         {/* Nav desktop */}
