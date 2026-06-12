@@ -108,6 +108,7 @@ export default async function ClienteDetailPage({
           contactName: client.contactName,
           email: client.email,
           phone: client.phone,
+          domain: client.domain,
           whatsapp: client.whatsapp,
           notes: client.notes,
           pack: client.pack,

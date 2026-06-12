@@ -3,9 +3,26 @@ import { getToken } from "next-auth/jwt";
 
 const TENANT_BASE = process.env.TENANT_BASE_DOMAIN; // ej: "cauce.app" → cliente.cauce.app
 
+// Dominios propios de clientes (Client.domain) → slug, con cache de 5 min
+const domainCache = new Map<string, { slug: string | null; exp: number }>();
+
+async function slugByCustomDomain(req: NextRequest, host: string): Promise<string | null> {
+  const hit = domainCache.get(host);
+  if (hit && hit.exp > Date.now()) return hit.slug;
+  let slug: string | null = null;
+  try {
+    const r = await fetch(`${req.nextUrl.origin}/api/public/tenant-by-host?host=${encodeURIComponent(host)}`);
+    if (r.ok) slug = ((await r.json()) as { slug: string | null }).slug;
+  } catch {
+    slug = null;
+  }
+  domainCache.set(host, { slug, exp: Date.now() + 5 * 60_000 });
+  return slug;
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const host = req.headers.get("host") ?? "";
+  const host = (req.headers.get("host") ?? "").toLowerCase();
 
   // ── Cauce OS: subdominio del tenant → rewrite a /os/<slug> ──
   if (
@@ -20,6 +37,28 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = `/os/${slug}${pathname === "/" ? "" : pathname}`;
     return NextResponse.rewrite(url);
+  }
+
+  // ── Cauce OS: dominio PROPIO del cliente (Client.domain) → rewrite a /os/<slug> ──
+  const esHostPropio =
+    host &&
+    !host.includes("localhost") &&
+    !host.startsWith("127.") &&
+    !host.startsWith("192.168.") &&
+    (!TENANT_BASE || (host !== TENANT_BASE && !host.endsWith(`.${TENANT_BASE}`)));
+  if (
+    esHostPropio &&
+    !pathname.startsWith("/os/") &&
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/login")
+  ) {
+    const slug = await slugByCustomDomain(req, host);
+    if (slug) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/os/${slug}${pathname === "/" ? "" : pathname}`;
+      return NextResponse.rewrite(url);
+    }
   }
 
   const needsAuth =

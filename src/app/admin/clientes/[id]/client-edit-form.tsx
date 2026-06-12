@@ -13,6 +13,7 @@ export type ClientEditData = {
   email: string | null;
   phone: string | null;
   whatsapp: string | null;
+  domain: string | null;
   notes: string | null;
   pack: string;
   status: string;
@@ -30,6 +31,7 @@ export function ClientEditForm({ client }: { client: ClientEditData }) {
     email: client.email ?? "",
     phone: client.phone ?? "",
     whatsapp: client.whatsapp ?? "",
+    domain: client.domain ?? "",
     notes: client.notes ?? "",
     pack: client.pack,
     status: client.status,
@@ -62,6 +64,7 @@ export function ClientEditForm({ client }: { client: ClientEditData }) {
           email: form.email || null,
           phone: form.phone || null,
           whatsapp: form.whatsapp || null,
+          domain: form.domain.trim().toLowerCase() || null,
           notes: form.notes || null,
           pack: form.pack,
           status: form.status,
@@ -102,6 +105,9 @@ export function ClientEditForm({ client }: { client: ClientEditData }) {
         </Field>
         <Field label="WhatsApp">
           <Input value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} />
+        </Field>
+        <Field label="Dominio propio (Cauce OS)" help="Ej: turnos.sunegocio.com.ar — apuntalo por CNAME al deploy y su sistema atiende ahí">
+          <Input value={form.domain} onChange={(e) => set("domain", e.target.value)} placeholder="sin dominio propio" />
         </Field>
         <Field label="Pack">
           <Select value={form.pack} onChange={(e) => set("pack", e.target.value)}>

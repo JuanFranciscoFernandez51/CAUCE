@@ -10,6 +10,7 @@ const patchSchema = z.object({
   email: z.string().max(200).nullable().optional(),
   phone: z.string().max(50).nullable().optional(),
   whatsapp: z.string().max(50).nullable().optional(),
+  domain: z.string().max(200).nullable().optional(),
   notes: z.string().max(10000).nullable().optional(),
   pack: z.enum(["NONE", "STARTER", "PRO", "SCALE", "CUSTOM"]).optional(),
   status: z.enum(["PROSPECT", "ONBOARDING", "ACTIVE", "PAUSED", "CHURNED"]).optional(),
