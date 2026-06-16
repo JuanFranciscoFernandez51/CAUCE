@@ -61,6 +61,12 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Rutas PÚBLICAS sin auth: calendario de auto-agendado + su API.
+  // (igual que /login, /api/hooks, /api/public — el cliente final no tiene sesión)
+  if (pathname.startsWith("/agendar") || pathname.startsWith("/api/public/agendar")) {
+    return NextResponse.next();
+  }
+
   const needsAuth =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/portal") ||

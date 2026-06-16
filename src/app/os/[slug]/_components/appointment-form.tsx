@@ -19,14 +19,17 @@ import { CustomFieldsInputs, type CustomValues } from "./custom-fields";
 
 type SlotOption = { time: string; minutes: number };
 type ContactOption = { id: string; name: string; phone: string | null };
+type EmployeeOption = { id: string; name: string };
 
 export function AppointmentForm({
   slug,
   contacts,
+  employees = [],
   customDefs,
 }: {
   slug: string;
   contacts: ContactOption[];
+  employees?: EmployeeOption[];
   customDefs: CustomFieldDef[];
 }) {
   const router = useRouter();
@@ -34,6 +37,7 @@ export function AppointmentForm({
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState<string>("");
+  const [employeeId, setEmployeeId] = useState("");
   const [slots, setSlots] = useState<SlotOption[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [slotsError, setSlotsError] = useState("");
@@ -62,7 +66,9 @@ export function AppointmentForm({
     setLoadingSlots(true);
     setSlotsError("");
     setTime("");
-    fetch(`/api/os/${slug}/slots?date=${date}`)
+    const qs = new URLSearchParams({ date });
+    if (employeeId) qs.set("employeeId", employeeId);
+    fetch(`/api/os/${slug}/slots?${qs.toString()}`)
       .then(async (res) => {
         if (!res.ok) throw new Error("No se pudieron cargar los horarios");
         const data = await res.json();
@@ -80,7 +86,7 @@ export function AppointmentForm({
     return () => {
       alive = false;
     };
-  }, [date, slug]);
+  }, [date, slug, employeeId]);
 
   const selectedSlot = slots.find((s) => s.time === time);
   const effectiveDuration = duration || (selectedSlot ? String(selectedSlot.minutes) : "");
@@ -105,6 +111,7 @@ export function AppointmentForm({
           date,
           time,
           durationMinutes: effectiveDuration ? Number(effectiveDuration) : undefined,
+          employeeId: employeeId || undefined,
           contactId: contactMode === "existing" ? contactId : undefined,
           newContact:
             contactMode === "new"
@@ -138,6 +145,19 @@ export function AppointmentForm({
             autoFocus
           />
         </Field>
+
+        {employees.length > 0 ? (
+          <Field label="Recurso" help="Con quién es el turno (profe, doctor, empleado). Opcional.">
+            <Select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+              <option value="">Sin asignar</option>
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Fecha *">

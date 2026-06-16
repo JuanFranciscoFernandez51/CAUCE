@@ -6,10 +6,18 @@ export type FreeSlot = { time: string; minutes: number };
 /**
  * Huecos LIBRES de un día para un tenant:
  * Availability del weekday − Appointments existentes no cancelados.
- * Única fuente de verdad: la usan el form de turnos, /api/os/[slug]/slots
- * y los hooks del bot (/api/hooks/[slug]/slots y /book).
+ * Única fuente de verdad: la usan el form de turnos, /api/os/[slug]/slots,
+ * el calendario público de auto-agendado y los hooks del bot.
+ *
+ * `employeeId` (opcional) acota la ocupación a ese recurso: dos profes/doctores
+ * pueden tener el mismo horario libre. Sin recurso, la ocupación es del negocio
+ * entero (turnos sin recurso bloquean para todos).
  */
-export async function getFreeSlots(clientId: string, dateStr: string): Promise<FreeSlot[]> {
+export async function getFreeSlots(
+  clientId: string,
+  dateStr: string,
+  employeeId?: string | null
+): Promise<FreeSlot[]> {
   const weekday = weekdayOf(dateStr);
   const blocks = await db.availability.findMany({
     where: { clientId, weekday },
@@ -24,6 +32,9 @@ export async function getFreeSlots(clientId: string, dateStr: string): Promise<F
       status: { not: "CANCELLED" },
       startsAt: { lt: end },
       endsAt: { gt: start },
+      // Si se filtra por recurso, sólo los turnos de ESE recurso (o sin recurso)
+      // bloquean; si no, el negocio entero.
+      ...(employeeId ? { OR: [{ employeeId }, { employeeId: null }] } : {}),
     },
     select: { startsAt: true, endsAt: true },
   });
@@ -55,11 +66,16 @@ export async function getFreeSlots(clientId: string, dateStr: string): Promise<F
   return out;
 }
 
-/** ¿Hay solapamiento con otro turno no cancelado? (para validar al crear) */
+/**
+ * ¿Hay solapamiento con otro turno no cancelado? (para validar al crear)
+ * `employeeId` acota igual que getFreeSlots: si se pasa, sólo chocan los turnos
+ * de ese recurso o los turnos sin recurso.
+ */
 export async function hasOverlap(
   clientId: string,
   startsAt: Date,
-  endsAt: Date
+  endsAt: Date,
+  employeeId?: string | null
 ): Promise<boolean> {
   const clash = await db.appointment.findFirst({
     where: {
@@ -67,6 +83,7 @@ export async function hasOverlap(
       status: { not: "CANCELLED" },
       startsAt: { lt: endsAt },
       endsAt: { gt: startsAt },
+      ...(employeeId ? { OR: [{ employeeId }, { employeeId: null }] } : {}),
     },
     select: { id: true },
   });

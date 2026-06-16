@@ -443,17 +443,20 @@ model Appointment {
   client    Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   contactId String?
   contact   Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  employeeId String? // recurso (profe/doctor/empleado) con quien es el turno
+  employee   Employee?  @relation(fields: [employeeId], references: [id], onDelete: SetNull)
   title     String
   startsAt  DateTime
   endsAt    DateTime
   status    ApptStatus @default(PENDING)
-  source    String     @default("manual") // bot | manual | web
+  source    String     @default("manual") // bot | manual | web | auto-agendado
   notes     String?
   custom    Json?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
   @@index([clientId, startsAt])
+  @@index([employeeId])
 }
 
 model Availability {
@@ -498,7 +501,8 @@ model Employee {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  timeEntries TimeEntry[]
+  timeEntries  TimeEntry[]
+  appointments Appointment[]
 
   @@index([clientId])
 }

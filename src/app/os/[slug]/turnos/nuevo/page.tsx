@@ -28,6 +28,13 @@ export default async function NuevoTurnoPage({
     select: { id: true, name: true, phone: true },
   });
 
+  // Recursos (empleados activos) para asignar el turno; opcional.
+  const employees = await db.employee.findMany({
+    where: { clientId: tenant.id, active: true },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
   const customDefs = tenantCustomFields(tenant).appointment ?? [];
 
   return (
@@ -38,7 +45,12 @@ export default async function NuevoTurnoPage({
           Los horarios que se muestran son los huecos libres según tu disponibilidad.
         </p>
       </div>
-      <AppointmentForm slug={tenant.slug} contacts={contacts} customDefs={customDefs} />
+      <AppointmentForm
+        slug={tenant.slug}
+        contacts={contacts}
+        employees={employees}
+        customDefs={customDefs}
+      />
     </div>
   );
 }

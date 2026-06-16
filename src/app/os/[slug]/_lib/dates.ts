@@ -59,6 +59,61 @@ export function monthStart(now: Date = new Date()): Date {
   return new Date(`${argDateStr(now).slice(0, 7)}-01T00:00:00-03:00`);
 }
 
+/** "YYYY-MM" del mes calendario argentino del instante (o de hoy). */
+export function argMonthStr(d: Date = new Date()): string {
+  return argDateStr(d).slice(0, 7);
+}
+
+/** Suma n meses a un "YYYY-MM" (devuelve otro "YYYY-MM"). */
+export function addMonths(monthStr: string, n: number): string {
+  const [y, m] = monthStr.split("-").map(Number);
+  const total = (y * 12 + (m - 1)) + n;
+  const ny = Math.floor(total / 12);
+  const nm = (total % 12) + 1;
+  return `${ny}-${String(nm).padStart(2, "0")}`;
+}
+
+/** "junio 2026" para un "YYYY-MM". */
+export function fmtMonthLabel(monthStr: string): string {
+  return new Date(`${monthStr}-01T12:00:00-03:00`).toLocaleDateString("es-AR", {
+    month: "long",
+    year: "numeric",
+    timeZone: ART_TZ,
+  });
+}
+
+/**
+ * Grilla de un mes "YYYY-MM" como semanas que empiezan el LUNES.
+ * Cada celda es { date: "YYYY-MM-DD", inMonth: boolean }.
+ * Rellena días del mes anterior/siguiente para completar las semanas.
+ */
+export function monthGrid(monthStr: string): { date: string; inMonth: boolean }[][] {
+  const first = `${monthStr}-01`;
+  // weekdayOf: 0=domingo..6=sábado → cuántos días retroceder hasta el lunes.
+  const firstWd = weekdayOf(first); // 0..6
+  const back = (firstWd + 6) % 7; // lunes=0
+  const startCell = addDays(first, -back);
+
+  const weeks: { date: string; inMonth: boolean }[][] = [];
+  let cursor = startCell;
+  for (let w = 0; w < 6; w++) {
+    const week: { date: string; inMonth: boolean }[] = [];
+    for (let i = 0; i < 7; i++) {
+      week.push({ date: cursor, inMonth: cursor.slice(0, 7) === monthStr });
+      cursor = addDays(cursor, 1);
+    }
+    weeks.push(week);
+    // Si la próxima semana ya pasó el mes, cortamos (5 o 6 semanas).
+    if (week[6].date.slice(0, 7) > monthStr && weeks.length >= 5) break;
+  }
+  return weeks;
+}
+
+/** Día del mes (número) de un "YYYY-MM-DD". */
+export function dayNum(dateStr: string): number {
+  return Number(dateStr.slice(8, 10));
+}
+
 /** Tiempo relativo en castellano ("hace 2 días", "recién"). */
 export function relativeTime(iso: string | null | undefined): string {
   if (!iso) return "sin contacto";

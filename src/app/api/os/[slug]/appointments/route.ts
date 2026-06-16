@@ -10,6 +10,7 @@ const createSchema = z.object({
   date: z.string().regex(DATE_RE, "Fecha inválida (YYYY-MM-DD)"),
   time: z.string().regex(TIME_RE, "Hora inválida (HH:MM)"),
   durationMinutes: z.number().int().min(5).max(480).optional(),
+  employeeId: z.string().min(1).optional(),
   contactId: z.string().min(1).optional(),
   newContact: z
     .object({
@@ -46,15 +47,28 @@ export async function POST(
     return NextResponse.json({ error: "Fecha u hora inválida" }, { status: 400 });
   }
 
+  // Recurso (empleado) opcional: tiene que pertenecer al tenant.
+  let employeeId: string | null = null;
+  if (d.employeeId) {
+    const employee = await db.employee.findFirst({
+      where: { id: d.employeeId, clientId: tenant.id },
+      select: { id: true },
+    });
+    if (!employee) {
+      return NextResponse.json({ error: "Recurso no encontrado" }, { status: 404 });
+    }
+    employeeId = employee.id;
+  }
+
   // Duración: la pedida, o el slotMinutes del hueco elegido, o 60.
   let minutes = d.durationMinutes;
   if (!minutes) {
-    const free = await getFreeSlots(tenant.id, d.date);
+    const free = await getFreeSlots(tenant.id, d.date, employeeId);
     minutes = free.find((s) => s.time === d.time)?.minutes ?? 60;
   }
   const endsAt = new Date(startsAt.getTime() + minutes * 60_000);
 
-  if (await hasOverlap(tenant.id, startsAt, endsAt)) {
+  if (await hasOverlap(tenant.id, startsAt, endsAt, employeeId)) {
     return NextResponse.json(
       { error: "Ese horario ya está ocupado. Elegí otro hueco libre." },
       { status: 409 }
@@ -94,6 +108,7 @@ export async function POST(
     data: {
       clientId: tenant.id,
       contactId,
+      employeeId,
       title: d.title,
       startsAt,
       endsAt,

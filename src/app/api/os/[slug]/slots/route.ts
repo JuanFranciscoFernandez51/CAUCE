@@ -12,11 +12,13 @@ export async function GET(
   const guard = await guardOsApi(slug, "turnos");
   if (guard.error) return guard.error;
 
-  const date = new URL(req.url).searchParams.get("date") ?? "";
+  const url = new URL(req.url);
+  const date = url.searchParams.get("date") ?? "";
   if (!DATE_RE.test(date)) {
     return NextResponse.json({ error: "Parámetro date inválido (YYYY-MM-DD)" }, { status: 400 });
   }
+  const employeeId = url.searchParams.get("employeeId") || undefined;
 
-  const slots = await getFreeSlots(guard.tenant.id, date);
+  const slots = await getFreeSlots(guard.tenant.id, date, employeeId);
   return NextResponse.json({ slots });
 }

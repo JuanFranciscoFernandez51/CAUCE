@@ -37,3 +37,8 @@ negocio adentro del sistema. Antes de reportar una entrega como terminada, pasal
 - [ ] **Robustez de producción**: lazy-init de SDKs, fallbacks, rate-limit, secretos cifrados, feature flags por integración.
 
 > Regla madre: **superar expectativas siempre.** Si no le ahorra horas reales al cliente desde el día uno, no está terminado.
+
+### Reglas fijas de producto (no-negociables en cada entrega)
+
+- [ ] **Turnos/agenda = paquete completo, siempre**: (a) vista **calendario** en el back del tenant (mes/semana), (b) **calendario público** con link para que el cliente final **auto-agende sin login**, (c) **segmentación por recurso** (profe/doctor/empleado/sillón/cancha según rubro), (d) **vista de lista por día**. Nunca entregar "una lista de turnos" pelada.
+- [ ] **CRM unificado**: TODO dato de cliente que entre por cualquier canal (bot, formulario, auto-agendado, compra, carga manual) **se guarda y deduplica en la base de clientes** (Contact) con su `origen`. Ningún dato queda suelto.
