@@ -23,6 +23,7 @@ model User {
   passwordHash String
   name         String
   role         Role     @default(CLIENT)
+  osRole       String   @default("dueno") // dueno | equipo — rol DENTRO del software del tenant
   clientId     String? // tenant al que pertenece (si role=CLIENT)
   client       Client?  @relation(fields: [clientId], references: [id])
   createdAt    DateTime @default(now())

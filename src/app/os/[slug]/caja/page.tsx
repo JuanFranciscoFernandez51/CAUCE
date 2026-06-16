@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
+import { isOsOwner, resolveOsRole } from "../_components/os-role";
 import { Card, EmptyState, Stat, Table, Td, Th } from "@/components/ui";
 import { ModuleDisabled } from "../_components/module-disabled";
 import { DATE_RE, argDateStr, dayRange, fmtDayLabel, fmtTime } from "../_lib/dates";
@@ -61,6 +63,19 @@ export default async function CajaPage({
   if (!tenant) notFound();
   if (!hasModule(tenant, "caja")) {
     return <ModuleDisabled moduleLabel={MODULE_LABELS.caja} />;
+  }
+
+  // Caja es solo del dueño: los usuarios "equipo" no la ven.
+  const session = await auth();
+  const osRole = session ? await resolveOsRole(session.user.id, tenant.id) : null;
+  if (!isOsOwner(osRole)) {
+    return (
+      <ModuleDisabled
+        moduleLabel={MODULE_LABELS.caja}
+        title="No tenés acceso a Caja & Reportes"
+        detail="Pedile acceso al dueño de la cuenta."
+      />
+    );
   }
 
   const dateStr = date && DATE_RE.test(date) ? date : argDateStr();

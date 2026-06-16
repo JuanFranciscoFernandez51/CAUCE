@@ -11,6 +11,7 @@ import {
   type OsModule,
 } from "@/lib/tenant";
 import { ThemeToggle } from "@/components/theme";
+import { isOsOwner, resolveOsRole } from "./_components/os-role";
 
 /** Módulos con UI lista en esta versión de Cauce OS. */
 const READY_MODULES: OsModule[] = ["crm", "turnos", "catalogo", "rrhh", "caja"];
@@ -66,7 +67,12 @@ export default async function OsLayout({
     );
   }
 
-  const active = tenantModules(tenant);
+  // Rol dentro del OS (leído de la DB): define qué ve en el nav.
+  const osRole = session ? await resolveOsRole(session.user.id, tenant.id) : null;
+  const owner = isOsOwner(osRole);
+
+  // Los "equipo" no ven Caja — es info sensible del dueño.
+  const active = tenantModules(tenant).filter((m) => m !== "caja" || owner);
   const base = `/os/${tenant.slug}`;
 
   return (
@@ -105,6 +111,8 @@ export default async function OsLayout({
                 </span>
               )
             )}
+            <NavLink href={`${base}/automatizaciones`} label="⚡ Automatizaciones" />
+            {owner ? <NavLink href={`${base}/config`} label="⚙️ Configuración" /> : null}
           </nav>
 
           <div className="ml-auto sm:ml-0">
