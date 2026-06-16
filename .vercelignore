@@ -1,0 +1,8 @@
+.devdb
+evidencia
+ejemplos
+scripts
+*.md
+.git
+.next
+node_modules

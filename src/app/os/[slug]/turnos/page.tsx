@@ -245,14 +245,17 @@ async function CalendarView({
       </div>
 
       <Card className="overflow-hidden p-0">
-        <div className="grid grid-cols-7 border-b bg-muted text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <div
+          className="grid border-b bg-muted text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+          style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}
+        >
           {weekdayNames.map((w) => (
             <div key={w} className="px-1 py-1.5">
               {w}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        <div className="grid" style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
           {weeks.flat().map((cell) => {
             const list = byDay.get(cell.date) ?? [];
             const isToday = cell.date === today;
