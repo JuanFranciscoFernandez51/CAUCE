@@ -3,24 +3,18 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
 import { isOsOwner, resolveOsRole } from "../_components/os-role";
-import { Card, EmptyState, Stat, Table, Td, Th } from "@/components/ui";
+import { Stat } from "@/components/ui";
 import { ModuleDisabled } from "../_components/module-disabled";
-import { DATE_RE, argDateStr, dayRange, fmtDayLabel, fmtTime } from "../_lib/dates";
+import { argMonthStr } from "../_lib/dates";
+import { storageAvailable } from "@/lib/storage";
+import { AccountsSection } from "../_components/finanzas/accounts-section";
+import { MonthSection } from "../_components/finanzas/month-section";
+import { YearSection } from "../_components/finanzas/year-section";
+import { FinanzasTabs } from "../_components/finanzas/tabs";
 import { fmtArs } from "../_components/money";
-import { CashForm } from "../_components/cash-form";
-import { CashDeleteButton } from "../_components/cash-actions";
 
-const KIND_LABELS: Record<string, string> = {
-  venta: "Venta",
-  gasto: "Gasto",
-  ajuste: "Ajuste",
-};
-
-const METHOD_LABELS: Record<string, string> = {
-  efectivo: "Efectivo",
-  mp: "Mercado Pago",
-  transferencia: "Transferencia",
-};
+const MONTH_RE = /^\d{4}-\d{2}$/;
+const YEAR_RE = /^\d{4}$/;
 
 type Mov = {
   id: string;
@@ -28,44 +22,65 @@ type Mov = {
   concept: string;
   amountArs: number;
   method: string | null;
-  createdAt: Date;
+  date: Date;
+  accountId: string | null;
+  toAccountId: string | null;
+  attachmentUrl: string | null;
 };
 
-/** venta suma, gasto resta, ajuste va con el signo cargado. */
-function signed(m: Pick<Mov, "kind" | "amountArs">): number {
-  if (m.kind === "venta") return m.amountArs;
-  if (m.kind === "gasto") return -m.amountArs;
-  return m.amountArs;
-}
-
-function totals(movs: Mov[]) {
+/** Ingresos/egresos/balance para reportes. Transferencia es neutra. Ajuste va con su signo. */
+function totals(movs: Pick<Mov, "kind" | "amountArs">[]) {
   let ingresos = 0;
   let egresos = 0;
-  let balance = 0;
   for (const m of movs) {
     if (m.kind === "venta") ingresos += m.amountArs;
     if (m.kind === "gasto") egresos += m.amountArs;
-    balance += signed(m);
+    if (m.kind === "ajuste") {
+      if (m.amountArs >= 0) ingresos += m.amountArs;
+      else egresos += -m.amountArs;
+    }
   }
-  return { ingresos, egresos, balance };
+  return { ingresos, egresos, balance: ingresos - egresos };
 }
+
+function monthRange(month: string) {
+  const [y, m] = month.split("-").map(Number);
+  const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+  return {
+    gte: new Date(`${month}-01T00:00:00-03:00`),
+    lt: new Date(`${next}-01T00:00:00-03:00`),
+  };
+}
+
+function yearRange(year: string) {
+  return {
+    gte: new Date(`${year}-01-01T00:00:00-03:00`),
+    lt: new Date(`${Number(year) + 1}-01-01T00:00:00-03:00`),
+  };
+}
+
+const METHOD_LABELS: Record<string, string> = {
+  efectivo: "Efectivo",
+  mp: "Mercado Pago",
+  transferencia: "Transferencia",
+};
 
 export default async function CajaPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ tab?: string; month?: string; year?: string; account?: string }>;
 }) {
   const { slug } = await params;
-  const { date } = await searchParams;
+  const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
   if (!hasModule(tenant, "caja")) {
     return <ModuleDisabled moduleLabel={MODULE_LABELS.caja} />;
   }
 
-  // Caja es solo del dueño: los usuarios "equipo" no la ven.
+  // Finanzas es solo del dueño: el equipo no la ve.
   const session = await auth();
   const osRole = session ? await resolveOsRole(session.user.id, tenant.id) : null;
   if (!isOsOwner(osRole)) {
@@ -78,173 +93,161 @@ export default async function CajaPage({
     );
   }
 
-  const dateStr = date && DATE_RE.test(date) ? date : argDateStr();
-  const { start: dayStart, end: dayEnd } = dayRange(dateStr);
+  const tab = sp.tab === "mes" || sp.tab === "ano" ? sp.tab : "saldos";
+  const month = sp.month && MONTH_RE.test(sp.month) ? sp.month : argMonthStr();
+  const year = sp.year && YEAR_RE.test(sp.year) ? sp.year : argMonthStr().slice(0, 4);
+  const accountFilter = sp.account || "";
 
-  // Mes calendario argentino que contiene el día elegido.
-  const monthStr = dateStr.slice(0, 7);
-  const [y, m] = monthStr.split("-").map(Number);
-  const nextMonth = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
-  const monthGte = new Date(`${monthStr}-01T00:00:00-03:00`);
-  const monthLt = new Date(`${nextMonth}-01T00:00:00-03:00`);
+  const accounts = await db.account.findMany({
+    where: { clientId: tenant.id },
+    orderBy: [{ active: "desc" }, { createdAt: "asc" }],
+  });
 
+  // ── Total consolidado en ARS (las USD aparte, no se suman) ──
+  const arsTotal = accounts
+    .filter((a) => a.active && a.currency === "ARS")
+    .reduce((s, a) => s + a.balance, 0);
+  const usdTotal = accounts
+    .filter((a) => a.active && a.currency === "USD")
+    .reduce((s, a) => s + a.balance, 0);
+  const hasUsd = accounts.some((a) => a.currency === "USD");
+
+  // ── Movimientos del mes (para tab Mes) ──
+  const mRange = monthRange(month);
   const monthMovs: Mov[] = await db.cashMovement.findMany({
-    where: { clientId: tenant.id, createdAt: { gte: monthGte, lt: monthLt } },
-    orderBy: { createdAt: "desc" },
+    where: {
+      clientId: tenant.id,
+      date: mRange,
+      ...(accountFilter
+        ? { OR: [{ accountId: accountFilter }, { toAccountId: accountFilter }] }
+        : {}),
+    },
+    orderBy: { date: "desc" },
     select: {
       id: true,
       kind: true,
       concept: true,
       amountArs: true,
       method: true,
-      createdAt: true,
+      date: true,
+      accountId: true,
+      toAccountId: true,
+      attachmentUrl: true,
     },
   });
-  const dayMovs = monthMovs.filter((mv) => mv.createdAt >= dayStart && mv.createdAt < dayEnd);
+  const monthTotals = totals(monthMovs);
 
-  const day = totals(dayMovs);
-  const month = totals(monthMovs);
+  // ── Movimientos del año (para dashboard anual) ──
+  const yRange = yearRange(year);
+  const yearMovs = await db.cashMovement.findMany({
+    where: { clientId: tenant.id, date: yRange },
+    orderBy: { date: "asc" },
+    select: { kind: true, amountArs: true, method: true, date: true },
+  });
 
-  // Desglose del mes por medio de pago.
+  // Agregar por mes (1..12) en calendario argentino.
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const mm = String(i + 1).padStart(2, "0");
+    return { month: i + 1, key: `${year}-${mm}`, ingresos: 0, egresos: 0, balance: 0 };
+  });
+  for (const m of yearMovs) {
+    const mk = m.date.toLocaleDateString("en-CA", {
+      timeZone: "America/Argentina/Buenos_Aires",
+    }); // YYYY-MM-DD
+    const idx = Number(mk.slice(5, 7)) - 1;
+    if (idx < 0 || idx > 11) continue;
+    const row = months[idx];
+    if (m.kind === "venta") row.ingresos += m.amountArs;
+    else if (m.kind === "gasto") row.egresos += m.amountArs;
+    else if (m.kind === "ajuste") {
+      if (m.amountArs >= 0) row.ingresos += m.amountArs;
+      else row.egresos += -m.amountArs;
+    }
+  }
+  for (const row of months) row.balance = row.ingresos - row.egresos;
+
+  const yearTotals = months.reduce(
+    (acc, m) => ({
+      ingresos: acc.ingresos + m.ingresos,
+      egresos: acc.egresos + m.egresos,
+      balance: acc.balance + m.balance,
+    }),
+    { ingresos: 0, egresos: 0, balance: 0 }
+  );
+
+  // Desglose por medio del año.
   const methodKeys = ["efectivo", "mp", "transferencia", null] as const;
   const byMethod = methodKeys
     .map((key) => {
-      const movs = monthMovs.filter((mv) => (mv.method ?? null) === key);
-      return { key, label: key ? METHOD_LABELS[key] : "Sin medio", ...totals(movs), count: movs.length };
+      const movs = yearMovs.filter((mv) => (mv.method ?? null) === key);
+      return {
+        key: key ?? "none",
+        label: key ? METHOD_LABELS[key] : "Sin medio",
+        ...totals(movs),
+        count: movs.length,
+      };
     })
-    .filter((row) => row.count > 0);
+    .filter((r) => r.count > 0);
 
-  const monthLabel = monthGte.toLocaleDateString("es-AR", {
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Argentina/Buenos_Aires",
-  });
+  const accountsLite = accounts.map((a) => ({
+    id: a.id,
+    name: a.name,
+    kind: a.kind,
+    currency: a.currency,
+    balance: a.balance,
+    active: a.active,
+  }));
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Caja & Reportes</h1>
-          <p className="text-sm capitalize text-muted-foreground">{fmtDayLabel(dateStr)}</p>
-        </div>
-        <form method="GET" className="flex items-center gap-2">
-          <input
-            type="date"
-            name="date"
-            defaultValue={dateStr}
-            aria-label="Elegir día"
-            className="h-10 rounded-md border border-input bg-card px-3 text-sm text-card-foreground focus-visible:outline-2 focus-visible:outline-ring"
-          />
-          <button
-            type="submit"
-            className="h-10 shrink-0 rounded-md border bg-card px-4 text-sm font-medium hover:bg-muted"
-          >
-            Ver
-          </button>
-        </form>
+      <div>
+        <h1 className="text-2xl font-semibold">Finanzas</h1>
+        <p className="text-sm text-muted-foreground">
+          Cuentas, movimientos y reportes de tu negocio.
+        </p>
       </div>
 
+      {/* Total consolidado arriba */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Stat label="Ingresos del día" value={fmtArs(day.ingresos)} tone="success" hint="Ventas" />
-        <Stat label="Egresos del día" value={fmtArs(day.egresos)} tone="destructive" hint="Gastos" />
         <Stat
-          label="Balance del día"
-          value={fmtArs(day.balance)}
-          tone={day.balance > 0 ? "success" : day.balance < 0 ? "destructive" : "default"}
-          hint="Ventas − gastos ± ajustes"
+          label="Total en pesos"
+          value={fmtArs(arsTotal)}
+          tone={arsTotal >= 0 ? "default" : "destructive"}
+          hint="Suma de cuentas activas en ARS"
         />
+        {hasUsd ? (
+          <Stat
+            label="Total en dólares"
+            value={usdTotal.toLocaleString("es-AR", {
+              style: "currency",
+              currency: "USD",
+              maximumFractionDigits: 2,
+            })}
+            hint="Cuentas en USD (no se suman a pesos)"
+          />
+        ) : null}
+        <Stat label="Balance del mes" value={fmtArs(monthTotals.balance)} tone={monthTotals.balance >= 0 ? "success" : "destructive"} hint="Mes seleccionado" />
       </div>
 
-      <section>
-        <h2 className="mb-2 font-semibold">Movimiento rápido</h2>
-        <CashForm slug={tenant.slug} />
-      </section>
-
-      <section>
-        <h2 className="mb-2 font-semibold">Movimientos del día</h2>
-        {dayMovs.length === 0 ? (
-          <EmptyState
-            icon="🧾"
-            title="Sin movimientos este día"
-            detail="Cargá ventas y gastos con el formulario de arriba y los ves acá al toque."
+      <FinanzasTabs slug={tenant.slug} active={tab} month={month} year={year}>
+        {tab === "saldos" ? (
+          <AccountsSection slug={tenant.slug} accounts={accountsLite} arsTotal={arsTotal} />
+        ) : null}
+        {tab === "mes" ? (
+          <MonthSection
+            slug={tenant.slug}
+            month={month}
+            accounts={accountsLite.filter((a) => a.active)}
+            accountFilter={accountFilter}
+            movements={monthMovs.map((m) => ({ ...m, date: m.date.toISOString() }))}
+            totals={monthTotals}
+            storageReady={storageAvailable()}
           />
-        ) : (
-          <Card className="divide-y p-0">
-            {dayMovs.map((mv) => {
-              const amount = signed(mv);
-              const color =
-                mv.kind === "venta"
-                  ? "text-success"
-                  : mv.kind === "gasto"
-                    ? "text-destructive"
-                    : "text-warning";
-              return (
-                <div
-                  key={mv.id}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2.5 sm:px-4"
-                >
-                  <span className="font-mono text-sm tabular-nums text-muted-foreground">
-                    {fmtTime(mv.createdAt)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{mv.concept}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {KIND_LABELS[mv.kind] ?? mv.kind}
-                      {mv.method ? ` · ${METHOD_LABELS[mv.method] ?? mv.method}` : ""}
-                    </p>
-                  </div>
-                  <span className={`text-sm font-semibold tabular-nums ${color}`}>
-                    {amount > 0 ? "+" : amount < 0 ? "−" : ""}
-                    {fmtArs(Math.abs(amount))}
-                  </span>
-                  <CashDeleteButton slug={tenant.slug} movementId={mv.id} concept={mv.concept} />
-                </div>
-              );
-            })}
-          </Card>
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-semibold">
-          Resumen del mes <span className="font-normal capitalize text-muted-foreground">· {monthLabel}</span>
-        </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Stat label="Ingresos del mes" value={fmtArs(month.ingresos)} tone="success" />
-          <Stat label="Egresos del mes" value={fmtArs(month.egresos)} tone="destructive" />
-          <Stat
-            label="Balance del mes"
-            value={fmtArs(month.balance)}
-            tone={month.balance > 0 ? "success" : month.balance < 0 ? "destructive" : "default"}
-          />
-        </div>
-        {byMethod.length === 0 ? (
-          <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
-            Sin movimientos este mes todavía.
-          </p>
-        ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>Medio de pago</Th>
-                <Th className="text-right">Ingresos</Th>
-                <Th className="text-right">Egresos</Th>
-                <Th className="text-right">Balance</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {byMethod.map((row) => (
-                <tr key={row.key ?? "none"}>
-                  <Td className="font-medium">{row.label}</Td>
-                  <Td className="text-right tabular-nums text-success">{fmtArs(row.ingresos)}</Td>
-                  <Td className="text-right tabular-nums text-destructive">{fmtArs(row.egresos)}</Td>
-                  <Td className="text-right font-medium tabular-nums">{fmtArs(row.balance)}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </section>
+        ) : null}
+        {tab === "ano" ? (
+          <YearSection slug={tenant.slug} year={year} months={months} totals={yearTotals} byMethod={byMethod} />
+        ) : null}
+      </FinanzasTabs>
     </div>
   );
 }

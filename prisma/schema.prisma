@@ -92,6 +92,9 @@ model Client {
   employees    Employee[]
   timeEntries  TimeEntry[]
   cashMovements CashMovement[]
+  accounts     Account[]
+  records      ContactRecord[]
+  attachments  Attachment[]
 }
 
 // Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
@@ -411,6 +414,7 @@ model Contact {
 
   appointments Appointment[]
   tasks        CrmTask[]
+  records      ContactRecord[]
 
   @@index([clientId])
 }
@@ -526,11 +530,76 @@ model CashMovement {
   id        String   @id @default(cuid())
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  kind      String // venta | gasto | ajuste
+  kind      String // venta | gasto | ajuste | transferencia
   concept   String
   amountArs Float
   method    String? // efectivo | mp | transferencia
+  date      DateTime @default(now()) // fecha contable del movimiento
+  accountId String? // cuenta afectada
+  account   Account? @relation("AccountMovements", fields: [accountId], references: [id], onDelete: SetNull)
+  toAccountId String? // cuenta destino (solo transferencias)
+  toAccount   Account? @relation("AccountTransfersIn", fields: [toAccountId], references: [id], onDelete: SetNull)
+  attachmentUrl String? // comprobante (Cloudinary)
   createdAt DateTime @default(now())
 
   @@index([clientId])
+  @@index([accountId])
+}
+
+// Módulo Finanzas — cuentas/billeteras del negocio con saldo propio
+model Account {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String // "Efectivo", "Banco Galicia", "Mercado Pago", "Dólares"...
+  kind      String   @default("efectivo") // efectivo | banco | mp | dolares | cheques | otro
+  currency  String   @default("ARS") // ARS | USD
+  balance   Float    @default(0) // saldo actual
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  movements    CashMovement[] @relation("AccountMovements")
+  transfersIn  CashMovement[] @relation("AccountTransfersIn")
+
+  @@index([clientId])
+}
+
+// Ficha/historial del contacto: cada consulta, servicio o reparación suma una entrada
+model ContactRecord {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type      String   @default("nota") // consulta | servicio | reparacion | visita | nota
+  date      DateTime @default(now())
+  title     String?
+  summary   String?
+  fields    Json? // campos del rubro (diagnóstico/tratamiento, trabajo/repuestos, etc.)
+  authorId  String? // empleado/profesional que la cargó
+  createdAt DateTime @default(now())
+
+  attachments Attachment[]
+
+  @@index([clientId])
+  @@index([contactId])
+}
+
+// Adjuntos (fotos, PDFs, documentos) guardados en Cloudinary, scopeados por tenant
+model Attachment {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  recordId  String?
+  record    ContactRecord? @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String? // id en Cloudinary (para borrar)
+  name      String
+  mime      String?
+  bytes     Int?
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+  @@index([recordId])
 }
