@@ -21,6 +21,22 @@ export const APPT_STATUS: Record<
   DONE: { label: "Hecho", variant: "primary" },
 };
 
+/** Punto de color por estado (tokens globales) para el calendario y listas. */
+export const STATUS_DOT: Record<ApptStatus, string> = {
+  PENDING: "bg-warning",
+  CONFIRMED: "bg-success",
+  CANCELLED: "bg-muted-foreground",
+  DONE: "bg-primary",
+};
+
+/** Orden de estados para el ciclo rápido de edición. */
+export const APPT_STATUS_ORDER: ApptStatus[] = [
+  "PENDING",
+  "CONFIRMED",
+  "DONE",
+  "CANCELLED",
+];
+
 export const WEEKDAY_LABELS = [
   "Domingo",
   "Lunes",

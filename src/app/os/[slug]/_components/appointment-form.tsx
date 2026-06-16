@@ -26,15 +26,17 @@ export function AppointmentForm({
   contacts,
   employees = [],
   customDefs,
+  initialDate = "",
 }: {
   slug: string;
   contacts: ContactOption[];
   employees?: EmployeeOption[];
   customDefs: CustomFieldDef[];
+  initialDate?: string;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState<string>("");
   const [employeeId, setEmployeeId] = useState("");

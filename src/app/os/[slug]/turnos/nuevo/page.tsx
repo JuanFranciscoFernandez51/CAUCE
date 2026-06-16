@@ -8,18 +8,25 @@ import {
 } from "@/lib/tenant";
 import { ModuleDisabled } from "../../_components/module-disabled";
 import { AppointmentForm } from "../../_components/appointment-form";
+import { DATE_RE } from "../../_lib/dates";
 
 export default async function NuevoTurnoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ fecha?: string }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
   if (!hasModule(tenant, "turnos")) {
     return <ModuleDisabled moduleLabel={MODULE_LABELS.turnos} />;
   }
+
+  // Fecha pre-cargada desde el calendario (click en un día vacío).
+  const initialDate = sp.fecha && DATE_RE.test(sp.fecha) ? sp.fecha : "";
 
   // Misma tabla Contact que el CRM: si el CRM está activo, lo que crees acá aparece allá.
   const contacts = await db.contact.findMany({
@@ -50,6 +57,7 @@ export default async function NuevoTurnoPage({
         contacts={contacts}
         employees={employees}
         customDefs={customDefs}
+        initialDate={initialDate}
       />
     </div>
   );

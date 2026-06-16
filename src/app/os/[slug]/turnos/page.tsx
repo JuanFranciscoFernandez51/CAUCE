@@ -11,7 +11,6 @@ import {
   addMonths,
   argDateStr,
   argMonthStr,
-  dayNum,
   dayRange,
   fmtDayLabel,
   fmtMonthLabel,
@@ -19,15 +18,9 @@ import {
   monthGrid,
 } from "../_lib/dates";
 import { APPT_STATUS } from "../_lib/labels";
+import { MonthCalendar, type CalAppt } from "../_components/month-calendar";
 
 type Vista = "calendario" | "lista";
-
-const STATUS_DOT: Record<keyof typeof APPT_STATUS, string> = {
-  PENDING: "bg-warning",
-  CONFIRMED: "bg-success",
-  CANCELLED: "bg-muted-foreground",
-  DONE: "bg-primary",
-};
 
 export default async function TurnosPage({
   params,
@@ -132,9 +125,9 @@ export default async function TurnosPage({
           slug={tenant.slug}
           base={base}
           where={apptWhere}
+          employees={employees}
           monthStr={sp.fecha && /^\d{4}-\d{2}/.test(sp.fecha) ? sp.fecha.slice(0, 7) : argMonthStr()}
           today={today}
-          recurso={recurso}
           withParams={withParams}
         />
       ) : (
@@ -187,17 +180,17 @@ async function CalendarView({
   slug,
   base,
   where,
+  employees,
   monthStr,
   today,
-  recurso,
   withParams,
 }: {
   slug: string;
   base: string;
   where: { clientId: string; employeeId?: string };
+  employees: { id: string; name: string }[];
   monthStr: string;
   today: string;
-  recurso: string;
   withParams: (next: Partial<{ vista: Vista; fecha: string; recurso: string }>) => string;
 }) {
   const weeks = monthGrid(monthStr);
@@ -209,20 +202,29 @@ async function CalendarView({
   const appts = await db.appointment.findMany({
     where: { ...where, startsAt: { gte: start, lt: end } },
     orderBy: { startsAt: "asc" },
-    select: { id: true, title: true, startsAt: true, status: true },
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      status: true,
+      employeeId: true,
+      employee: { select: { name: true } },
+    },
   });
 
-  const byDay = new Map<string, typeof appts>();
-  for (const a of appts) {
-    const key = argDateStr(a.startsAt);
-    const list = byDay.get(key) ?? [];
-    list.push(a);
-    byDay.set(key, list);
-  }
+  // Serializamos para el client component (sin objetos Date crudos).
+  const serialized: CalAppt[] = appts.map((a) => ({
+    id: a.id,
+    title: a.title,
+    date: argDateStr(a.startsAt),
+    time: fmtTime(a.startsAt),
+    status: a.status,
+    employeeId: a.employeeId,
+    employeeName: a.employee?.name ?? null,
+  }));
 
   const prev = addMonths(monthStr, -1);
   const next = addMonths(monthStr, 1);
-  const weekdayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
   return (
     <section className="space-y-3">
@@ -244,69 +246,15 @@ async function CalendarView({
         </ButtonLink>
       </div>
 
-      <Card className="overflow-hidden p-0">
-        <div
-          className="grid border-b bg-muted text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-          style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}
-        >
-          {weekdayNames.map((w) => (
-            <div key={w} className="px-1 py-1.5">
-              {w}
-            </div>
-          ))}
-        </div>
-        <div className="grid" style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
-          {weeks.flat().map((cell) => {
-            const list = byDay.get(cell.date) ?? [];
-            const isToday = cell.date === today;
-            return (
-              <Link
-                key={cell.date}
-                href={withParams({ vista: "lista", fecha: cell.date })}
-                className={`min-h-20 border-b border-r p-1 text-left align-top transition-colors hover:bg-muted sm:min-h-24 ${
-                  cell.inMonth ? "" : "bg-muted/40 text-muted-foreground"
-                }`}
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <span
-                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                      isToday ? "bg-primary font-semibold text-primary-foreground" : ""
-                    }`}
-                  >
-                    {dayNum(cell.date)}
-                  </span>
-                  {list.length > 0 ? (
-                    <span className="text-[10px] text-muted-foreground">{list.length}</span>
-                  ) : null}
-                </div>
-                <div className="space-y-0.5">
-                  {list.slice(0, 3).map((a) => (
-                    <div
-                      key={a.id}
-                      className="flex items-center gap-1 truncate text-[11px] leading-tight"
-                      title={`${fmtTime(a.startsAt)} · ${a.title}`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[a.status]}`}
-                      />
-                      <span className="font-mono tabular-nums">{fmtTime(a.startsAt)}</span>
-                      <span className="truncate">{a.title}</span>
-                    </div>
-                  ))}
-                  {list.length > 3 ? (
-                    <div className="text-[10px] text-muted-foreground">
-                      +{list.length - 3} más
-                    </div>
-                  ) : null}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </Card>
-      <p className="text-xs text-muted-foreground">
-        Tocá un día para ver su agenda completa.
-      </p>
+      <MonthCalendar
+        key={`${monthStr}:${where.employeeId ?? "all"}`}
+        slug={slug}
+        base={base}
+        weeks={weeks}
+        appointments={serialized}
+        employees={employees}
+        today={today}
+      />
     </section>
   );
 }
