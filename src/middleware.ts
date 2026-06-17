@@ -40,12 +40,18 @@ export async function middleware(req: NextRequest) {
   }
 
   // ── Cauce OS: dominio PROPIO del cliente (Client.domain) → rewrite a /os/<slug> ──
+  // Solo se activa cuando hay un TENANT_BASE configurado (setup con dominios propios).
+  // Los dominios de Vercel (*.vercel.app) y localhost sirven SIEMPRE la app principal,
+  // nunca se tratan como dominio de un tenant (evita un fetch por request que rompe el edge).
   const esHostPropio =
+    Boolean(TENANT_BASE) &&
     host &&
     !host.includes("localhost") &&
     !host.startsWith("127.") &&
     !host.startsWith("192.168.") &&
-    (!TENANT_BASE || (host !== TENANT_BASE && !host.endsWith(`.${TENANT_BASE}`)));
+    !host.endsWith(".vercel.app") &&
+    host !== TENANT_BASE &&
+    !host.endsWith(`.${TENANT_BASE}`);
   if (
     esHostPropio &&
     !pathname.startsWith("/os/") &&
