@@ -20,7 +20,7 @@ async function slugByCustomDomain(req: NextRequest, host: string): Promise<strin
   return slug;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const host = (req.headers.get("host") ?? "").toLowerCase();
 
