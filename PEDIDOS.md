@@ -9,7 +9,8 @@ Cada pedido de Francisco se anota como criterio verificable. Estados: ⏳ pendie
 | 1 | Crear la empresa completa del kit en carpeta nueva | ✅ | F0→F6 construidas; build verde; F7 (módulos restantes OS) y F8 (MP) diferidas según el kit |
 | 2 | **Design tokens del brand "Corriente" APLICADOS** (10/06, pedido de Fran: "no te salgas de eso") | 🔍 | Tomados de `Cauce - Design Tokens.html`: ink/surface/line, blue #2E6BFF, cyan #7FE8FF, Space Grotesk + IBM Plex Sans/Mono, radios 8/14/22, dark-first (modo claro sobre --fog). Evidencia regenerada con el brand |
 | 3 | Empresa funcional, "que no le erre", lista para rendir al 100% | 🔍 | Verificado: build + typecheck verdes, login en las 3 superficies, 31 screenshots en `evidencia/` |
-| 4 | Preview corriendo | ✅ | `npm run dev` → http://localhost:3000 (el panel de preview de Claude.app está roto en esta instalación — binario `disclaimer` faltante) |
+| 4 | Preview corriendo | ✅ | Local `npm run dev`. **PRODUCCIÓN LIVE: https://cauce-arg.vercel.app** (cuenta Vercel `vespa-bahia`, repo `JuanFranciscoFernandez51/CAUCE`, auto-deploy en cada push) |
+| 4b | **Deploy a Vercel** (18/06) | ✅ | Bug clave resuelto: Next 16 deprecó `middleware.ts` → renombrado a `proxy.ts` (el middleware deprecado rompía el routing en Vercel = 404 en todo). Framework Preset Next.js. Env cargadas en Production. Cloudinary `dgtlyzyra` activo. 38 workflows n8n re-provisionados al dominio real. Login/admin/hooks verificados en prod |
 | 5 | Manual de uso | ✅ | `MANUAL.md` |
 | 6 | 20 mejoras aplicables, iniciar las posibles | ✅ | `MEJORAS.md` — 10 implementadas hoy |
 | 7 | 10 leads de complejidad variada con resolución completa | ✅ | `npm run demo` (idempotente): N1→N4, 6 áreas, blueprints, todos aprobados, 27 automatizaciones en TEST con config, QA corrido, usuarios de portal, suscripciones, uso del mes y reportes. 3 con roadmap de consultoría. 4 con Cauce OS activo (módulos + branding) |
