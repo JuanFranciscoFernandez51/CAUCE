@@ -95,6 +95,9 @@ model Client {
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
+  listings     Listing[]
+  proyectos    Proyecto[]
+  proyectoTareas ProyectoTarea[]
 }
 
 // Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
@@ -602,4 +605,75 @@ model Attachment {
 
   @@index([clientId])
   @@index([recordId])
+}
+
+// Propiedades de la inmobiliaria (catálogo público). Reutilizable como listing genérico.
+model Listing {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  slug         String // para la URL pública /sitio/<tenant>/<slug>
+  title        String
+  operation    String   @default("venta") // venta | alquiler | alquiler_temporal
+  propertyType String   @default("departamento") // casa | departamento | ph | local | terreno | oficina | galpon
+  status       String   @default("disponible") // disponible | reservada | vendida | alquilada
+  priceUsd     Float?
+  priceArs     Float?
+  expensesArs  Float? // expensas mensuales
+  address      String?
+  neighborhood String?
+  city         String?
+  bedrooms     Int? // ambientes/dormitorios
+  bathrooms    Int?
+  areaM2       Float?
+  coveredM2    Float?
+  description  String?
+  amenities    String[] @default([]) // [cochera, pileta, parrilla, balcón...]
+  photos       String[] @default([]) // URLs Cloudinary
+  featured     Boolean  @default(false) // destacada en la home del sitio
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([clientId, status])
+}
+
+// Proyectos de la agencia (gestión de principio a fin)
+model Proyecto {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name        String
+  clienteName String? // el cliente de la agencia para quien es el proyecto
+  status      String   @default("propuesta") // propuesta | en_curso | revision | entregado | pausado
+  area        String? // branding | ads | redes | web | contenido | SEO
+  budgetUsd   Float?
+  startDate   DateTime?
+  dueDate     DateTime?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tareas      ProyectoTarea[]
+
+  @@index([clientId])
+}
+
+model ProyectoTarea {
+  id         String   @id @default(cuid())
+  clientId   String
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  proyectoId String
+  proyecto   Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  title      String
+  status     String   @default("pendiente") // pendiente | haciendo | revision | hecho
+  assigneeId String? // Employee del tenant
+  dueAt      DateTime?
+  hours      Float? // horas estimadas/cargadas
+  orderIdx   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([clientId])
+  @@index([proyectoId])
 }

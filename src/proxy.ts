@@ -73,6 +73,12 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Sitio web público de la inmobiliaria (catálogo de propiedades + consulta).
+  // Mismo trato que /agendar: sin sesión, scoping por slug del tenant.
+  if (pathname.startsWith("/sitio") || pathname.startsWith("/api/public/sitio")) {
+    return NextResponse.next();
+  }
+
   const needsAuth =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/portal") ||

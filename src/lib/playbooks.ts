@@ -77,7 +77,7 @@ export interface TenantCtx {
   modules: TenantModule[];
 }
 
-type TenantModule = "crm" | "turnos" | "catalogo" | "rrhh" | "caja";
+type TenantModule = "crm" | "turnos" | "catalogo" | "rrhh" | "caja" | "proyectos" | "sitio";
 
 export type KpiValue = number | string;
 
@@ -764,6 +764,50 @@ const RULES: Array<{ key: string; match: string[]; build: PlaybookFactory }> = [
         kpiIngresosMes,
       ],
       alerts: [alertTurnosSinConfirmar, alertSenaPendiente],
+    }),
+  },
+  // ── Agencia de marketing / publicidad ──
+  {
+    key: "agencia",
+    match: ["agencia", "marketing", "publicidad", "comunicacion", "comunicación", "branding", "creativa", "ads"],
+    build: () => ({
+      glossary: { contact: "cuenta", contacts: "cuentas", appointment: "reunión", appointments: "reuniones" },
+      heroSubtitle: "Tu agencia hoy: proyectos en curso, entregas de la semana y el equipo.",
+      crmStages: STAGES.generic,
+      quickActions: [
+        { label: "+ Proyecto", href: "/proyectos", variant: "primary", requires: "proyectos" },
+        qaContacto("+ Cuenta"),
+      ],
+      kpis: [
+        {
+          key: "proyectos_activos",
+          label: "Proyectos en curso",
+          hint: "activos ahora",
+          requires: "proyectos",
+          tone: "default",
+          compute: (db, t) =>
+            db.proyecto.count({ where: { clientId: t.id, status: { in: ["en_curso", "revision"] } } }),
+        },
+        {
+          key: "entregados",
+          label: "Entregados",
+          hint: "proyectos cerrados",
+          requires: "proyectos",
+          tone: "success",
+          compute: (db, t) => db.proyecto.count({ where: { clientId: t.id, status: "entregado" } }),
+        },
+        {
+          key: "tareas_pend",
+          label: "Tareas del equipo",
+          hint: "pendientes",
+          requires: "proyectos",
+          tone: "warning",
+          compute: (db, t) =>
+            db.proyectoTarea.count({ where: { clientId: t.id, status: { not: "hecho" } } }),
+        },
+        { ...kpiContactos("Cuentas", "clientes activos"), key: "cuentas" },
+      ],
+      alerts: [alertTareasVencidas],
     }),
   },
 ];

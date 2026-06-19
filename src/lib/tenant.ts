@@ -28,7 +28,7 @@ export type TenantCustomFields = {
   product?: CustomFieldDef[];
 };
 
-export const OS_MODULES = ["crm", "turnos", "catalogo", "rrhh", "caja"] as const;
+export const OS_MODULES = ["crm", "turnos", "catalogo", "rrhh", "caja", "proyectos", "sitio"] as const;
 export type OsModule = (typeof OS_MODULES)[number];
 
 export const MODULE_LABELS: Record<OsModule, string> = {
@@ -37,6 +37,8 @@ export const MODULE_LABELS: Record<OsModule, string> = {
   catalogo: "Catálogo & Stock",
   rrhh: "RRHH",
   caja: "Caja & Reportes",
+  proyectos: "Proyectos",
+  sitio: "Sitio web",
 };
 
 export async function getTenantBySlug(slug: string): Promise<Client | null> {

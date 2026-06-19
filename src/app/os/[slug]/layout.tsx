@@ -14,7 +14,13 @@ import { ThemeToggle } from "@/components/theme";
 import { isOsOwner, resolveOsRole } from "./_components/os-role";
 
 /** Módulos con UI lista en esta versión de Cauce OS. */
-const READY_MODULES: OsModule[] = ["crm", "turnos", "catalogo", "rrhh", "caja"];
+const READY_MODULES: OsModule[] = ["crm", "turnos", "catalogo", "rrhh", "caja", "sitio", "proyectos"];
+
+/** Algunos módulos abren una ruta propia (no /<module>) con su propia etiqueta. */
+const MODULE_NAV: Partial<Record<OsModule, { path: string; label: string }>> = {
+  sitio: { path: "propiedades", label: "🏠 Propiedades" },
+  proyectos: { path: "proyectos", label: "📁 Proyectos" },
+};
 
 export default async function OsLayout({
   children,
@@ -99,7 +105,11 @@ export default async function OsLayout({
             <NavLink href={base} label="Inicio" />
             {OS_MODULES.filter((m) => active.includes(m)).map((m) =>
               READY_MODULES.includes(m) ? (
-                <NavLink key={m} href={`${base}/${m}`} label={MODULE_LABELS[m]} />
+                <NavLink
+                  key={m}
+                  href={`${base}/${MODULE_NAV[m]?.path ?? m}`}
+                  label={MODULE_NAV[m]?.label ?? MODULE_LABELS[m]}
+                />
               ) : (
                 <span
                   key={m}
