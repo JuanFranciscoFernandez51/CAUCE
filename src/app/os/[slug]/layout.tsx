@@ -6,21 +6,23 @@ import {
   getTenantBySlug,
   tenantBranding,
   tenantModules,
-  MODULE_LABELS,
-  OS_MODULES,
   type OsModule,
 } from "@/lib/tenant";
-import { ThemeToggle } from "@/components/theme";
 import { isOsOwner, resolveOsRole } from "./_components/os-role";
+import { OsSidebar, type NavEntry } from "./_components/os-sidebar";
 
-/** Módulos con UI lista en esta versión de Cauce OS. */
-const READY_MODULES: OsModule[] = ["crm", "turnos", "catalogo", "rrhh", "caja", "sitio", "proyectos"];
-
-/** Algunos módulos abren una ruta propia (no /<module>) con su propia etiqueta. */
-const MODULE_NAV: Partial<Record<OsModule, { path: string; label: string }>> = {
-  sitio: { path: "propiedades", label: "🏠 Propiedades" },
-  proyectos: { path: "proyectos", label: "📁 Proyectos" },
+/** Módulos operativos: etiqueta + ruta + ícono dentro del grupo "Operaciones". */
+const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: string }>> = {
+  turnos: { path: "turnos", label: "Turnos & Agenda", icon: "📅" },
+  catalogo: { path: "catalogo", label: "Catálogo & Stock", icon: "📦" },
+  sitio: { path: "propiedades", label: "Propiedades", icon: "🏠" },
+  proyectos: { path: "proyectos", label: "Proyectos", icon: "📁" },
+  rrhh: { path: "rrhh", label: "RRHH", icon: "👥" },
+  caja: { path: "caja", label: "Finanzas", icon: "💵" },
 };
+
+/** Orden de los módulos operativos dentro del grupo. */
+const OPS_ORDER: OsModule[] = ["turnos", "catalogo", "sitio", "proyectos", "rrhh", "caja"];
 
 export default async function OsLayout({
   children,
@@ -59,12 +61,11 @@ export default async function OsLayout({
 
   if (forbidden) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background px-6 text-center">
+      <div style={themeVars} className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background px-6 text-center">
         <div className="text-4xl">🔒</div>
         <h1 className="text-xl font-semibold">No tenés acceso a este sistema</h1>
         <p className="max-w-md text-sm text-muted-foreground">
-          Tu usuario no pertenece a {branding.displayName}. Si creés que es un
-          error, hablá con Cauce.
+          Tu usuario no pertenece a {branding.displayName}. Si creés que es un error, hablá con Cauce.
         </p>
         <Link href="/login" className="text-sm font-medium text-primary underline">
           Volver al login
@@ -76,82 +77,52 @@ export default async function OsLayout({
   // Rol dentro del OS (leído de la DB): define qué ve en el nav.
   const osRole = session ? await resolveOsRole(session.user.id, tenant.id) : null;
   const owner = isOsOwner(osRole);
-
-  // Los "equipo" no ven Caja — es info sensible del dueño.
-  const active = tenantModules(tenant).filter((m) => m !== "caja" || owner);
   const base = `/os/${tenant.slug}`;
 
+  const modules = tenantModules(tenant);
+  const crm = modules.includes("crm");
+
+  // Grupo Operaciones: módulos operativos activos (Caja solo para el dueño) + Automatizaciones.
+  const opsItems = OPS_ORDER.filter((m) => modules.includes(m) && (m !== "caja" || owner)).map((m) => ({
+    label: OPS_NAV[m]!.label,
+    href: `${base}/${OPS_NAV[m]!.path}`,
+    icon: OPS_NAV[m]!.icon,
+  }));
+  opsItems.push({ label: "Automatizaciones", href: `${base}/automatizaciones`, icon: "⚡" });
+
+  // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
+  const nav: NavEntry[] = [
+    { label: "Dashboard", href: base, icon: "🏁", exact: true },
+    ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
+    { label: "Operaciones", icon: "🛠️", items: opsItems },
+    ...(owner
+      ? [
+          { label: "Configuración de la página", href: `${base}/config`, icon: "⚙️" },
+          { label: "Usuarios", href: `${base}/usuarios`, icon: "👤" },
+        ]
+      : []),
+    { label: "Asistente IA", href: `${base}/asistente`, icon: "✨" },
+  ];
+
   return (
-    <div style={themeVars} className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-          <Link href={base} className="flex min-w-0 items-center gap-2.5">
-            {branding.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={branding.logo}
-                alt={branding.displayName}
-                className="h-9 w-9 rounded-full border object-cover"
-              />
-            ) : (
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                {branding.displayName.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <span className="truncate text-base font-semibold">{branding.displayName}</span>
-          </Link>
-
-          <nav className="order-3 -mx-1 flex w-full items-center gap-1 overflow-x-auto pb-1 sm:order-none sm:mx-0 sm:w-auto sm:flex-1 sm:pb-0">
-            <NavLink href={base} label="Inicio" />
-            {OS_MODULES.filter((m) => active.includes(m)).map((m) =>
-              READY_MODULES.includes(m) ? (
-                <NavLink
-                  key={m}
-                  href={`${base}/${MODULE_NAV[m]?.path ?? m}`}
-                  label={MODULE_NAV[m]?.label ?? MODULE_LABELS[m]}
-                />
-              ) : (
-                <span
-                  key={m}
-                  title="Próximamente"
-                  className="cursor-not-allowed whitespace-nowrap rounded-md px-3 py-1.5 text-sm text-muted-foreground opacity-60"
-                >
-                  {MODULE_LABELS[m]}
-                  <span className="ml-1 text-[10px] uppercase">pronto</span>
-                </span>
-              )
-            )}
-            <NavLink href={`${base}/automatizaciones`} label="⚡ Automatizaciones" />
-            {owner ? <NavLink href={`${base}/config`} label="⚙️ Configuración" /> : null}
-          </nav>
-
-          <div className="ml-auto sm:ml-0">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
-
-      <footer className="border-t py-4">
-        <p className="text-center text-xs text-muted-foreground">
-          ⚡ Powered by{" "}
-          <a href="https://cauce.app" className="font-medium hover:text-foreground">
-            Cauce
-          </a>
-        </p>
-      </footer>
+    <div style={themeVars} className="flex min-h-screen bg-background text-foreground lg:flex-row flex-col">
+      <OsSidebar
+        displayName={branding.displayName}
+        logo={branding.logo || null}
+        initial={branding.displayName.charAt(0).toUpperCase()}
+        nav={nav}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
+        <footer className="border-t py-4">
+          <p className="text-center text-xs text-muted-foreground">
+            ⚡ Powered by{" "}
+            <a href="https://cauce.app" className="font-medium hover:text-foreground">
+              Cauce
+            </a>
+          </p>
+        </footer>
+      </div>
     </div>
-  );
-}
-
-function NavLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-    >
-      {label}
-    </Link>
   );
 }

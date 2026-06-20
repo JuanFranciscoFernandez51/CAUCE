@@ -42,7 +42,7 @@ function roleLabel(r: string) {
   return r === "dueno" ? "Dueño" : "Equipo";
 }
 
-function TeamSection({ slug, meId, initialUsers }: { slug: string; meId: string; initialUsers: OsUser[] }) {
+export function TeamSection({ slug, meId, initialUsers }: { slug: string; meId: string; initialUsers: OsUser[] }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [adding, setAdding] = useState(false);
@@ -192,7 +192,7 @@ function TeamSection({ slug, meId, initialUsers }: { slug: string; meId: string;
   );
 }
 
-function BrandingSection({ slug, initial }: { slug: string; initial: Branding }) {
+export function BrandingSection({ slug, initial }: { slug: string; initial: Branding }) {
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [busy, setBusy] = useState(false);
