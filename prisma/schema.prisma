@@ -420,6 +420,7 @@ model Contact {
   records      ContactRecord[]
 
   @@index([clientId])
+  @@index([clientId, lastTouchAt])
 }
 
 model CrmTask {
@@ -546,6 +547,7 @@ model CashMovement {
   createdAt DateTime @default(now())
 
   @@index([clientId])
+  @@index([clientId, date])
   @@index([accountId])
 }
 

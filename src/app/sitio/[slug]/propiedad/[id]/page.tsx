@@ -14,7 +14,7 @@ import {
   fmtExpenses,
 } from "@/app/os/[slug]/_lib/listings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: cachea 5 min (la región gru1 + esto = páginas casi instantáneas)
 
 export async function generateMetadata({
   params,

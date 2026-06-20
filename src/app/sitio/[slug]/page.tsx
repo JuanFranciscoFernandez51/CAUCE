@@ -6,7 +6,7 @@ import { getTenantBySlug, hasModule, tenantBranding } from "@/lib/tenant";
 import { SiteShell, siteContact } from "./_components/site-shell";
 import { PropertyCard, type PublicListing } from "./_components/property-card";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: cachea 5 min (la región gru1 + esto = páginas casi instantáneas)
 
 export async function generateMetadata({
   params,
