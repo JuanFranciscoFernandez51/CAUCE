@@ -65,6 +65,8 @@ type Answers = {
   business: string;
   rubro: string;
   size: string;
+  web: string;
+  instagram: string;
   dolores: string[];
   dolorOtro: string;
   frecuencia: string;
@@ -80,6 +82,8 @@ const INITIAL: Answers = {
   business: "",
   rubro: "",
   size: "",
+  web: "",
+  instagram: "",
   dolores: [],
   dolorOtro: "",
   frecuencia: "",
@@ -312,6 +316,29 @@ export function IntakeWizard() {
                     {s.label}
                   </Chip>
                 ))}
+              </div>
+            </div>
+            <div className="rounded-lg border border-dashed bg-muted/40 p-4">
+              <p className="text-sm font-medium">¿Ya tenés web o Instagram? 🎨</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Opcional. Si nos pasás el link, tomamos tu identidad (colores, logo y estilo) para armar todo con tu marca.
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <Field label="Tu web">
+                  <Input
+                    value={a.web}
+                    onChange={(e) => set("web", e.target.value)}
+                    placeholder="tunegocio.com"
+                    inputMode="url"
+                  />
+                </Field>
+                <Field label="Tu Instagram">
+                  <Input
+                    value={a.instagram}
+                    onChange={(e) => set("instagram", e.target.value)}
+                    placeholder="@tunegocio"
+                  />
+                </Field>
               </div>
             </div>
           </>

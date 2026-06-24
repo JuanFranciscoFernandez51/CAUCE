@@ -8,6 +8,8 @@ const intakeSchema = z.object({
   business: z.string().trim().min(1, "Falta el nombre del negocio").max(200),
   rubro: z.string().trim().min(1, "Falta el rubro").max(200),
   size: z.enum(["solo", "2-5", "6-20", "20+"]),
+  web: z.string().trim().max(300).optional().default(""),
+  instagram: z.string().trim().max(150).optional().default(""),
   dolores: z
     .array(
       z.enum([
@@ -82,6 +84,8 @@ export async function POST(req: Request) {
       whatsapp: data.whatsapp,
       intake: {
         size: data.size,
+        web: data.web || null,
+        instagram: data.instagram || null,
         dolores: data.dolores,
         dolorOtro: data.dolorOtro || null,
         frecuencia: data.frecuencia,
