@@ -97,6 +97,14 @@ export default async function ClienteDetailPage({
           <span className="text-sm text-muted-foreground">
             MRR {fmtUsd(client.mrr)} · {client.slug}.cauce.app
           </span>
+          <a
+            href={`/admin/clientes/${client.id}/presentacion`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
+          >
+            📄 Presentación para el cliente
+          </a>
         </div>
       </div>
 
