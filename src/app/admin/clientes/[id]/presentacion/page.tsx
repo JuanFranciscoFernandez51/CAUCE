@@ -84,6 +84,14 @@ export default async function PresentacionPage({
   const tieneSitio = modules.includes("sitio");
   const tieneTurnos = modules.includes("turnos");
 
+  // Capturas reales del sitio y el sistema (las genera scripts/capturar-cliente.ts → Cloudinary)
+  const shots =
+    ((client.settings as Record<string, unknown> | null)?.shots as
+      | { titulo: string; grupo: string; url: string }[]
+      | undefined) ?? [];
+  const shotsWeb = shots.filter((s) => s.grupo === "web");
+  const shotsSistema = shots.filter((s) => s.grupo === "sistema");
+
   const fecha = new Date().toLocaleDateString("es-AR", {
     day: "numeric",
     month: "long",
@@ -317,6 +325,41 @@ export default async function PresentacionPage({
             )}
           </div>
         </section>
+
+        {/* ── ASÍ QUEDÓ (capturas reales) ──────────────────── */}
+        {shots.length > 0 ? (
+          <section className="slide rounded-2xl bg-white p-12 shadow-md">
+            <SectionTitle accent={accent} kicker="03 — Así quedó" title="Tu negocio, ya armado" />
+            {shotsWeb.length > 0 ? (
+              <div className="mb-8">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Tu página web</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {shotsWeb.map((s) => (
+                    <figure key={s.url} className="avoid-break overflow-hidden rounded-xl border">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={s.url} alt={s.titulo} className="w-full border-b object-cover" />
+                      <figcaption className="bg-gray-50 px-3 py-2 text-sm font-medium text-gray-600">{s.titulo}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {shotsSistema.length > 0 ? (
+              <div>
+                <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Tu sistema de gestión</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {shotsSistema.map((s) => (
+                    <figure key={s.url} className="avoid-break overflow-hidden rounded-xl border">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={s.url} alt={s.titulo} className="w-full border-b object-cover" />
+                      <figcaption className="bg-gray-50 px-3 py-2 text-sm font-medium text-gray-600">{s.titulo}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         {/* ── SISTEMA EN NÚMEROS ───────────────────────────── */}
         {numeros.length > 0 ? (
