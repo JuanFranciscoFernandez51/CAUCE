@@ -136,8 +136,50 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Áreas ── */}
+      {/* ── Qué te entregamos (diferencial) ── */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <Badge variant="primary">La entrega Cauce</Badge>
+          <h2 className="mt-4 text-3xl font-bold">No te damos un bot suelto. Te damos tu negocio entero, online.</h2>
+          <p className="mt-3 text-muted-foreground">
+            Toda empresa que entra a Cauce se va con las tres patas funcionando en paralelo
+            —y todo con <span className="font-semibold text-foreground">tu marca</span>, no la nuestra.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              icon: "🌐",
+              t: "Tu página web",
+              d: "Pública y lista para mostrar: institucional, catálogo, reservas online o tu carta. Con tus colores y tu logo. Si ya tenés web, nos integramos a ella.",
+            },
+            {
+              icon: "🗂️",
+              t: "Tu software de gestión",
+              d: "El back para operar: CRM, turnos, stock, finanzas, proyectos, equipo. Tu sistema propio, no una planilla — con tu marca y tu gente adentro.",
+            },
+            {
+              icon: "⚡",
+              t: "Tus automatizaciones",
+              d: "Trabajando solas 24/7: responden, agendan, cobran, hacen seguimiento y cargan todo al sistema. Vos recibís resultados, no tareas.",
+            },
+          ].map((x) => (
+            <Card key={x.t} className="p-6">
+              <div className="text-3xl">{x.icon}</div>
+              <h3 className="mt-3 text-lg font-semibold">{x.t}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{x.d}</p>
+            </Card>
+          ))}
+        </div>
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
+          Las tres conectadas entre sí: la web capta, el sistema ordena, las automatizaciones empujan.
+          <span className="font-medium text-foreground"> Tu negocio funcionando solo, de punta a punta.</span>
+        </p>
+      </section>
+
+      {/* ── Áreas ── */}
+      <section className="border-t bg-muted/40">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <h2 className="text-center text-3xl font-bold">Resolvemos todas las áreas</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-muted-foreground">
           Estas son automatizaciones reales de nuestro recetario, listas para
@@ -179,6 +221,7 @@ export default async function LandingPage() {
               </Card>
             );
           })}
+        </div>
         </div>
       </section>
 
