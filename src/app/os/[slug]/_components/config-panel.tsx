@@ -96,6 +96,22 @@ export function TeamSection({ slug, meId, initialUsers }: { slug: string; meId: 
     }
   }
 
+  async function cambiarPassword(id: string, name: string) {
+    const pwd = prompt(`Nueva contraseña para ${name} (mínimo 8 caracteres):`);
+    if (pwd === null) return;
+    if (pwd.length < 8) { alert("La contraseña debe tener al menos 8 caracteres."); return; }
+    const res = await fetch(`/api/os/${slug}/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pwd }),
+    });
+    if (res.ok) alert(`Contraseña de ${name} actualizada.`);
+    else {
+      const data = await res.json().catch(() => null);
+      alert(data?.error ?? "No se pudo cambiar la contraseña");
+    }
+  }
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -177,11 +193,16 @@ export function TeamSection({ slug, meId, initialUsers }: { slug: string; meId: 
                   )}
                 </Td>
                 <Td className="text-right">
-                  {u.id !== meId ? (
-                    <Button variant="ghost" size="sm" onClick={() => removeUser(u.id, u.name)}>
-                      Quitar acceso
+                  <div className="flex justify-end gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => cambiarPassword(u.id, u.name)}>
+                      🔑 Contraseña
                     </Button>
-                  ) : null}
+                    {u.id !== meId ? (
+                      <Button variant="ghost" size="sm" onClick={() => removeUser(u.id, u.name)}>
+                        Quitar acceso
+                      </Button>
+                    ) : null}
+                  </div>
                 </Td>
               </tr>
             ))}

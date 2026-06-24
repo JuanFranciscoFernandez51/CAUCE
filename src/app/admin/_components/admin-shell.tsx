@@ -84,13 +84,21 @@ export function AdminShell({
         </div>
         <ThemeToggle />
       </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => signOut({ callbackUrl: "/login" })}
-      >
-        Salir
-      </Button>
+      <div className="flex gap-2">
+        <Link
+          href="/admin/cuenta"
+          className="flex-1 rounded-md border bg-card px-3 py-1.5 text-center text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          Mi cuenta
+        </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+        >
+          Salir
+        </Button>
+      </div>
     </div>
   );
 

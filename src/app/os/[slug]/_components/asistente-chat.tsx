@@ -21,11 +21,14 @@ type Msg = {
 };
 
 const SUGERENCIAS_OWNER = [
-  "¿Cuántos turnos tengo esta semana?",
+  "¿Qué tengo pendiente hoy?",
+  "Cargá un turno para mañana a las 15",
+  "Agregá un producto",
+  "Cargá un contacto nuevo",
   "Cambiá mi color principal a azul",
-  "Agregá horario los sábados de 9 a 13",
 ];
 const SUGERENCIAS_EQUIPO = [
+  "¿Cómo viene el día?",
   "¿Cuántos turnos hay esta semana?",
   "¿Cuántos contactos tenemos en el CRM?",
   "¿Cuáles son los horarios de atención?",

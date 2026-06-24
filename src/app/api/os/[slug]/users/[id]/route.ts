@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { guardOsApi } from "../../_guard";
 import { resolveOsRole, isOsOwner } from "@/app/os/[slug]/_components/os-role";
 
-const patchSchema = z.object({ osRole: z.enum(["dueno", "equipo"]) });
+const patchSchema = z
+  .object({
+    osRole: z.enum(["dueno", "equipo"]).optional(),
+    password: z.string().min(8, "Mínimo 8 caracteres").max(100).optional(),
+  })
+  .refine((d) => d.osRole !== undefined || d.password !== undefined, {
+    message: "Nada para actualizar",
+  });
 
-/** Cambiar el rol de un usuario del equipo. Solo el dueño. */
+/** Cambiar el rol o resetear la contraseña de un usuario del equipo. Solo el dueño. */
 export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string; id: string }> }) {
   const { slug, id } = await ctx.params;
   const g = await guardOsApi(slug);
@@ -23,13 +31,19 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
     return NextResponse.json({ error: "Cuerpo inválido" }, { status: 400 });
   }
   const parsed = patchSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: "Rol inválido" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 });
+  }
 
   // El usuario tiene que ser de este tenant.
   const target = await db.user.findFirst({ where: { id, clientId: g.tenant.id } });
   if (!target) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 
-  await db.user.update({ where: { id }, data: { osRole: parsed.data.osRole } });
+  const data: { osRole?: string; passwordHash?: string } = {};
+  if (parsed.data.osRole) data.osRole = parsed.data.osRole;
+  if (parsed.data.password) data.passwordHash = await bcrypt.hash(parsed.data.password, 10);
+
+  await db.user.update({ where: { id }, data });
   return NextResponse.json({ ok: true });
 }
 

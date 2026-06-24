@@ -93,6 +93,62 @@ export function getCaso(slug: string): Caso | undefined {
   return CASOS.find((c) => c.slug === slug);
 }
 
+// ── Negocios reales (capturas) ────────────────────────────
+/**
+ * Una captura real guardada en Client.settings.shots por
+ * scripts/capturar-cliente.ts (subida a Cloudinary).
+ */
+export type Shot = {
+  titulo: string;
+  grupo: "web" | "sistema";
+  url: string;
+};
+
+/** Slugs de tenants demo que queremos destacar como negocios reales, en orden. */
+export const NEGOCIOS_DESTACADOS = [
+  "marenco-propiedades",
+  "lume-studio",
+  "pulso-studio",
+] as const;
+
+/**
+ * Frase honesta de "qué se logró", derivada del rubro cuando no hay una a mano.
+ * Son negocios que YA funcionan con Cauce, así que hablamos en presente.
+ */
+export function logroPorRubro(rubro: string | null | undefined): string {
+  const r = (rubro ?? "").toLowerCase();
+  if (r.includes("inmob") || r.includes("propiedad"))
+    return "Catálogo de propiedades online y consultas que entran solas al CRM.";
+  if (r.includes("estudio") || r.includes("studio") || r.includes("dise"))
+    return "Web con su marca y la operación ordenada en un solo lugar.";
+  if (r.includes("salud") || r.includes("clínic") || r.includes("clinic") || r.includes("dental") || r.includes("consult"))
+    return "Turnos online y agenda que se llena sin atender el teléfono.";
+  if (r.includes("distrib") || r.includes("mayor") || r.includes("comercio"))
+    return "Pedidos y stock sincronizados, sin planillas ni papelitos.";
+  if (r.includes("gimnas") || r.includes("fitness") || r.includes("entren"))
+    return "Reservas de clases y seguimiento de clientes, automatizados.";
+  return "Su web, su sistema y sus automatizaciones funcionando en paralelo.";
+}
+
+/** Extrae las shots de un Client.settings de forma segura (puede no existir). */
+export function shotsDeSettings(settings: unknown): Shot[] {
+  if (!settings || typeof settings !== "object") return [];
+  const raw = (settings as Record<string, unknown>).shots;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (s): s is Shot =>
+      !!s &&
+      typeof s === "object" &&
+      typeof (s as Shot).url === "string" &&
+      typeof (s as Shot).titulo === "string"
+  );
+}
+
+/** La captura a mostrar: preferimos la de la web; si no hay, la primera que haya. */
+export function shotPrincipal(shots: Shot[]): Shot | undefined {
+  return shots.find((s) => s.grupo === "web") ?? shots[0];
+}
+
 /** Etiquetas en español para cada área de negocio. */
 export const AREA_LABELS: Record<BizArea, string> = {
   ATENCION: "Atención al cliente",

@@ -7,8 +7,9 @@ import { guardOsApi } from "../_guard";
 import { resolveOsRole, isOsOwner } from "@/app/os/[slug]/_components/os-role";
 import {
   buildTenantSummary,
+  buildAlertas,
   buildSystemPrompt,
-  ASISTENTE_TOOLS,
+  buildAsistenteTools,
   accionSchema,
   describirAccion,
   type AccionConfirmada,
@@ -60,8 +61,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
   }
 
   const modules = tenantModules(tenant);
-  const summary = await buildTenantSummary(tenant, modules);
-  const system = await buildSystemPrompt(tenant, modules, summary, owner);
+  const [summary, alertas] = await Promise.all([
+    buildTenantSummary(tenant, modules),
+    buildAlertas(tenant, modules),
+  ]);
+  const system = await buildSystemPrompt(tenant, modules, summary, owner, alertas);
 
   let res;
   try {
@@ -70,7 +74,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
       max_tokens: 1200,
       system,
       // Sólo el dueño tiene herramientas de escritura; el equipo sólo consulta.
-      ...(owner ? { tools: ASISTENTE_TOOLS } : {}),
+      // Las de alta dependen del módulo activo del tenant.
+      ...(owner ? { tools: buildAsistenteTools(modules) } : {}),
       messages: parsed.data.messages.map((m) => ({ role: m.role, content: m.content })),
     });
   } catch {

@@ -222,6 +222,11 @@ export default async function LandingPage() {
             );
           })}
         </div>
+        <div className="mt-10 text-center">
+          <ButtonLink href="/casos" variant="secondary">
+            Ver negocios reales que ya funcionan con Cauce →
+          </ButtonLink>
+        </div>
         </div>
       </section>
 

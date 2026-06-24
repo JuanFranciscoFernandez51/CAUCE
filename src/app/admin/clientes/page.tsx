@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { fmtUsd } from "@/lib/pricing";
-import { Badge, EmptyState, Table, Td, Th } from "@/components/ui";
+import { Badge, ButtonLink, EmptyState, Table, Td, Th } from "@/components/ui";
 import {
   CLIENT_STATUS_BADGE,
   CLIENT_STATUS_LABELS,
@@ -24,6 +24,7 @@ export default async function ClientesPage() {
             Cartera de Cauce: packs, MRR, salud y Cauce OS de cada cliente.
           </p>
         </div>
+        <ButtonLink href="/admin/clientes/nuevo">➕ Nuevo cliente</ButtonLink>
       </div>
 
       <NewClientButton />

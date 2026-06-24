@@ -3,7 +3,8 @@ import type { Client, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { tenantBranding, tenantModules, MODULE_LABELS, type OsModule } from "@/lib/tenant";
-import { TIME_RE } from "@/app/os/[slug]/_lib/dates";
+import { TIME_RE, DATE_RE, weekdayOf, fmtDayLabel } from "@/app/os/[slug]/_lib/dates";
+import { hasOverlap } from "@/app/os/[slug]/_lib/slots";
 
 /**
  * Cerebro del Asistente de IA del panel del tenant.
@@ -22,6 +23,16 @@ export type TenantSummary = {
   proyectosActivos: number;
   empleadosActivos: number;
   saldoArs: number;
+};
+
+/** Aviso del día: algo que el dueño/equipo debería revisar ahora. */
+export type Alerta = {
+  modulo: OsModule;
+  /** Ruta relativa al módulo dentro del panel del tenant (sin el /os/[slug] inicial). */
+  href: string;
+  emoji: string;
+  titulo: string;
+  detalle: string;
 };
 
 const HOY_TZ = "America/Argentina/Buenos_Aires";
@@ -89,6 +100,99 @@ export async function buildTenantSummary(
   };
 }
 
+// ── Proactividad: alertas reales del día (scopeadas + por módulo) ────────
+const DIAS_SIN_SEGUIMIENTO = 14; // contacto sin tocar hace +14 días = a seguir
+
+/**
+ * Avisos del día que aplican al tenant según sus módulos activos.
+ * TODO scopeado por clientId. Devuelve a lo sumo las pocas cosas que importan
+ * para mostrarlas arriba del chat ANTES de que el usuario pregunte.
+ */
+export async function buildAlertas(tenant: Client, modules: OsModule[]): Promise<Alerta[]> {
+  const id = tenant.id;
+  const has = (m: OsModule) => modules.includes(m);
+  const now = new Date();
+  const todayStr = now.toLocaleDateString("en-CA", { timeZone: HOY_TZ });
+  const todayStart = new Date(`${todayStr}T00:00:00-03:00`);
+  const todayEnd = new Date(todayStart.getTime() + 86_400_000);
+  const sinSeguimientoAntes = new Date(now.getTime() - DIAS_SIN_SEGUIMIENTO * 86_400_000);
+
+  const [turnosSinConfirmarHoy, stockBajo, tareasVencidas, contactosSinSeguimiento] =
+    await Promise.all([
+      has("turnos")
+        ? db.appointment.count({
+            where: {
+              clientId: id,
+              status: "PENDING",
+              startsAt: { gte: todayStart, lt: todayEnd },
+            },
+          })
+        : Promise.resolve(0),
+      has("catalogo")
+        ? db.product.count({
+            where: { clientId: id, active: true, stock: { lte: db.product.fields.minStock } },
+          })
+        : Promise.resolve(0),
+      has("crm")
+        ? db.crmTask.count({
+            where: { clientId: id, done: false, dueAt: { lt: now } },
+          })
+        : Promise.resolve(0),
+      has("crm")
+        ? db.contact.count({
+            where: {
+              clientId: id,
+              OR: [{ lastTouchAt: null }, { lastTouchAt: { lt: sinSeguimientoAntes } }],
+            },
+          })
+        : Promise.resolve(0),
+    ]);
+
+  const alertas: Alerta[] = [];
+
+  if (turnosSinConfirmarHoy > 0) {
+    alertas.push({
+      modulo: "turnos",
+      href: "turnos",
+      emoji: "📅",
+      titulo: turnosSinConfirmarHoy === 1 ? "1 turno sin confirmar hoy" : `${turnosSinConfirmarHoy} turnos sin confirmar hoy`,
+      detalle: "Revisalos y confirmalos antes de que pase el día.",
+    });
+  }
+  if (stockBajo > 0) {
+    alertas.push({
+      modulo: "catalogo",
+      href: "catalogo",
+      emoji: "📦",
+      titulo: stockBajo === 1 ? "1 producto con stock bajo" : `${stockBajo} productos con stock bajo`,
+      detalle: "Están en o por debajo del mínimo. Conviene reponer.",
+    });
+  }
+  if (tareasVencidas > 0) {
+    alertas.push({
+      modulo: "crm",
+      href: "crm",
+      emoji: "⏰",
+      titulo: tareasVencidas === 1 ? "1 tarea vencida" : `${tareasVencidas} tareas vencidas`,
+      detalle: "Tenés tareas del CRM con la fecha pasada sin completar.",
+    });
+  }
+  if (contactosSinSeguimiento > 0) {
+    alertas.push({
+      modulo: "crm",
+      href: "crm",
+      emoji: "👋",
+      titulo:
+        contactosSinSeguimiento === 1
+          ? "1 contacto sin seguimiento"
+          : `${contactosSinSeguimiento} contactos sin seguimiento`,
+      detalle: `Sin contacto hace más de ${DIAS_SIN_SEGUIMIENTO} días. Quizá vale un mensaje.`,
+    });
+  }
+
+  return alertas;
+}
+
 // ── System prompt con TODA la info del negocio ──────────────────────────
 const WEEKDAYS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 
@@ -96,7 +200,8 @@ export async function buildSystemPrompt(
   tenant: Client,
   modules: OsModule[],
   summary: TenantSummary,
-  isOwner: boolean
+  isOwner: boolean,
+  alertas: Alerta[] = []
 ): Promise<string> {
   const branding = tenantBranding(tenant);
   const settings = (tenant.settings as Record<string, unknown> | null) ?? {};
@@ -113,6 +218,10 @@ export async function buildSystemPrompt(
       : "sin horarios de atención cargados";
 
   const modulosTxt = modules.length ? modules.map((m) => MODULE_LABELS[m]).join(", ") : "ninguno";
+
+  const alertasTxt = alertas.length
+    ? alertas.map((a) => `- ${a.titulo}: ${a.detalle}`).join("\n")
+    : "- Nada urgente por ahora.";
 
   return [
     `Sos el asistente del sistema de "${branding.displayName}". Conocés a fondo SU sistema en Cauce OS y sólo hablás de SU negocio.`,
@@ -136,9 +245,13 @@ export async function buildSystemPrompt(
     `- Empleados activos: ${summary.empleadosActivos}`,
     `- Saldo total en cuentas (ARS): ${summary.saldoArs}`,
     ``,
+    `AVISOS DEL DÍA (lo que conviene revisar ahora, ya scopeado a su cuenta)`,
+    alertasTxt,
+    `Si el usuario saluda, pregunta "¿cómo viene el día?" o "¿qué tengo pendiente?", arrancá mencionando de forma proactiva lo más urgente de estos avisos (1 o 2 cosas, no toda la lista) y ofrecé ayudar a resolverlo. Si no hay avisos, decí que está todo al día. No inventes avisos que no estén acá.`,
+    ``,
     isOwner
-      ? `PODÉS PROPONER CAMBIOS CHICOS con las herramientas disponibles (marca, datos del negocio, horarios, contacto de la cuenta). Cuando uses una herramienta, NO la des por hecha: el dueño todavía tiene que confirmar la propuesta con un botón. Después de proponer, contá en una frase qué cambio dejaste listo para confirmar.`
-      : `Este usuario es del equipo (no es el dueño): SÓLO consultá e informá. No podés cambiar nada; si te piden un cambio, aclará que eso lo tiene que hacer el dueño desde el Asistente o la Configuración.`,
+      ? `PODÉS PROPONER CAMBIOS Y ALTAS con las herramientas disponibles: marca, datos del negocio, horarios, contacto de la cuenta, y además crear un turno, agregar un producto o cargar un contacto (cada una sólo si el módulo correspondiente está activo). Cuando uses una herramienta, NO la des por hecha: el dueño todavía tiene que confirmar la propuesta con un botón. Después de proponer, contá en una frase qué dejaste listo para confirmar. Si te piden algo de un módulo que no está activo, aclaralo en vez de proponerlo.`
+      : `Este usuario es del equipo (no es el dueño): SÓLO consultá e informá. No podés cambiar ni crear nada; si te piden un cambio o un alta, aclará que eso lo tiene que hacer el dueño desde el Asistente o la Configuración.`,
     `Nunca borres nada, ni toques finanzas ni datos de clientes de forma masiva.`,
   ].join("\n");
 }
@@ -210,6 +323,68 @@ export const ASISTENTE_TOOLS: Anthropic.Tool[] = [
   },
 ];
 
+// Tools de alta que dependen del módulo activo del tenant.
+const TOOL_CREAR_TURNO: Anthropic.Tool = {
+  name: "crear_turno",
+  description:
+    "Propone crear un turno en la agenda. fecha en YYYY-MM-DD, hora en HH:MM 24hs. Sólo para tenants con el módulo de Turnos. Si te dicen 'mañana' u otra referencia, convertila a la fecha exacta usando que HOY es el día actual argentino.",
+  input_schema: {
+    type: "object",
+    properties: {
+      titulo: { type: "string", description: "Motivo o título del turno" },
+      fecha: { type: "string", description: "Fecha del turno YYYY-MM-DD" },
+      hora: { type: "string", description: "Hora de inicio HH:MM 24hs" },
+      nombre_cliente: { type: "string", description: "Nombre de la persona del turno (opcional)" },
+    },
+    required: ["titulo", "fecha", "hora"],
+  },
+};
+
+const TOOL_AGREGAR_PRODUCTO: Anthropic.Tool = {
+  name: "agregar_producto",
+  description:
+    "Propone agregar un producto al catálogo. Precio en pesos argentinos. Sólo para tenants con el módulo de Catálogo.",
+  input_schema: {
+    type: "object",
+    properties: {
+      nombre: { type: "string", description: "Nombre del producto" },
+      precio_ars: { type: "number", description: "Precio en ARS (opcional)" },
+      stock: { type: "integer", description: "Stock inicial (opcional, default 0)" },
+      minimo: { type: "integer", description: "Stock mínimo para avisar (opcional, default 0)" },
+    },
+    required: ["nombre"],
+  },
+};
+
+const TOOL_AGREGAR_CONTACTO: Anthropic.Tool = {
+  name: "agregar_contacto",
+  description:
+    "Propone cargar un contacto en el CRM. Sólo para tenants con el módulo de CRM. Si ya existe uno con el mismo teléfono, se reusa en vez de duplicar.",
+  input_schema: {
+    type: "object",
+    properties: {
+      nombre: { type: "string", description: "Nombre del contacto" },
+      telefono: { type: "string", description: "Teléfono (opcional)" },
+      email: { type: "string", description: "Email (opcional)" },
+      etapa: { type: "string", description: "Etapa del pipeline (opcional, ej: nuevo)" },
+    },
+    required: ["nombre"],
+  },
+};
+
+/**
+ * Tools disponibles para el dueño según los módulos activos del tenant.
+ * Las de alta (turno/producto/contacto) sólo aparecen si su módulo está activo,
+ * así el asistente no propone algo que el negocio no tiene.
+ */
+export function buildAsistenteTools(modules: OsModule[]): Anthropic.Tool[] {
+  const tools = [...ASISTENTE_TOOLS];
+  if (modules.includes("turnos")) tools.push(TOOL_CREAR_TURNO);
+  if (modules.includes("catalogo")) tools.push(TOOL_AGREGAR_PRODUCTO);
+  if (modules.includes("crm")) tools.push(TOOL_AGREGAR_CONTACTO);
+  return tools;
+}
+
 // ── Validación + aplicación de una propuesta confirmada ──────────────────
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Color inválido (ej: #2E6BFF)");
 
@@ -265,6 +440,34 @@ export const accionSchema = z.discriminatedUnion("tool", [
       })
       .refine((v) => v.email || v.phone || v.whatsapp, "No hay ningún dato para actualizar"),
   }),
+  z.object({
+    tool: z.literal("crear_turno"),
+    input: z.object({
+      titulo: z.string().trim().min(1, "Falta el motivo del turno").max(120),
+      fecha: z.string().regex(DATE_RE, "Fecha inválida (YYYY-MM-DD)"),
+      hora: z.string().regex(TIME_RE, "Hora inválida (HH:MM)"),
+      nombre_cliente: z.string().trim().min(1).max(120).optional(),
+    }),
+  }),
+  z.object({
+    tool: z.literal("agregar_producto"),
+    input: z.object({
+      nombre: z.string().trim().min(1, "Falta el nombre del producto").max(120),
+      precio_ars: z.number().nonnegative("El precio no puede ser negativo").max(1_000_000_000).optional(),
+      stock: z.number().int().min(0).max(1_000_000).optional(),
+      minimo: z.number().int().min(0).max(1_000_000).optional(),
+    }),
+  }),
+  z.object({
+    tool: z.literal("agregar_contacto"),
+    input: z
+      .object({
+        nombre: z.string().trim().min(1, "Falta el nombre del contacto").max(120),
+        telefono: z.string().trim().max(60).optional(),
+        email: z.string().trim().email("Email inválido").max(120).optional(),
+        etapa: z.string().trim().max(40).optional(),
+      }),
+  }),
 ]);
 
 export type AccionConfirmada = z.infer<typeof accionSchema>;
@@ -272,6 +475,97 @@ export type AccionConfirmada = z.infer<typeof accionSchema>;
 /** Aplica una propuesta YA validada, scopeada al tenant. Devuelve un texto de confirmación. */
 export async function aplicarAccion(tenant: Client, accion: AccionConfirmada): Promise<string> {
   const id = tenant.id;
+  const modules = tenantModules(tenant);
+  const requireModule = (m: OsModule, label: string) => {
+    if (!modules.includes(m)) throw new Error(`El módulo de ${label} no está activo en tu sistema`);
+  };
+
+  if (accion.tool === "crear_turno") {
+    requireModule("turnos", "Turnos");
+    const { titulo, fecha, hora, nombre_cliente } = accion.input;
+    const startsAt = new Date(`${fecha}T${hora}:00-03:00`);
+    if (Number.isNaN(startsAt.getTime())) throw new Error("La fecha u hora del turno no es válida");
+
+    // Duración: tomamos el slotMinutes de la disponibilidad de ese día, o 30 por defecto.
+    const weekday = weekdayOf(fecha);
+    const block = await db.availability.findFirst({
+      where: { clientId: id, weekday },
+      orderBy: { startTime: "asc" },
+      select: { slotMinutes: true },
+    });
+    const minutes = block?.slotMinutes && block.slotMinutes > 0 ? block.slotMinutes : 30;
+    const endsAt = new Date(startsAt.getTime() + minutes * 60_000);
+
+    // No permitir choque con otro turno no cancelado (reusa la lógica de slots).
+    if (await hasOverlap(id, startsAt, endsAt)) {
+      throw new Error("Ya hay un turno en ese horario. Probá con otro horario.");
+    }
+
+    // Si vino nombre, dejamos el contacto enganchado (dedup por nombre dentro del tenant).
+    let contactId: string | undefined;
+    if (nombre_cliente) {
+      const existing = await db.contact.findFirst({
+        where: { clientId: id, name: nombre_cliente },
+        select: { id: true },
+      });
+      contactId = existing?.id;
+    }
+
+    await db.appointment.create({
+      data: {
+        clientId: id,
+        title: titulo,
+        startsAt,
+        endsAt,
+        status: "PENDING",
+        source: "asistente",
+        ...(contactId ? { contactId } : {}),
+      },
+    });
+    return `Listo, cargué el turno "${titulo}" para el ${fmtDayLabel(fecha)} a las ${hora} (queda pendiente de confirmar).`;
+  }
+
+  if (accion.tool === "agregar_producto") {
+    requireModule("catalogo", "Catálogo");
+    const { nombre, precio_ars, stock, minimo } = accion.input;
+    await db.product.create({
+      data: {
+        clientId: id,
+        name: nombre,
+        priceArs: precio_ars ?? null,
+        stock: stock ?? 0,
+        minStock: minimo ?? 0,
+        active: true,
+      },
+    });
+    return `Listo, agregué el producto "${nombre}" al catálogo.`;
+  }
+
+  if (accion.tool === "agregar_contacto") {
+    requireModule("crm", "CRM");
+    const { nombre, telefono, email, etapa } = accion.input;
+    // Dedup por teléfono dentro del tenant.
+    if (telefono) {
+      const existing = await db.contact.findFirst({
+        where: { clientId: id, phone: telefono },
+        select: { id: true, name: true },
+      });
+      if (existing) {
+        return `Ese teléfono ya estaba cargado como "${existing.name}", así que no dupliqué el contacto.`;
+      }
+    }
+    await db.contact.create({
+      data: {
+        clientId: id,
+        name: nombre,
+        phone: telefono ?? null,
+        email: email ?? null,
+        stage: etapa || "nuevo",
+        source: "asistente",
+      },
+    });
+    return `Listo, cargué a "${nombre}" en el CRM.`;
+  }
 
   if (accion.tool === "cambiar_branding") {
     const current = (tenant.branding as Record<string, unknown> | null) ?? {};
@@ -341,6 +635,35 @@ export function describirAccion(accion: AccionConfirmada): { titulo: string; det
       if (accion.input.phone !== undefined) partes.push(`teléfono → ${accion.input.phone}`);
       if (accion.input.whatsapp !== undefined) partes.push(`WhatsApp → ${accion.input.whatsapp}`);
       return { titulo: "Actualizar contacto de la cuenta", detalle: partes.join(" · ") };
+    }
+    case "crear_turno": {
+      const partes = [`${fmtDayLabel(accion.input.fecha)} a las ${accion.input.hora}`];
+      if (accion.input.nombre_cliente) partes.push(`con ${accion.input.nombre_cliente}`);
+      return {
+        titulo: `Cargar turno: ${accion.input.titulo}`,
+        detalle: partes.join(" · "),
+      };
+    }
+    case "agregar_producto": {
+      const partes: string[] = [];
+      if (accion.input.precio_ars !== undefined)
+        partes.push(`$${accion.input.precio_ars.toLocaleString("es-AR")}`);
+      if (accion.input.stock !== undefined) partes.push(`stock ${accion.input.stock}`);
+      if (accion.input.minimo !== undefined) partes.push(`mínimo ${accion.input.minimo}`);
+      return {
+        titulo: `Agregar producto: ${accion.input.nombre}`,
+        detalle: partes.length ? partes.join(" · ") : "Sin precio ni stock por ahora",
+      };
+    }
+    case "agregar_contacto": {
+      const partes: string[] = [];
+      if (accion.input.telefono) partes.push(`tel ${accion.input.telefono}`);
+      if (accion.input.email) partes.push(accion.input.email);
+      if (accion.input.etapa) partes.push(`etapa ${accion.input.etapa}`);
+      return {
+        titulo: `Cargar contacto: ${accion.input.nombre}`,
+        detalle: partes.length ? partes.join(" · ") : "Sin datos de contacto adicionales",
+      };
     }
   }
 }

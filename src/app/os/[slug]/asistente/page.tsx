@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { aiAvailable } from "@/lib/anthropic";
 import { getTenantBySlug, tenantBranding, tenantModules } from "@/lib/tenant";
 import { Stat } from "@/components/ui";
-import { buildTenantSummary } from "@/lib/asistente";
+import { buildTenantSummary, buildAlertas } from "@/lib/asistente";
 import { resolveOsRole, isOsOwner } from "../_components/os-role";
 import { AsistenteChat } from "../_components/asistente-chat";
 
@@ -25,8 +26,14 @@ export default async function AsistentePage({
   const role = session ? await resolveOsRole(session.user.id, tenant.id) : null;
   const owner = isOsOwner(role);
 
-  const summary = await buildTenantSummary(tenant, modules);
+  const [summary, alertas] = await Promise.all([
+    buildTenantSummary(tenant, modules),
+    buildAlertas(tenant, modules),
+  ]);
   const has = (m: (typeof modules)[number]) => modules.includes(m);
+
+  // Mostramos a lo sumo 3 avisos del día arriba del chat.
+  const avisos = alertas.slice(0, 3);
 
   // Sólo mostramos las métricas que aplican a sus módulos.
   const stats: { label: string; value: string | number; hint?: string }[] = [];
@@ -56,6 +63,31 @@ export default async function AsistentePage({
           {stats.map((s) => (
             <Stat key={s.label} label={s.label} value={s.value} hint={s.hint} />
           ))}
+        </div>
+      ) : null}
+
+      {avisos.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Avisos del día
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {avisos.map((a, i) => (
+              <Link
+                key={`${a.modulo}-${i}`}
+                href={`/os/${slug}/${a.href}`}
+                className="flex items-start gap-3 rounded-lg border border-accent/40 bg-accent/5 p-3 transition-colors hover:bg-accent/10"
+              >
+                <span className="text-xl leading-none" aria-hidden>
+                  {a.emoji}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-medium leading-snug">{a.titulo}</span>
+                  <span className="mt-0.5 block text-sm text-muted-foreground">{a.detalle}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : null}
 
