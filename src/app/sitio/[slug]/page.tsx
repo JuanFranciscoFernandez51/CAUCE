@@ -3,10 +3,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, tenantBranding } from "@/lib/tenant";
+import { playbookForClient } from "@/lib/playbooks";
 import { SiteShell, siteContact } from "./_components/site-shell";
 import { PropertyCard, type PublicListing } from "./_components/property-card";
+import { ProductCard, type PublicProduct } from "./_components/product-card";
+import { ConsultaForm } from "./_components/consulta-form";
+import { siteContent } from "./_lib/site-content";
 
-export const revalidate = 300; // ISR: cachea 5 min (la región gru1 + esto = páginas casi instantáneas)
+export const revalidate = 300; // ISR: cachea 5 min (gru1 + esto = páginas casi instantáneas)
 
 export async function generateMetadata({
   params,
@@ -15,12 +19,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant) return { title: "Propiedades" };
+  if (!tenant) return { title: "Sitio" };
   const b = tenantBranding(tenant);
+  const pb = playbookForClient(tenant);
   return {
-    title: `${b.displayName} — Propiedades`,
-    description: `Comprá o alquilá tu próxima propiedad con ${b.displayName}.`,
-    robots: { index: false, follow: false },
+    title: b.displayName,
+    description: pb.heroSubtitle,
+    robots: { index: false, follow: false }, // noindex por ahora (brief)
+    openGraph: { title: b.displayName, description: pb.heroSubtitle },
   };
 }
 
@@ -50,165 +56,219 @@ export default async function SitioHome({
 
   const branding = tenantBranding(tenant);
   const contact = siteContact(tenant);
+  const playbook = playbookForClient(tenant);
+  const content = siteContent(tenant, playbook);
   const base = `/sitio/${tenant.slug}`;
 
-  const [featured, ventas, alquileres] = await Promise.all([
-    db.listing.findMany({
-      where: { clientId: tenant.id, active: true, featured: true, status: "disponible" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: CARD_SELECT,
-    }),
-    db.listing.findMany({
-      where: { clientId: tenant.id, active: true, operation: "venta", status: "disponible" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: CARD_SELECT,
-    }),
-    db.listing.findMany({
-      where: {
-        clientId: tenant.id,
-        active: true,
-        operation: { in: ["alquiler", "alquiler_temporal"] },
-        status: "disponible",
-      },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      select: CARD_SELECT,
-    }),
+  const esInmobiliaria = playbook.key === "inmobiliaria";
+  const tieneCatalogo = hasModule(tenant, "catalogo") && !esInmobiliaria;
+  const tieneTurnos = hasModule(tenant, "turnos");
+
+  // Cargas condicionales, todas scopeadas por clientId, nunca rompen si no hay datos.
+  const [featuredListings, featuredProducts] = await Promise.all([
+    esInmobiliaria
+      ? db.listing.findMany({
+          where: { clientId: tenant.id, active: true, status: "disponible" },
+          orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+          take: 6,
+          select: CARD_SELECT,
+        })
+      : Promise.resolve([] as PublicListing[]),
+    tieneCatalogo
+      ? db.product.findMany({
+          where: { clientId: tenant.id, active: true },
+          orderBy: { createdAt: "desc" },
+          take: 8,
+          select: { id: true, name: true, priceUsd: true, priceArs: true, photo: true },
+        })
+      : Promise.resolve([] as PublicProduct[]),
   ]);
 
   return (
-    <SiteShell tenant={tenant} contact={contact}>
-      {/* Hero */}
+    <SiteShell
+      tenant={tenant}
+      contact={contact}
+      tagline={content.heroSubtitle}
+      nav={{
+        propiedades: esInmobiliaria,
+        turnos: tieneTurnos,
+        catalogoLabel: tieneCatalogo ? content.catalogoTitle : undefined,
+      }}
+    >
+      {/* ── Hero institucional (todos los rubros) ── */}
       <section className="border-b bg-gradient-to-b from-primary-soft to-background">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:py-24">
+        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:py-24">
           <h1 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl">
-            Encontrá tu próxima propiedad con {branding.displayName}
+            {branding.displayName}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Casas, departamentos y locales en venta y alquiler. Mirá nuestra cartera completa.
+            {content.heroSubtitle}
           </p>
-          <form
-            method="GET"
-            action={`${base}/propiedades`}
-            className="mx-auto mt-8 flex max-w-xl flex-col gap-2 sm:flex-row"
-          >
-            <input
-              type="search"
-              name="q"
-              placeholder="Buscá por barrio, ciudad o título…"
-              aria-label="Buscar propiedades"
-              className="h-12 flex-1 rounded-md border border-border bg-card px-4 text-base text-card-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring"
-            />
-            <button
-              type="submit"
-              className="h-12 rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {esInmobiliaria ? (
+              <Link
+                href={`${base}/propiedades`}
+                className="inline-flex h-12 items-center rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Ver propiedades
+              </Link>
+            ) : null}
+            {tieneTurnos ? (
+              <Link
+                href={`/agendar/${tenant.slug}`}
+                className="inline-flex h-12 items-center rounded-md bg-primary px-6 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Reservá tu turno
+              </Link>
+            ) : null}
+            <a
+              href="#contacto"
+              className="inline-flex h-12 items-center rounded-md border border-primary px-6 text-base font-medium text-primary transition-colors hover:bg-card"
             >
-              Buscar
-            </button>
-          </form>
+              Contactanos
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Destacadas */}
-      {featured.length > 0 ? (
-        <Section
-          title="Propiedades destacadas"
-          subtitle="Nuestra selección del momento"
-          slug={tenant.slug}
-          listings={featured}
-          href={`${base}/propiedades`}
-        />
-      ) : null}
-
-      {/* En venta */}
-      {ventas.length > 0 ? (
-        <Section
-          title="En venta"
-          slug={tenant.slug}
-          listings={ventas}
-          href={`${base}/propiedades?operation=venta`}
-        />
-      ) : null}
-
-      {/* En alquiler */}
-      {alquileres.length > 0 ? (
-        <Section
-          title="En alquiler"
-          slug={tenant.slug}
-          listings={alquileres}
-          href={`${base}/propiedades?operation=alquiler`}
-        />
-      ) : null}
-
-      {featured.length === 0 && ventas.length === 0 && alquileres.length === 0 ? (
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted-foreground">
-          <p className="text-lg">Todavía no hay propiedades publicadas.</p>
-          <p className="mt-1 text-sm">Volvé pronto: estamos sumando nuevas oportunidades.</p>
+      {/* ── Qué hacemos / Servicios (todos los rubros) ── */}
+      <section className="mx-auto max-w-6xl px-4 py-14">
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+          {content.serviciosTitle}
+        </h2>
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {content.servicios.map((s, i) => (
+            <div key={i} className="rounded-xl border bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-semibold">{s.titulo}</h3>
+              {s.detalle ? (
+                <p className="mt-1.5 text-sm text-muted-foreground">{s.detalle}</p>
+              ) : null}
+            </div>
+          ))}
         </div>
+      </section>
+
+      {/* ── Propiedades destacadas (inmobiliaria) ── */}
+      {esInmobiliaria && featuredListings.length > 0 ? (
+        <section className="border-t bg-muted/40">
+          <div className="mx-auto max-w-6xl px-4 py-14">
+            <div className="mb-6 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Propiedades destacadas</h2>
+                <p className="text-sm text-muted-foreground">Nuestra selección del momento</p>
+              </div>
+              <Link
+                href={`${base}/propiedades`}
+                className="shrink-0 text-sm font-medium text-primary hover:underline"
+              >
+                Ver todas →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredListings.map((l) => (
+                <PropertyCard key={l.id} slug={tenant.slug} listing={l} />
+              ))}
+            </div>
+          </div>
+        </section>
       ) : null}
 
-      {/* CTA contacto */}
-      <section className="border-t bg-primary-soft">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-12 text-center">
-          <h2 className="text-2xl font-semibold">¿Buscás algo en particular?</h2>
-          <p className="max-w-lg text-muted-foreground">
-            Contanos qué necesitás y te ayudamos a encontrarlo.
-          </p>
-          <div className="mt-2 flex flex-wrap justify-center gap-2">
+      {/* ── Catálogo / Carta (tenant con productos) ── */}
+      {tieneCatalogo && featuredProducts.length > 0 ? (
+        <section className="border-t bg-muted/40">
+          <div className="mx-auto max-w-6xl px-4 py-14">
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight">{content.catalogoTitle}</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {featuredProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Reservá tu turno (tenant con turnos) ── */}
+      {tieneTurnos ? (
+        <section className="border-t bg-primary-soft">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 py-14 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Reservá tu {playbook.glossary.appointment} online
+            </h2>
+            <p className="max-w-lg text-muted-foreground">
+              Elegí día, horario y profesional en pocos pasos. Sin llamados ni esperas.
+            </p>
             <Link
-              href={`${base}/propiedades`}
-              className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-medium text-primary-foreground hover:opacity-90"
+              href={`/agendar/${tenant.slug}`}
+              className="mt-2 inline-flex h-12 items-center rounded-md bg-primary px-8 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Ver todas las propiedades
+              Reservar ahora
             </Link>
-            {contact.whatsapp ? (
-              <a
-                href={`https://wa.me/${contact.whatsapp.replace(/[^\d]/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-11 items-center rounded-md border border-primary px-6 font-medium text-primary hover:bg-card"
-              >
-                Escribinos por WhatsApp
-              </a>
-            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Sobre nosotros (si hay texto en settings) ── */}
+      {content.sobre ? (
+        <section className="border-t">
+          <div className="mx-auto max-w-3xl px-4 py-14">
+            <h2 className="text-2xl font-semibold tracking-tight">Sobre nosotros</h2>
+            <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">
+              {content.sobre}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Contacto (siempre) — cae al CRM ── */}
+      <section id="contacto" className="scroll-mt-16 border-t bg-muted/40">
+        <div className="mx-auto grid max-w-5xl gap-10 px-4 py-14 md:grid-cols-2">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Contactanos</h2>
+            <p className="mt-2 text-muted-foreground">
+              Escribinos y te respondemos a la brevedad.
+            </p>
+            <div className="mt-6 space-y-2 text-sm">
+              {contact.address ? (
+                <p>
+                  <span className="text-muted-foreground">Dirección: </span>
+                  <span className="font-medium">{contact.address}</span>
+                </p>
+              ) : null}
+              {contact.phone ? (
+                <p>
+                  <span className="text-muted-foreground">Teléfono: </span>
+                  <a href={`tel:${contact.phone}`} className="font-medium hover:text-primary">
+                    {contact.phone}
+                  </a>
+                </p>
+              ) : null}
+              {contact.email ? (
+                <p>
+                  <span className="text-muted-foreground">Email: </span>
+                  <a href={`mailto:${contact.email}`} className="font-medium hover:text-primary">
+                    {contact.email}
+                  </a>
+                </p>
+              ) : null}
+              {contact.whatsapp ? (
+                <p>
+                  <a
+                    href={`https://wa.me/${contact.whatsapp.replace(/[^\d]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Escribinos por WhatsApp →
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <ConsultaForm slug={tenant.slug} />
           </div>
         </div>
       </section>
     </SiteShell>
-  );
-}
-
-function Section({
-  title,
-  subtitle,
-  slug,
-  listings,
-  href,
-}: {
-  title: string;
-  subtitle?: string;
-  slug: string;
-  listings: PublicListing[];
-  href: string;
-}) {
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-5 flex items-end justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-          {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
-        </div>
-        <Link href={href} className="shrink-0 text-sm font-medium text-primary hover:underline">
-          Ver todas →
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {listings.map((l) => (
-          <PropertyCard key={l.id} slug={slug} listing={l} />
-        ))}
-      </div>
-    </section>
   );
 }

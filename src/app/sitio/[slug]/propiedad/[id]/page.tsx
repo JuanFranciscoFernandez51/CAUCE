@@ -60,7 +60,7 @@ export default async function PropiedadDetalle({
   if (listing.coveredM2 != null) specs.push({ label: "Sup. cubierta", value: `${listing.coveredM2} m²` });
 
   return (
-    <SiteShell tenant={tenant} contact={contact}>
+    <SiteShell tenant={tenant} contact={contact} nav={{ propiedades: true }}>
       <div className="mx-auto max-w-6xl px-4 py-6">
         <nav className="mb-4 text-sm text-muted-foreground">
           <Link href={base} className="hover:text-foreground">

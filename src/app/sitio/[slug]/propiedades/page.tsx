@@ -113,7 +113,7 @@ export default async function SitioCatalogo({
     "h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-card-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring";
 
   return (
-    <SiteShell tenant={tenant} contact={contact}>
+    <SiteShell tenant={tenant} contact={contact} nav={{ propiedades: true }}>
       <div className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Propiedades</h1>
         <p className="mt-1 text-sm text-muted-foreground">
