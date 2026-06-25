@@ -1,3 +1,4 @@
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -10,6 +11,62 @@ import {
 } from "@/lib/tenant";
 import { isOsOwner, resolveOsRole } from "./_components/os-role";
 import { OsSidebar, type NavEntry } from "./_components/os-sidebar";
+import { InstallPrompt } from "./_components/install-prompt";
+
+/** ¿URL absoluta de Cloudinary? (sirve como apple-touch-icon). */
+function isCloudinaryUrl(url: string): boolean {
+  return /^https:\/\/res\.cloudinary\.com\//.test(url);
+}
+
+/**
+ * theme-color por tenant: la barra del navegador / status bar de la PWA toma
+ * el color de marca del cliente. En Next 16 el theme-color vive en el viewport.
+ */
+export async function generateViewport({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Viewport> {
+  const { slug } = await params;
+  const tenant = await getTenantBySlug(slug);
+  const primary = tenant ? tenantBranding(tenant).primary : "#0f766e";
+  return { themeColor: primary };
+}
+
+/**
+ * Metadata por tenant: linkea el manifest dinámico y setea theme-color +
+ * apple-touch-icon con la marca del cliente, para que sea instalable como app
+ * con SU nombre y SU color.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tenant = await getTenantBySlug(slug);
+  if (!tenant) return {};
+
+  const branding = tenantBranding(tenant);
+  const appleIcon = isCloudinaryUrl(branding.logo) ? branding.logo : "/icon.svg";
+
+  return {
+    title: {
+      default: branding.displayName,
+      template: `%s · ${branding.displayName}`,
+    },
+    applicationName: branding.displayName,
+    manifest: `/os/${slug}/manifest.webmanifest`,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: branding.displayName,
+    },
+    icons: {
+      apple: appleIcon,
+    },
+  };
+}
 
 /** Módulos operativos: etiqueta + ruta + ícono dentro del grupo "Operaciones". */
 const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: string }>> = {
@@ -114,6 +171,7 @@ export default async function OsLayout({
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
+        <InstallPrompt appName={branding.displayName} />
         <footer className="border-t py-4">
           <p className="text-center text-xs text-muted-foreground">
             ⚡ Powered by{" "}

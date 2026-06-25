@@ -3,6 +3,7 @@ import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/theme";
 import { GoogleAnalytics, MetaPixel } from "@/components/analytics";
+import { PwaRegister } from "@/components/pwa-register";
 
 // Tipografía del brand (dirección Corriente): Space Grotesk (display),
 // IBM Plex Sans (cuerpo/UI), IBM Plex Mono (datos).
@@ -46,6 +47,8 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>{children}</Providers>
+        {/* PWA: registra el service worker (offline + instalable). Client-only. */}
+        <PwaRegister />
         {/* Analytics: se activan solos cuando existan las envs en Vercel. */}
         <GoogleAnalytics />
         <MetaPixel />
