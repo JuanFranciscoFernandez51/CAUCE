@@ -79,6 +79,12 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // El manifest de la PWA debe ser público (el navegador lo lee sin cookies).
+  // Solo expone nombre/color/íconos del tenant, nada sensible.
+  if (pathname.endsWith("/manifest.webmanifest") || pathname === "/sw.js") {
+    return NextResponse.next();
+  }
+
   const needsAuth =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/portal") ||
