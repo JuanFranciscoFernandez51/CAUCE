@@ -27,6 +27,7 @@ type Result = {
   clientId: string;
   modules: string[];
   brandNote: string | null;
+  provisionadas: number;
   warnings: string[];
 };
 
@@ -133,6 +134,14 @@ export function OnboardingForm() {
 
         {result.brandNote ? (
           <p className="text-sm text-success">{result.brandNote}</p>
+        ) : null}
+
+        {result.provisionadas > 0 ? (
+          <p className="text-sm text-success">
+            ⚡ {result.provisionadas} automatización{result.provisionadas === 1 ? "" : "es"}{" "}
+            provisionada{result.provisionadas === 1 ? "" : "s"} y activa
+            {result.provisionadas === 1 ? "" : "s"} en n8n.
+          </p>
         ) : null}
 
         {result.warnings.length > 0 ? (

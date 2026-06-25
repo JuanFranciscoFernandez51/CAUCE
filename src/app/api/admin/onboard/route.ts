@@ -13,6 +13,8 @@ import {
   seedSettingsForRubro,
 } from "@/lib/onboarding";
 import { OS_MODULES } from "@/lib/tenant";
+import { n8nConfigured } from "@/lib/n8n";
+import { provisionar, activar } from "@/lib/provision";
 
 /**
  * ONBOARDING 1-CLICK — orquesta la creación de un cliente COMPLETO encadenando
@@ -20,10 +22,14 @@ import { OS_MODULES } from "@/lib/tenant";
  * el core (Client + User) es transaccional; los pasos opcionales (marca, recetas,
  * settings) son best-effort y avisan en `warnings` sin abortar el alta.
  *
- * La provisión real en n8n y las capturas NO van acá: son pasos posteriores con
- * sus scripts (scripts/provision-all.ts, scripts/capturar-cliente.ts). Acá las
- * automatizaciones quedan en ACTIVE para que se vean en el panel.
+ * Si n8n está configurado, además PROVISIONA cada automatización recién creada
+ * (clona la plantilla del recipe en n8n con las variables del cliente) y la activa,
+ * todo best-effort: lo que falle queda en TEST y avisa en `warnings` sin abortar
+ * el alta. Las capturas siguen siendo un paso posterior (scripts/capturar-cliente.ts).
  */
+
+/** Tope de provisiones por alta para no estirar el request más de la cuenta. */
+const MAX_PROVISIONES = 6;
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +172,10 @@ export async function POST(req: Request) {
       return { client: created };
     });
 
+    // IDs de las automatizaciones recién creadas, para provisionarlas en n8n (paso e).
+    const nuevasAutomationIds: string[] = [];
+    let provisionadas = 0;
+
     // ── c) Lead CONVERTED + Blueprint curado (best-effort) ─
     const hints = recipeHintsForRubro(data.rubro);
     let recipeIds: string[] = [];
@@ -238,7 +248,7 @@ export async function POST(req: Request) {
       });
 
       for (const r of recipes) {
-        await db.automation.create({
+        const auto = await db.automation.create({
           data: {
             clientId: client.id,
             recipeId: r.id,
@@ -248,12 +258,49 @@ export async function POST(req: Request) {
             config,
           },
         });
+        nuevasAutomationIds.push(auto.id);
       }
       if (recipes.length === 0) {
         warnings.push("No se encontraron recetas para el rubro; el cliente quedó sin automatizaciones (cargalas en el recetario).");
       }
     } catch {
       warnings.push("El cliente se creó, pero falló el armado del blueprint/automatizaciones (revisá el recetario).");
+    }
+
+    // ── e) Provisión en n8n (best-effort) ─────────────────
+    // Por cada automatización recién creada: clonamos la plantilla en n8n y la
+    // activamos. Cada una va en su propio try/catch — un fallo de n8n NUNCA
+    // aborta el alta del cliente: esa automatización queda en TEST con su aviso.
+    if (nuevasAutomationIds.length > 0) {
+      if (!n8nConfigured()) {
+        warnings.push("n8n no configurado: las automatizaciones quedan listas en TEST.");
+      } else {
+        const aProvisionar = nuevasAutomationIds.slice(0, MAX_PROVISIONES);
+        if (nuevasAutomationIds.length > MAX_PROVISIONES) {
+          warnings.push(
+            `Se provisionaron las primeras ${MAX_PROVISIONES} automatizaciones; el resto quedó en TEST (provisionalas luego).`
+          );
+        }
+        for (const autoId of aProvisionar) {
+          try {
+            const auto = await db.automation.findUnique({
+              where: { id: autoId },
+              select: { name: true },
+            });
+            const nombre = auto?.name ?? autoId;
+            const prov = await provisionar(autoId);
+            if (!prov.ok) {
+              warnings.push(`La automatización "${nombre}" quedó en TEST: ${prov.detail}`);
+              continue;
+            }
+            await activar(autoId);
+            provisionadas++;
+          } catch (e) {
+            const motivo = e instanceof Error ? e.message : "error desconocido";
+            warnings.push(`La automatización ${autoId} quedó en TEST: ${motivo}`);
+          }
+        }
+      }
     }
 
     return NextResponse.json({
@@ -264,6 +311,7 @@ export async function POST(req: Request) {
       clientId: client.id,
       modules,
       brandNote,
+      provisionadas,
       warnings,
     });
   } catch (e) {
