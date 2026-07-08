@@ -15,9 +15,7 @@ const ROUTES = [
   "/login",
   "/registro",
   "/api/health",
-  "/sitio/marenco-propiedades",
-  "/sitio/marenco-propiedades/propiedades",
-  "/agendar/lume-studio",
+  "/agendar/vespabahia",
 ];
 
 async function check(path: string): Promise<{ path: string; status: number; ok: boolean }> {
