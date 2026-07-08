@@ -66,7 +66,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
       "Le recuerda el turno al cliente el día anterior por WhatsApp y email. Las ausencias se desploman.",
     cuando: "Todos los días a las 9:00",
     area: "TURNOS",
-    rubros: ["turno", "peluquer", "estetic", "salud", "clinic", "clínic", "dental", "consult", "taller", "gimnas", "escuela", "profe"],
+    rubros: ["turno", "peluquer", "estetic", "salud", "clinic", "clínic", "dental", "consult", "taller", "gimnas", "escuela", "profe", "service", "scooter", "moto"],
   },
   {
     key: "reserva-vence-24h",
@@ -86,7 +86,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
       "A los meses de la compra, le avisa al cliente que le toca el service y le ofrece agendar turno. Es el mensaje que más plata recupera.",
     cuando: "Todos los días a las 12:00",
     area: "VENTAS_CRM",
-    rubros: ["moto", "vespa", "auto", "bici", "concesionar", "taller"],
+    rubros: ["moto", "vespa", "scooter", "auto", "bici", "concesionar", "taller", "service"],
   },
   {
     key: "aviso-cuota",

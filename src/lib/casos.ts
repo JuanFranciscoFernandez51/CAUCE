@@ -104,12 +104,8 @@ export type Shot = {
   url: string;
 };
 
-/** Slugs de tenants demo que queremos destacar como negocios reales, en orden. */
-export const NEGOCIOS_DESTACADOS = [
-  "marenco-propiedades",
-  "lume-studio",
-  "pulso-studio",
-] as const;
+/** Slugs de tenants que destacamos como negocios reales, en orden. */
+export const NEGOCIOS_DESTACADOS = ["vespabahia"] as const;
 
 /**
  * Frase honesta de "qué se logró", derivada del rubro cuando no hay una a mano.

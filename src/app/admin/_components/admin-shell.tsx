@@ -13,7 +13,7 @@ const NAV = [
   { href: "/admin/leads", label: "Leads", icon: "🎯" },
   { href: "/admin/clientes", label: "Clientes", icon: "🏢" },
   { href: "/admin/consultorias", label: "Consultorías", icon: "🗓️" },
-  { href: "/admin/pricing", label: "Pricing", icon: "💵" },
+  { href: "/admin/pricing", label: "Presupuestos", icon: "💵" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
