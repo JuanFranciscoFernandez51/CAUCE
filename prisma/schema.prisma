@@ -78,7 +78,7 @@ model Client {
   users        User[]
   leads        Lead[]
   projects     Project[]
-  automations  Automation[]
+  procesos     Proceso[]
   usages       Usage[]
   subscriptions Subscription[]
   invoices     Invoice[]
@@ -255,65 +255,31 @@ enum BizArea {
   FINANZAS
 }
 
-model Recipe {
-  id          String   @id @default(cuid())
-  name        String
-  area        BizArea
-  level       Level
-  apps        String[] @default([]) // ["whatsapp","sheets","calendar",...]
-  solves      String // qué resuelve
-  variables   Json // [{key,label,type,required,help}]
-  template    Json? // plantilla de flujo / referencia a workflow template n8n
-  n8nTemplateId String? // id del workflow plantilla en n8n
-  buildHours  Float    @default(2)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ════════════════════════════════════════════════
+// PROCESOS — cómo está armado el negocio del cliente.
+// Lista simple y en criollo: qué corre, cuándo y qué resuelve.
+// La lógica vive en el código (crons, emails, wa.me), no en herramientas externas.
+// ════════════════════════════════════════════════
 
-  automations Automation[]
+enum ProcesoEstado {
+  ACTIVO
+  PAUSADO
 }
 
-enum AutomationStatus {
-  TEST
-  ACTIVE
-  PAUSED
-  ERROR
-}
+model Proceso {
+  id          String        @id @default(cuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre      String // "Recordatorio de service"
+  queHace     String // "Le avisa al cliente por WhatsApp que le toca el service"
+  cuando      String // "Todos los días a las 9:00" | "Cuando entra una consulta"
+  estado      ProcesoEstado @default(ACTIVO)
+  orden       Int           @default(0)
+  ultimaCorrida DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-enum HealthStatus {
-  UNKNOWN
-  OK
-  WARN
-  DOWN
-}
-
-model Automation {
-  id            String           @id @default(cuid())
-  clientId      String
-  client        Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  recipeId      String?
-  recipe        Recipe?          @relation(fields: [recipeId], references: [id])
-  name          String
-  status        AutomationStatus @default(TEST) // TODA automatización nace en TEST
-  health        HealthStatus     @default(UNKNOWN)
-  n8nWorkflowId String?
-  config        Json? // valores de las variables de la receta
-  lastRunAt     DateTime?
-  lastError     String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  qaChecks QACheck[]
-}
-
-model QACheck {
-  id           String     @id @default(cuid())
-  automationId String
-  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  name         String
-  passed       Boolean
-  detail       String?
-  runAt        DateTime   @default(now())
+  @@index([clientId, orden])
 }
 
 // ════════════════════════════════════════════════

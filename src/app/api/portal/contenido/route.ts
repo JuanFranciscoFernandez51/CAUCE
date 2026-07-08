@@ -60,24 +60,5 @@ export async function PUT(req: Request) {
 
   await db.client.update({ where: { id: clientId }, data: { settings } });
 
-  // Si hay automatizaciones del bot, actualizamos su config para que la
-  // provisión use siempre el contenido más nuevo.
-  const automations = await db.automation.findMany({ where: { clientId } });
-  for (const a of automations) {
-    const prevConfig = (a.config ?? {}) as Record<string, unknown>;
-    await db.automation.update({
-      where: { id: a.id },
-      data: {
-        config: {
-          ...prevConfig,
-          faqs: data.faqs,
-          horarios: data.horarios,
-          datos_negocio: data.datosNegocio,
-          tono: data.tono,
-        },
-      },
-    });
-  }
-
   return NextResponse.json({ ok: true });
 }

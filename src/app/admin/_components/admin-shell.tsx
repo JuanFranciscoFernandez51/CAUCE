@@ -12,7 +12,6 @@ const NAV = [
   { href: "/admin/pipeline", label: "Pipeline", icon: "🛠️" },
   { href: "/admin/leads", label: "Leads", icon: "🎯" },
   { href: "/admin/clientes", label: "Clientes", icon: "🏢" },
-  { href: "/admin/recetario", label: "Recetario", icon: "📒" },
   { href: "/admin/consultorias", label: "Consultorías", icon: "🗓️" },
   { href: "/admin/pricing", label: "Pricing", icon: "💵" },
 ] as const;
@@ -52,22 +51,12 @@ function NavLinks({ pathname, onNavigate, newLeads }: { pathname: string; onNavi
   );
 }
 
-function EngineBadge({ connected }: { connected: boolean }) {
-  return (
-    <Badge variant={connected ? "success" : "outline"} className="w-fit">
-      motor n8n: {connected ? "conectado" : "sin conectar"}
-    </Badge>
-  );
-}
-
 export function AdminShell({
   adminName,
-  n8nConnected,
   newLeads = 0,
   children,
 }: {
   adminName: string;
-  n8nConnected: boolean;
   newLeads?: number;
   children: ReactNode;
 }) {
@@ -76,7 +65,6 @@ export function AdminShell({
 
   const userBlock = (
     <div className="flex flex-col gap-3 border-t pt-4">
-      <EngineBadge connected={n8nConnected} />
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{adminName}</p>
@@ -141,7 +129,6 @@ export function AdminShell({
           <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
             <div>
               <p className="text-sm font-medium">{adminName}</p>
-              <EngineBadge connected={n8nConnected} />
             </div>
             <Button
               variant="secondary"

@@ -11,7 +11,8 @@ import {
   PACK_LABELS,
 } from "../../_components/format";
 import { ClientEditForm } from "./client-edit-form";
-import { AutomationsSection, type AutomationData, type RecipeVariable } from "./automations-section";
+import { FichaTabs } from "./ficha-tabs";
+import { ProcesosSection, type ProcesoData } from "./procesos-section";
 import { OsSection, type BrandingData } from "./os-section";
 import { CredentialsSection } from "./credentials-section";
 import { ReportsSection, type ReportData } from "./reports-section";
@@ -28,13 +29,7 @@ export default async function ClienteDetailPage({
   const client = await db.client.findUnique({
     where: { id },
     include: {
-      automations: {
-        orderBy: { createdAt: "asc" },
-        include: {
-          recipe: { select: { name: true, variables: true } },
-          qaChecks: { orderBy: { runAt: "desc" }, take: 6 },
-        },
-      },
+      procesos: { orderBy: [{ orden: "asc" }, { createdAt: "asc" }] },
       credentials: { orderBy: { createdAt: "desc" } },
       usages: { orderBy: { period: "desc" } },
       reports: { orderBy: { period: "desc" } },
@@ -43,35 +38,15 @@ export default async function ClienteDetailPage({
   });
   if (!client) notFound();
 
-  const [fairUse, recipes] = await Promise.all([
-    getFairUse(client.id),
-    db.recipe.findMany({
-      where: { active: true },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
-  ]);
+  const fairUse = await getFairUse(client.id);
 
-  const automations: AutomationData[] = client.automations.map((a) => ({
-    id: a.id,
-    name: a.name,
-    status: a.status,
-    health: a.health,
-    n8nWorkflowId: a.n8nWorkflowId,
-    lastRunAt: a.lastRunAt?.toISOString() ?? null,
-    lastError: a.lastError,
-    config: Object.fromEntries(
-      Object.entries((a.config as Record<string, unknown> | null) ?? {}).map(([k, v]) => [k, String(v ?? "")])
-    ),
-    recipeName: a.recipe?.name ?? null,
-    variables: ((a.recipe?.variables as RecipeVariable[] | null) ?? []).filter((v) => v && v.key),
-    qaChecks: a.qaChecks.map((c) => ({
-      id: c.id,
-      name: c.name,
-      passed: c.passed,
-      detail: c.detail,
-      runAt: c.runAt.toISOString(),
-    })),
+  const procesos: ProcesoData[] = client.procesos.map((p) => ({
+    id: p.id,
+    nombre: p.nombre,
+    queHace: p.queHace,
+    cuando: p.cuando,
+    estado: p.estado,
+    ultimaCorrida: p.ultimaCorrida?.toISOString() ?? null,
   }));
 
   const branding = (client.branding as BrandingData | null) ?? {};
@@ -82,32 +57,61 @@ export default async function ClienteDetailPage({
     content: (r.content as ReportData["content"]) ?? {},
   }));
 
-  return (
+  const tieneSitio = client.modules.includes("sitio");
+  const procesosActivos = procesos.filter((p) => p.estado === "ACTIVO").length;
+
+  // ── Pestaña 1: CÓMO ESTÁ ARMADO (lo primero que se ve) ──
+  const armado = (
     <div className="space-y-6">
-      <div>
-        <Link href="/admin/clientes" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Clientes
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">{client.name}</h1>
-          <Badge variant={PACK_BADGE[client.pack] ?? "default"}>{PACK_LABELS[client.pack] ?? client.pack}</Badge>
-          <Badge variant={CLIENT_STATUS_BADGE[client.status] ?? "default"}>
-            {CLIENT_STATUS_LABELS[client.status] ?? client.status}
-          </Badge>
-          <span className="text-sm text-muted-foreground">
-            MRR {fmtUsd(client.mrr)} · {client.slug}.cauce.app
-          </span>
+      {/* Las tres patas de la entrega, con sus links directos */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">🌐 Su web</p>
+          {tieneSitio || client.domain ? (
+            <a
+              href={client.domain ? `https://${client.domain}` : `/sitio/${client.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 block truncate font-medium text-primary hover:underline"
+            >
+              {client.domain ?? `/sitio/${client.slug}`} →
+            </a>
+          ) : (
+            <p className="mt-1 text-sm text-muted-foreground">Sin web propia (módulo apagado).</p>
+          )}
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">🖥️ Su sistema</p>
           <a
-            href={`/admin/clientes/${client.id}/presentacion`}
+            href={`/os/${client.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
+            className="mt-1 block truncate font-medium text-primary hover:underline"
           >
-            📄 Presentación para el cliente
+            /os/{client.slug} →
           </a>
-        </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {client.modules.length > 0 ? client.modules.join(" · ") : "sin módulos activos"}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">⚡ Sus procesos</p>
+          <p className="mt-1 font-medium">
+            {procesos.length === 0 ? "Sin procesos" : `${procesosActivos} de ${procesos.length} funcionando`}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">La lista completa, acá abajo.</p>
+        </Card>
       </div>
 
+      <ProcesosSection clientId={client.id} procesos={procesos} />
+
+      <OsSection clientId={client.id} slug={client.slug} modules={client.modules} branding={branding} />
+    </div>
+  );
+
+  // ── Pestaña 2: DATOS (contacto, credenciales, accesos) ──
+  const datos = (
+    <div className="space-y-6">
       <ClientEditForm
         client={{
           id: client.id,
@@ -126,11 +130,7 @@ export default async function ClienteDetailPage({
           health: client.health,
         }}
       />
-
-      <AutomationsSection clientId={client.id} automations={automations} recipes={recipes} />
-
       <div className="grid gap-6 xl:grid-cols-2">
-        <OsSection clientId={client.id} slug={client.slug} modules={client.modules} branding={branding} />
         <CredentialsSection
           clientId={client.id}
           credentials={client.credentials.map((c) => ({
@@ -140,9 +140,23 @@ export default async function ClienteDetailPage({
             createdAt: c.createdAt.toISOString(),
           }))}
         />
+        <PortalAccessSection
+          clientId={client.id}
+          users={client.users.map((u) => ({
+            id: u.id,
+            username: u.username,
+            name: u.name,
+            email: u.email,
+            createdAt: u.createdAt.toISOString(),
+          }))}
+        />
       </div>
+    </div>
+  );
 
-      {/* Uso y fair use (server-rendered) */}
+  // ── Pestaña 3: USO Y REPORTES ────────────────────────────
+  const uso = (
+    <div className="space-y-6">
       <Card className="p-5">
         <h2 className="mb-4 font-semibold">Uso</h2>
         <div className="mb-5">
@@ -208,19 +222,37 @@ export default async function ClienteDetailPage({
         )}
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <ReportsSection clientId={client.id} reports={reports} currentPeriod={currentPeriod()} />
-        <PortalAccessSection
-          clientId={client.id}
-          users={client.users.map((u) => ({
-            id: u.id,
-            username: u.username,
-            name: u.name,
-            email: u.email,
-            createdAt: u.createdAt.toISOString(),
-          }))}
-        />
+      <ReportsSection clientId={client.id} reports={reports} currentPeriod={currentPeriod()} />
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Link href="/admin/clientes" className="text-sm text-muted-foreground hover:text-foreground">
+          ← Clientes
+        </Link>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">{client.name}</h1>
+          <Badge variant={PACK_BADGE[client.pack] ?? "default"}>{PACK_LABELS[client.pack] ?? client.pack}</Badge>
+          <Badge variant={CLIENT_STATUS_BADGE[client.status] ?? "default"}>
+            {CLIENT_STATUS_LABELS[client.status] ?? client.status}
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            MRR {fmtUsd(client.mrr)} · {client.slug}
+          </span>
+          <a
+            href={`/admin/clientes/${client.id}/presentacion`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
+          >
+            📄 Presentación para el cliente
+          </a>
+        </div>
       </div>
+
+      <FichaTabs armado={armado} datos={datos} uso={uso} />
     </div>
   );
 }

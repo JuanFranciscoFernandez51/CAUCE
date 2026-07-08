@@ -4,23 +4,6 @@ import { getFairUse, currentPeriod } from "@/lib/usage";
 import { Badge, ButtonLink, Card, EmptyState, Stat } from "@/components/ui";
 import { getPortalClient, timeAgo, fmtDateTime, type BotSettings } from "./_lib";
 
-const STATUS_BADGE: Record<
-  string,
-  { label: string; variant: "default" | "success" | "warning" | "destructive" }
-> = {
-  TEST: { label: "En prueba", variant: "warning" },
-  ACTIVE: { label: "Activa", variant: "success" },
-  PAUSED: { label: "Pausada", variant: "default" },
-  ERROR: { label: "Error", variant: "destructive" },
-};
-
-const HEALTH_LABEL: Record<string, string> = {
-  UNKNOWN: "Sin datos",
-  OK: "Funcionando bien",
-  WARN: "Con avisos",
-  DOWN: "Caída",
-};
-
 function ChecklistItem({
   done,
   title,
@@ -64,10 +47,10 @@ export default async function PortalHome() {
   if (!client) return null; // el layout muestra el aviso
 
   const period = currentPeriod();
-  const [automations, channelCount, fairUse] = await Promise.all([
-    db.automation.findMany({
+  const [procesos, channelCount, fairUse] = await Promise.all([
+    db.proceso.findMany({
       where: { clientId: client.id },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ orden: "asc" }, { createdAt: "asc" }],
     }),
     db.credential.count({
       where: { clientId: client.id, kind: { in: ["whatsapp", "instagram"] } },
@@ -101,7 +84,7 @@ export default async function PortalHome() {
   const checks = {
     canal: channelCount > 0,
     contenido: Array.isArray(settings.faqs) && settings.faqs.length > 0,
-    bot: automations.some((a) => a.n8nWorkflowId || a.status === "ACTIVE"),
+    bot: procesos.some((p) => p.estado === "ACTIVO"),
     activo: client.status === "ACTIVE",
   };
   const allDone = Object.values(checks).every(Boolean);
@@ -243,14 +226,14 @@ export default async function PortalHome() {
         ) : null}
       </div>
 
-      {/* Automatizaciones */}
+      {/* Procesos */}
       <section>
-        <h2 className="mb-3 font-semibold">Mis automatizaciones</h2>
-        {automations.length === 0 ? (
+        <h2 className="mb-3 font-semibold">Mis procesos</h2>
+        {procesos.length === 0 ? (
           <EmptyState
             icon="🤖"
-            title="Tu bot se está preparando"
-            detail="Apenas conectes tu canal y cargues el contenido, Cauce lo arma y lo deja funcionando."
+            title="Tus procesos se están preparando"
+            detail="Apenas conectes tu canal y cargues el contenido, Cauce los deja funcionando."
             action={
               <ButtonLink href="/portal/canal" size="sm">
                 Conectar mi canal
@@ -259,27 +242,21 @@ export default async function PortalHome() {
           />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {automations.map((a) => {
-              const badge = STATUS_BADGE[a.status] ?? STATUS_BADGE.TEST;
+            {procesos.map((p) => {
+              const activo = p.estado === "ACTIVO";
               return (
-                <Card key={a.id} className="p-5">
+                <Card key={p.id} className="p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-medium">{a.name}</p>
-                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    <p className="font-medium">{p.nombre}</p>
+                    <Badge variant={activo ? "success" : "default"}>
+                      {activo ? "Funcionando" : "Pausado"}
+                    </Badge>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Salud: {HEALTH_LABEL[a.health] ?? a.health}
-                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">{p.queHace}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {a.lastRunAt
-                      ? `Última ejecución ${timeAgo(a.lastRunAt)}`
-                      : "Todavía no se ejecutó"}
+                    Corre: {p.cuando}
+                    {p.ultimaCorrida ? ` · Última vez ${timeAgo(p.ultimaCorrida)}` : ""}
                   </p>
-                  {a.status === "ERROR" && a.lastError ? (
-                    <p className="mt-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                      {a.lastError}
-                    </p>
-                  ) : null}
                 </Card>
               );
             })}

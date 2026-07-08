@@ -1,11 +1,13 @@
 import { getAnthropic, MODEL_AGENT, aiAvailable } from "@/lib/anthropic";
 import { db } from "@/lib/db";
-import type { Lead, Recipe } from "@prisma/client";
+import type { Lead } from "@prisma/client";
 import { getPricing } from "@/lib/pricing";
+import { PROCESOS_CATALOGO, procesosParaRubro } from "@/lib/procesos-catalogo";
 
 export type BlueprintDraft = {
   summary: string;
   level: "N1" | "N2" | "N3" | "N4";
+  /** Keys del catálogo de procesos (procesos-catalogo.ts). */
   recipeIds: string[];
   flow: { paso: number; titulo: string; detalle: string }[];
   suggestedPack: "STARTER" | "PRO" | "SCALE" | "CUSTOM";
@@ -22,7 +24,7 @@ const TOOL = {
     properties: {
       summary: { type: "string", description: "Diagnóstico en lenguaje claro para el cliente (3-6 oraciones, español rioplatense)" },
       level: { type: "string", enum: ["N1", "N2", "N3", "N4"] },
-      recipeIds: { type: "array", items: { type: "string" }, description: "IDs de las recetas del recetario que aplican (pueden ser de varias áreas)" },
+      recipeIds: { type: "array", items: { type: "string" }, description: "Keys de los procesos del catálogo que aplican (pueden ser de varias áreas)" },
       flow: {
         type: "array",
         items: {
@@ -44,34 +46,30 @@ const TOOL = {
   },
 };
 
-function recipeCatalog(recipes: Recipe[]): string {
-  return recipes
-    .map(
-      (r) =>
-        `- id:${r.id} | ${r.name} | área:${r.area} | nivel:${r.level} | apps:${r.apps.join(",")} | resuelve: ${r.solves}`
-    )
-    .join("\n");
+function catalogoTexto(): string {
+  return PROCESOS_CATALOGO.map(
+    (p) => `- key:${p.key} | ${p.nombre} | área:${p.area} | corre:${p.cuando} | resuelve: ${p.queHace}`
+  ).join("\n");
 }
 
 /**
- * Agente Diagnóstico: matchea el intake contra el recetario completo (todas las áreas)
- * con tool use FORZADO y devuelve un Blueprint borrador. Crea el registro en DB.
+ * Agente Diagnóstico: matchea el intake contra el catálogo de procesos
+ * (todas las áreas) con tool use FORZADO y devuelve un Blueprint borrador.
  */
 export async function runDiagnostico(leadId: string): Promise<{ blueprintId: string }> {
   const lead = await db.lead.findUniqueOrThrow({ where: { id: leadId } });
-  const recipes = await db.recipe.findMany({ where: { active: true } });
   const pricing = await getPricing();
 
   let draft: BlueprintDraft;
   if (aiAvailable()) {
-    draft = await diagnoseWithClaude(lead, recipes, pricing.packs);
+    draft = await diagnoseWithClaude(lead, pricing.packs);
   } else {
-    draft = fallbackDraft(lead, recipes);
+    draft = fallbackDraft(lead);
   }
 
-  // Validar que las recetas existan de verdad (la IA no inventa IDs)
-  const validIds = new Set(recipes.map((r) => r.id));
-  draft.recipeIds = draft.recipeIds.filter((id) => validIds.has(id));
+  // Validar que los procesos existan en el catálogo (la IA no inventa keys)
+  const validKeys = new Set(PROCESOS_CATALOGO.map((p) => p.key));
+  draft.recipeIds = draft.recipeIds.filter((k) => validKeys.has(k));
 
   const bp = await db.blueprint.create({
     data: {
@@ -109,23 +107,19 @@ export async function runDiagnostico(leadId: string): Promise<{ blueprintId: str
   return { blueprintId: bp.id };
 }
 
-async function diagnoseWithClaude(
-  lead: Lead,
-  recipes: Recipe[],
-  packs: unknown
-): Promise<BlueprintDraft> {
+async function diagnoseWithClaude(lead: Lead, packs: unknown): Promise<BlueprintDraft> {
   const anthropic = getAnthropic();
   const res = await anthropic.messages.create({
     model: MODEL_AGENT,
     max_tokens: 2000,
     tools: [TOOL],
     tool_choice: { type: "tool", name: "emitir_blueprint" },
-    system: `Sos el agente de Diagnóstico de Cauce, agencia argentina de automatización con IA para negocios.
-Tu trabajo: leer el intake de un lead y matchearlo contra el RECETARIO completo (todas las áreas: atención, ventas/CRM, marketing, operaciones/stock, turnos, RRHH, finanzas). Un mismo cliente puede necesitar recetas de varias áreas.
+    system: `Sos el agente de Diagnóstico de Cauce, empresa argentina que entrega a cada PyME su web + su software de gestión + sus procesos automatizados (corriendo en el propio software, sin herramientas externas).
+Tu trabajo: leer el intake de un lead y matchearlo contra el CATÁLOGO de procesos (todas las áreas: atención, ventas/CRM, marketing, operaciones/stock, turnos, RRHH, finanzas). Un mismo cliente puede necesitar procesos de varias áreas.
 Reglas:
-- Elegí SOLO recetas del recetario provisto, por id exacto.
-- Nivel N1-N4 = complejidad total del proyecto (el mayor de las recetas + integraciones).
-- Pack: STARTER (1 bot simple autoservicio), PRO (bot + integraciones + varios flujos), SCALE (necesita software propio: CRM/turnos/stock/RRHH/caja con su marca = Cauce OS), CUSTOM (Cauce OS + desarrollo único).
+- Elegí SOLO procesos del catálogo provisto, por key exacta.
+- Nivel N1-N4 = complejidad total del proyecto.
+- Pack: STARTER (web + procesos básicos), PRO (web + varios procesos), SCALE (necesita software propio: CRM/turnos/stock/finanzas con su marca = Cauce OS), CUSTOM (Cauce OS + desarrollo único, ej: cronómetro de eventos).
 - Precios de referencia de packs (USD): ${JSON.stringify(packs)}. Setup = pago único; mensual = retainer. Sugerí números coherentes con eso.
 - summary en español rioplatense, claro, sin tecnicismos, vendedor pero honesto.`,
     messages: [
@@ -137,8 +131,8 @@ Negocio: ${lead.business ?? "—"} | Rubro: ${lead.rubro ?? "—"}
 Fuente: ${lead.source}
 Intake (scorecard): ${JSON.stringify(lead.intake ?? {}, null, 2)}
 
-RECETARIO:
-${recipeCatalog(recipes)}`,
+CATÁLOGO DE PROCESOS:
+${catalogoTexto()}`,
       },
     ],
   });
@@ -148,18 +142,15 @@ ${recipeCatalog(recipes)}`,
   return toolUse.input as BlueprintDraft;
 }
 
-/** Sin API key: heurística simple para que el flujo nunca se rompa. */
-function fallbackDraft(lead: Lead, recipes: Recipe[]): BlueprintDraft {
-  const starter = recipes.find((r) => r.name.toLowerCase().includes("faq"));
+/** Sin API key: sugiere los procesos del rubro para que el flujo nunca se rompa. */
+function fallbackDraft(lead: Lead): BlueprintDraft {
+  const sugeridos = procesosParaRubro(lead.rubro);
   return {
-    summary: `Diagnóstico preliminar para ${lead.business || lead.name}: arrancamos con un bot de atención 24/7 que responde consultas frecuentes y captura los datos de cada interesado. (Generado sin IA — configurá ANTHROPIC_API_KEY para diagnóstico completo.)`,
+    summary: `Diagnóstico preliminar para ${lead.business || lead.name}: arrancamos ordenando las consultas en un CRM único y dejando corriendo los procesos clave del rubro. (Generado sin IA — configurá ANTHROPIC_API_KEY para diagnóstico completo.)`,
     level: "N2",
-    recipeIds: starter ? [starter.id] : [],
-    flow: [
-      { paso: 1, titulo: "Bot de atención", detalle: "Responde FAQs 24/7 en WhatsApp y captura leads." },
-      { paso: 2, titulo: "Aviso de leads calientes", detalle: "Si el interesado quiere comprar/agendar, te avisa al toque." },
-    ],
-    suggestedPack: "STARTER",
+    recipeIds: sugeridos.map((p) => p.key),
+    flow: sugeridos.slice(0, 4).map((p, i) => ({ paso: i + 1, titulo: p.nombre, detalle: p.queHace })),
+    suggestedPack: "SCALE",
     suggestedSetup: 0,
     suggestedMonthly: 45,
     score: 50,

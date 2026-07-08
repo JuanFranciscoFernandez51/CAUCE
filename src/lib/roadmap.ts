@@ -1,6 +1,7 @@
 import { getAnthropic, MODEL_AGENT, aiAvailable } from "@/lib/anthropic";
 import { db } from "@/lib/db";
 import { getPricing } from "@/lib/pricing";
+import { PROCESOS_CATALOGO } from "@/lib/procesos-catalogo";
 
 export type RoadmapContent = {
   resumen: string;
@@ -61,7 +62,6 @@ export async function generarRoadmap(consultNoteId: string): Promise<{ roadmapId
     where: { id: consultNoteId },
     include: { lead: true },
   });
-  const recipes = await db.recipe.findMany({ where: { active: true } });
   const pricing = await getPricing();
 
   let content: RoadmapContent;
@@ -72,7 +72,7 @@ export async function generarRoadmap(consultNoteId: string): Promise<{ roadmapId
       max_tokens: 3000,
       tools: [TOOL],
       tool_choice: { type: "tool", name: "emitir_roadmap" },
-      system: `Sos el consultor de Cauce, agencia argentina de automatización con IA. A partir de las notas de una videollamada de consultoría, armás un roadmap de automatización por fases (de menor a mayor complejidad, quick wins primero). Usá las recetas del recetario por nombre, de cualquier área (atención, ventas, marketing, operaciones, turnos, RRHH, finanzas). Si el negocio necesita software propio (CRM, turnos, stock, RRHH, caja con su marca), proponé Cauce OS en una fase con pack SCALE. Precios de referencia (USD, setup único + mensual): ${JSON.stringify(pricing.packs)}. Español rioplatense, concreto, sin humo.`,
+      system: `Sos el consultor de Cauce, empresa argentina que entrega a cada PyME su web + su software de gestión + sus procesos automatizados. A partir de las notas de una videollamada de consultoría, armás un roadmap por fases (de menor a mayor complejidad, quick wins primero). Usá los procesos del catálogo por nombre, de cualquier área (atención, ventas, marketing, operaciones, turnos, RRHH, finanzas). Si el negocio necesita software propio (CRM, turnos, stock, RRHH, caja con su marca), proponé Cauce OS en una fase con pack SCALE. Precios de referencia (USD, setup único + mensual): ${JSON.stringify(pricing.packs)}. Español rioplatense, concreto, sin humo.`,
       messages: [
         {
           role: "user",
@@ -80,8 +80,8 @@ export async function generarRoadmap(consultNoteId: string): Promise<{ roadmapId
 NOTAS DE LA LLAMADA:
 ${note.callNotes ?? "(sin notas)"}
 
-RECETARIO DISPONIBLE:
-${recipes.map((r) => `- ${r.name} (${r.area}, ${r.level}): ${r.solves}`).join("\n")}`,
+CATÁLOGO DE PROCESOS DISPONIBLE:
+${PROCESOS_CATALOGO.map((p) => `- ${p.nombre} (${p.area}, corre: ${p.cuando}): ${p.queHace}`).join("\n")}`,
         },
       ],
     });

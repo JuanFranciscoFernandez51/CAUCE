@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { fmtUsd } from "@/lib/pricing";
+import { PROCESOS_CATALOGO } from "@/lib/procesos-catalogo";
 import { Badge, Card, EmptyState } from "@/components/ui";
 import {
   AREA_LABELS,
@@ -38,14 +39,10 @@ export default async function LeadDetailPage({
   });
   if (!lead) notFound();
 
-  const allRecipeIds = [...new Set(lead.blueprints.flatMap((b) => b.recipeIds))];
-  const recipes = allRecipeIds.length
-    ? await db.recipe.findMany({
-        where: { id: { in: allRecipeIds } },
-        select: { id: true, name: true, area: true },
-      })
-    : [];
-  const recipeById = new Map(recipes.map((r) => [r.id, r]));
+  // Los blueprints guardan keys del catálogo de procesos (en código).
+  const recipeById = new Map(
+    PROCESOS_CATALOGO.map((p) => [p.key, { id: p.key, name: p.nombre, area: p.area }])
+  );
 
   const intake = (lead.intake as Record<string, unknown> | null) ?? null;
 

@@ -1,7 +1,6 @@
 /**
  * Helpers del onboarding 1-click. Reglas por RUBRO (keyword-insensible a acentos):
  * - módulos default sugeridos,
- * - recetas relevantes (por nombre de receta del recetario),
  * - settings de ejemplo (servicios + "sobre") para que el sitio no nazca vacío.
  *
  * Todo es DATO/CONFIG; cero forks. El form puede sobreescribir los módulos.
@@ -31,8 +30,6 @@ interface RubroProfile {
   key: RubroKey;
   match: string[];
   modules: OsModule[];
-  /** Nombres (o fragmentos) de recetas a buscar en el recetario, en orden de prioridad. */
-  recetas: string[];
   /** Servicios de ejemplo para el sitio público. */
   servicios: { nombre: string; detalle: string }[];
   /** Texto "sobre el negocio" de ejemplo. */
@@ -45,7 +42,6 @@ const PROFILES: RubroProfile[] = [
     key: "salud",
     match: ["salud", "clinica", "consultorio", "odonto", "dental", "medic", "kinesio", "psico", "nutri"],
     modules: ["crm", "turnos", "rrhh", "caja", "sitio"],
-    recetas: ["Recordatorio de turnos/citas", "Agendado self-service por WhatsApp", "Captura multicanal → CRM"],
     servicios: [
       { nombre: "Primera consulta", detalle: "Evaluación inicial y plan de tratamiento personalizado." },
       { nombre: "Control y seguimiento", detalle: "Turnos de seguimiento para acompañar tu evolución." },
@@ -58,7 +54,6 @@ const PROFILES: RubroProfile[] = [
     key: "peluqueria",
     match: ["peluqu", "barber", "estetic", "spa", "uñas", "manicur", "belleza", "cosmet"],
     modules: ["crm", "turnos", "caja", "catalogo", "sitio"],
-    recetas: ["Agendado self-service por WhatsApp", "Recordatorio de turnos/citas", "Reactivación de clientes inactivos"],
     servicios: [
       { nombre: "Corte y peinado", detalle: "Asesoramiento de estilo según tu cara y tu look." },
       { nombre: "Color y tratamientos", detalle: "Coloración, nutrición y brillo con productos premium." },
@@ -71,7 +66,6 @@ const PROFILES: RubroProfile[] = [
     key: "gastronomia",
     match: ["gastro", "restaur", "resto", "bar", "pizzer", "cafe", "cafetería", "comida", "delivery", "helader", "panader"],
     modules: ["crm", "catalogo", "caja", "sitio"],
-    recetas: ["Confirmación y seguimiento de pedidos", "Bot FAQ + captura de lead", "Encuesta post-venta / pedido de reseña"],
     servicios: [
       { nombre: "Salón", detalle: "Atención en el local con la mejor experiencia." },
       { nombre: "Delivery", detalle: "Te lo llevamos a casa, rápido y caliente." },
@@ -84,7 +78,6 @@ const PROFILES: RubroProfile[] = [
     key: "inmobiliaria",
     match: ["inmobil", "propiedad", "bienes raices", "real estate", "alquiler", "venta de propiedades"],
     modules: ["crm", "turnos", "caja", "sitio"],
-    recetas: ["Captura multicanal → CRM", "Seguimiento de presupuesto no cerrado", "Recordatorio de turnos/citas"],
     servicios: [
       { nombre: "Venta", detalle: "Tasamos y comercializamos tu propiedad con respaldo profesional." },
       { nombre: "Alquiler", detalle: "Gestión integral de alquileres, garantías y contratos." },
@@ -97,7 +90,6 @@ const PROFILES: RubroProfile[] = [
     key: "agencia",
     match: ["agencia", "marketing", "publicidad", "comunicacion", "branding", "creativa", "ads", "diseño", "software"],
     modules: ["crm", "proyectos", "rrhh", "caja", "sitio"],
-    recetas: ["Captura multicanal → CRM", "Seguimiento de presupuesto no cerrado", "Publicación programada multicanal"],
     servicios: [
       { nombre: "Estrategia & branding", detalle: "Construimos tu marca de la identidad al mensaje." },
       { nombre: "Performance & Ads", detalle: "Campañas que venden, medidas al peso." },
@@ -110,7 +102,6 @@ const PROFILES: RubroProfile[] = [
     key: "tienda",
     match: ["tienda", "comercio", "ropa", "indument", "moda", "ecommerce", "e-commerce", "boutique", "kiosco", "almacen", "distribu", "mayorista"],
     modules: ["crm", "catalogo", "caja", "sitio"],
-    recetas: ["Bot FAQ + captura de lead", "Confirmación y seguimiento de pedidos", "Reactivación de clientes inactivos"],
     servicios: [
       { nombre: "Catálogo online", detalle: "Mirá todos nuestros productos con stock al día." },
       { nombre: "Envíos", detalle: "Despachamos a todo el país." },
@@ -123,7 +114,6 @@ const PROFILES: RubroProfile[] = [
     key: "taller",
     match: ["taller", "mecanic", "service", "scooter", "moto", "automotor", "vehicul", "gomeria", "chapa", "pintura", "lubricentro"],
     modules: ["crm", "turnos", "caja", "sitio"],
-    recetas: ["Agendado self-service por WhatsApp", "Recordatorio de turnos/citas", "Captura multicanal → CRM"],
     servicios: [
       { nombre: "Service general", detalle: "Mantenimiento preventivo completo de tu vehículo." },
       { nombre: "Diagnóstico", detalle: "Detectamos la falla y te pasamos presupuesto claro." },
@@ -136,7 +126,6 @@ const PROFILES: RubroProfile[] = [
     key: "gimnasio",
     match: ["gimnasio", "gym", "fitness", "crossfit", "pilates", "yoga", "box", "deportiv", "natacion"],
     modules: ["crm", "turnos", "rrhh", "caja", "sitio"],
-    recetas: ["Agendado self-service por WhatsApp", "Reactivación de clientes inactivos", "Recordatorio de turnos/citas"],
     servicios: [
       { nombre: "Musculación", detalle: "Sala equipada con plan personalizado." },
       { nombre: "Clases grupales", detalle: "Funcional, ritmos y más, todos los días." },
@@ -151,7 +140,6 @@ const GENERIC: RubroProfile = {
   key: "generico",
   match: [],
   modules: ["crm", "caja", "sitio"],
-  recetas: ["Bot FAQ + captura de lead", "Captura multicanal → CRM", "Reactivación de clientes inactivos"],
   servicios: [
     { nombre: "Nuestros servicios", detalle: "Contanos qué necesitás y te ayudamos." },
     { nombre: "Atención por WhatsApp", detalle: "Respondemos tus consultas al instante." },
@@ -196,7 +184,3 @@ export function seedSettingsForRubro(
   };
 }
 
-/** Fragmentos de nombres de recetas relevantes al rubro (para resolver IDs en DB). */
-export function recipeHintsForRubro(rubro: string | null | undefined): string[] {
-  return resolveRubroProfile(rubro).recetas;
-}

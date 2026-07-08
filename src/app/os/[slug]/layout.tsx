@@ -139,13 +139,13 @@ export default async function OsLayout({
   const modules = tenantModules(tenant);
   const crm = modules.includes("crm");
 
-  // Grupo Operaciones: módulos operativos activos (Caja solo para el dueño) + Automatizaciones.
+  // Grupo Operaciones: módulos operativos activos (Caja solo para el dueño) + Procesos.
   const opsItems = OPS_ORDER.filter((m) => modules.includes(m) && (m !== "caja" || owner)).map((m) => ({
     label: OPS_NAV[m]!.label,
     href: `${base}/${OPS_NAV[m]!.path}`,
     icon: OPS_NAV[m]!.icon,
   }));
-  opsItems.push({ label: "Automatizaciones", href: `${base}/automatizaciones`, icon: "⚡" });
+  opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [

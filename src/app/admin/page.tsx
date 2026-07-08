@@ -4,11 +4,7 @@ import { currentPeriod } from "@/lib/usage";
 import { fmtUsd } from "@/lib/pricing";
 import { Badge, Card, EmptyState, Stat, Table, Td, Th } from "@/components/ui";
 import {
-  AUTOMATION_STATUS_BADGE,
-  AUTOMATION_STATUS_LABELS,
   fmtDate,
-  HEALTH_BADGE,
-  HEALTH_LABELS,
   LEAD_SOURCE_BADGE,
   LEAD_SOURCE_LABELS,
   LEAD_STATUS_BADGE,
@@ -29,9 +25,9 @@ export default async function AdminDashboard() {
     enPipeline,
     churned,
     usageAgg,
-    healthGroups,
+    procesosGroups,
     ultimosLeads,
-    autosConProblemas,
+    procesosPausados,
   ] = await Promise.all([
     db.client.aggregate({
       where: { status: "ACTIVE" },
@@ -42,12 +38,10 @@ export default async function AdminDashboard() {
     db.project.count({ where: { stage: { not: "ACTIVO" } } }),
     db.client.count({ where: { status: "CHURNED" } }),
     db.usage.aggregate({ where: { period }, _sum: { messages: true, costUsd: true } }),
-    db.automation.groupBy({ by: ["health"], _count: true }),
+    db.proceso.groupBy({ by: ["estado"], _count: true }),
     db.lead.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-    db.automation.findMany({
-      where: {
-        OR: [{ health: { in: ["WARN", "DOWN"] } }, { status: "ERROR" }],
-      },
+    db.proceso.findMany({
+      where: { estado: "PAUSADO" },
       include: { client: { select: { id: true, name: true } } },
       orderBy: { updatedAt: "desc" },
       take: 10,
@@ -58,9 +52,8 @@ export default async function AdminDashboard() {
   const costos = activeAgg._sum.costEstUsd ?? 0;
   const margen = mrr - costos;
   const mensajes = usageAgg._sum.messages ?? 0;
-  const healthCount = (h: string) =>
-    healthGroups.find((g) => g.health === h)?._count ?? 0;
-  const totalAutos = healthGroups.reduce((acc, g) => acc + g._count, 0);
+  const procesosActivos = procesosGroups.find((g) => g.estado === "ACTIVO")?._count ?? 0;
+  const totalProcesos = procesosGroups.reduce((acc, g) => acc + g._count, 0);
 
   return (
     <div className="space-y-8">
@@ -84,24 +77,12 @@ export default async function AdminDashboard() {
         />
         <Stat label="Churn" value={churned} hint="Clientes dados de baja" tone={churned > 0 ? "warning" : "default"} />
         <Stat label="Mensajes del período" value={mensajes.toLocaleString("es-AR")} hint={`Costo IA: ${fmtUsd(Math.round((usageAgg._sum.costUsd ?? 0) * 100) / 100)}`} />
-        <Card className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Automatizaciones por salud
-          </p>
-          {totalAutos === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">Sin automatizaciones todavía.</p>
-          ) : (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {(["OK", "WARN", "DOWN", "UNKNOWN"] as const).map((h) =>
-                healthCount(h) > 0 ? (
-                  <Badge key={h} variant={HEALTH_BADGE[h]}>
-                    {HEALTH_LABELS[h]}: {healthCount(h)}
-                  </Badge>
-                ) : null
-              )}
-            </div>
-          )}
-        </Card>
+        <Stat
+          label="Procesos corriendo"
+          value={totalProcesos === 0 ? "—" : `${procesosActivos} / ${totalProcesos}`}
+          hint={totalProcesos === 0 ? "Sin procesos todavía" : "Activos sobre el total"}
+          tone={totalProcesos > 0 && procesosActivos === totalProcesos ? "success" : "default"}
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -156,48 +137,35 @@ export default async function AdminDashboard() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-semibold">Automatizaciones con problemas</h2>
-          {autosConProblemas.length === 0 ? (
+          <h2 className="font-semibold">Procesos pausados</h2>
+          {procesosPausados.length === 0 ? (
             <EmptyState
               icon="✅"
               title="Todo en orden"
-              detail="Ninguna automatización con salud WARN/DOWN ni en estado de error."
+              detail="Todos los procesos de todos los clientes están corriendo."
             />
           ) : (
             <Table>
               <thead>
                 <tr>
-                  <Th>Automatización</Th>
+                  <Th>Proceso</Th>
                   <Th>Cliente</Th>
-                  <Th>Estado</Th>
-                  <Th>Salud</Th>
+                  <Th>Corre</Th>
                 </tr>
               </thead>
               <tbody>
-                {autosConProblemas.map((a) => (
-                  <tr key={a.id} className="hover:bg-muted/50">
+                {procesosPausados.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/50">
                     <Td>
                       <Link
-                        href={`/admin/clientes/${a.client.id}`}
+                        href={`/admin/clientes/${p.client.id}`}
                         className="font-medium text-primary hover:underline"
                       >
-                        {a.name}
+                        {p.nombre}
                       </Link>
-                      {a.lastError ? (
-                        <p className="mt-0.5 max-w-xs truncate text-xs text-destructive">{a.lastError}</p>
-                      ) : null}
                     </Td>
-                    <Td>{a.client.name}</Td>
-                    <Td>
-                      <Badge variant={AUTOMATION_STATUS_BADGE[a.status] ?? "default"}>
-                        {AUTOMATION_STATUS_LABELS[a.status] ?? a.status}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <Badge variant={HEALTH_BADGE[a.health] ?? "default"}>
-                        {HEALTH_LABELS[a.health] ?? a.health}
-                      </Badge>
-                    </Td>
+                    <Td>{p.client.name}</Td>
+                    <Td className="text-muted-foreground">{p.cuando}</Td>
                   </tr>
                 ))}
               </tbody>

@@ -43,7 +43,7 @@ async function main() {
   // health debe responder ok:true
   try {
     const h = await (await fetch(`${BASE}/api/health`)).json();
-    console.log(`\n  health: db=${h.db} n8n=${h.n8n} ia=${h.ia}`);
+    console.log(`\n  health: db=${h.db} ia=${h.ia}`);
     if (!h.ok) failed++;
   } catch {
     console.log("\n  ❌ /api/health no respondió JSON");

@@ -9,27 +9,20 @@ import { extraerMarca } from "@/lib/brand-extractor";
 import {
   defaultModulesForRubro,
   normalizeModules,
-  recipeHintsForRubro,
   seedSettingsForRubro,
 } from "@/lib/onboarding";
 import { OS_MODULES } from "@/lib/tenant";
-import { n8nConfigured } from "@/lib/n8n";
-import { provisionar, activar } from "@/lib/provision";
+import { procesosParaRubro } from "@/lib/procesos-catalogo";
 
 /**
  * ONBOARDING 1-CLICK — orquesta la creación de un cliente COMPLETO encadenando
  * lo que ya existe (no reimplementa lógica de los módulos). Secuencia robusta:
- * el core (Client + User) es transaccional; los pasos opcionales (marca, recetas,
+ * el core (Client + User) es transaccional; los pasos opcionales (marca, procesos,
  * settings) son best-effort y avisan en `warnings` sin abortar el alta.
  *
- * Si n8n está configurado, además PROVISIONA cada automatización recién creada
- * (clona la plantilla del recipe en n8n con las variables del cliente) y la activa,
- * todo best-effort: lo que falle queda en TEST y avisa en `warnings` sin abortar
- * el alta. Las capturas siguen siendo un paso posterior (scripts/capturar-cliente.ts).
+ * Los procesos del cliente salen del catálogo en código (procesos-catalogo.ts)
+ * según el rubro: quedan ACTIVOS y explicados en criollo en su sistema.
  */
-
-/** Tope de provisiones por alta para no estirar el request más de la cuenta. */
-const MAX_PROVISIONES = 6;
 
 export const dynamic = "force-dynamic";
 
@@ -172,28 +165,10 @@ export async function POST(req: Request) {
       return { client: created };
     });
 
-    // IDs de las automatizaciones recién creadas, para provisionarlas en n8n (paso e).
-    const nuevasAutomationIds: string[] = [];
-    let provisionadas = 0;
-
     // ── c) Lead CONVERTED + Blueprint curado (best-effort) ─
-    const hints = recipeHintsForRubro(data.rubro);
-    let recipeIds: string[] = [];
-    try {
-      const recipes = await db.recipe.findMany({
-        where: { OR: hints.map((h) => ({ name: { contains: h } })) },
-        select: { id: true, name: true },
-      });
-      // Mantener el orden de prioridad de los hints y limitar a 3.
-      const byHint: string[] = [];
-      for (const h of hints) {
-        const m = recipes.find((r) => r.name.includes(h) && !byHint.includes(r.id));
-        if (m) byHint.push(m.id);
-      }
-      recipeIds = byHint.slice(0, 3);
-    } catch {
-      warnings.push("No se pudieron resolver las recetas del recetario.");
-    }
+    // Los procesos salen del catálogo en código según el rubro.
+    const procesosDelRubro = procesosParaRubro(data.rubro);
+    let procesosCreados = 0;
 
     try {
       const lead = await db.lead.create({
@@ -217,16 +192,8 @@ export async function POST(req: Request) {
 
       const summary =
         `${data.name}${data.rubro ? ` (${data.rubro})` : ""} arranca en Cauce con su software propio. ` +
-        `Encauzamos su operación: las consultas entran a un CRM único, las automatizaciones clave ` +
+        `Encauzamos su operación: las consultas entran a un CRM único, los procesos clave ` +
         `quedan corriendo desde el día uno y su sitio nace cargado para empezar a captar.`;
-
-      // ── d) Automatizaciones ACTIVE (que se vean en el panel) ─
-      const recipes = await db.recipe.findMany({ where: { id: { in: recipeIds } } });
-      const config = {
-        nombre_negocio: data.name,
-        telefono: data.whatsapp || "",
-        rubro: data.rubro || "",
-      };
 
       await db.blueprint.create({
         data: {
@@ -237,70 +204,30 @@ export async function POST(req: Request) {
           flow: [
             { paso: 1, titulo: "Software propio activo", detalle: `Cauce OS con los módulos: ${modules.join(", ")}.` },
             { paso: 2, titulo: "CRM unificado", detalle: "Toda consulta entra ordenada, con bienvenida automática." },
-            { paso: 3, titulo: "Automatizaciones corriendo", detalle: `${recipes.length} flujo(s) activo(s) desde el día uno.` },
+            { paso: 3, titulo: "Procesos corriendo", detalle: `${procesosDelRubro.length} proceso(s) activo(s) desde el día uno.` },
             { paso: 4, titulo: "Sitio cargado", detalle: "Servicios y presentación sembrados para captar ya." },
           ],
-          recipeIds,
+          recipeIds: procesosDelRubro.map((p) => p.key),
           suggestedPack: data.pack as Pack,
           suggestedSetup: setup,
           suggestedMonthly: mrr,
         },
       });
 
-      for (const r of recipes) {
-        const auto = await db.automation.create({
-          data: {
-            clientId: client.id,
-            recipeId: r.id,
-            name: r.name,
-            status: "ACTIVE",
-            health: "OK",
-            config,
-          },
-        });
-        nuevasAutomationIds.push(auto.id);
-      }
-      if (recipes.length === 0) {
-        warnings.push("No se encontraron recetas para el rubro; el cliente quedó sin automatizaciones (cargalas en el recetario).");
-      }
+      // ── d) Procesos ACTIVOS, explicados en criollo ───────
+      await db.proceso.createMany({
+        data: procesosDelRubro.map((p, i) => ({
+          clientId: client.id,
+          nombre: p.nombre,
+          queHace: p.queHace,
+          cuando: p.cuando,
+          estado: "ACTIVO" as const,
+          orden: i,
+        })),
+      });
+      procesosCreados = procesosDelRubro.length;
     } catch {
-      warnings.push("El cliente se creó, pero falló el armado del blueprint/automatizaciones (revisá el recetario).");
-    }
-
-    // ── e) Provisión en n8n (best-effort) ─────────────────
-    // Por cada automatización recién creada: clonamos la plantilla en n8n y la
-    // activamos. Cada una va en su propio try/catch — un fallo de n8n NUNCA
-    // aborta el alta del cliente: esa automatización queda en TEST con su aviso.
-    if (nuevasAutomationIds.length > 0) {
-      if (!n8nConfigured()) {
-        warnings.push("n8n no configurado: las automatizaciones quedan listas en TEST.");
-      } else {
-        const aProvisionar = nuevasAutomationIds.slice(0, MAX_PROVISIONES);
-        if (nuevasAutomationIds.length > MAX_PROVISIONES) {
-          warnings.push(
-            `Se provisionaron las primeras ${MAX_PROVISIONES} automatizaciones; el resto quedó en TEST (provisionalas luego).`
-          );
-        }
-        for (const autoId of aProvisionar) {
-          try {
-            const auto = await db.automation.findUnique({
-              where: { id: autoId },
-              select: { name: true },
-            });
-            const nombre = auto?.name ?? autoId;
-            const prov = await provisionar(autoId);
-            if (!prov.ok) {
-              warnings.push(`La automatización "${nombre}" quedó en TEST: ${prov.detail}`);
-              continue;
-            }
-            await activar(autoId);
-            provisionadas++;
-          } catch (e) {
-            const motivo = e instanceof Error ? e.message : "error desconocido";
-            warnings.push(`La automatización ${autoId} quedó en TEST: ${motivo}`);
-          }
-        }
-      }
+      warnings.push("El cliente se creó, pero falló el armado del blueprint/procesos.");
     }
 
     return NextResponse.json({
@@ -311,7 +238,7 @@ export async function POST(req: Request) {
       clientId: client.id,
       modules,
       brandNote,
-      provisionadas,
+      procesos: procesosCreados,
       warnings,
     });
   } catch (e) {

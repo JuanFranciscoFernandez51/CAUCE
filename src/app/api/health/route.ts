@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { n8nConfigured } from "@/lib/n8n";
 import { aiAvailable } from "@/lib/anthropic";
 
 export async function GET() {
@@ -15,7 +14,6 @@ export async function GET() {
     {
       ok: dbOk,
       db: dbOk ? "up" : "down",
-      n8n: n8nConfigured() ? "configurado" : "sin configurar",
       ia: aiAvailable() ? "configurada" : "sin configurar",
       ts: new Date().toISOString(),
     },

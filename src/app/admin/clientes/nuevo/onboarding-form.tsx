@@ -27,7 +27,7 @@ type Result = {
   clientId: string;
   modules: string[];
   brandNote: string | null;
-  provisionadas: number;
+  procesos: number;
   warnings: string[];
 };
 
@@ -122,7 +122,7 @@ export function OnboardingForm() {
         <div>
           <h2 className="text-xl font-bold">🎉 ¡{name} ya está en Cauce!</h2>
           <p className="text-sm text-muted-foreground">
-            Cliente creado, módulos activos y automatizaciones corriendo.
+            Cliente creado, módulos activos y procesos corriendo.
           </p>
         </div>
 
@@ -136,11 +136,9 @@ export function OnboardingForm() {
           <p className="text-sm text-success">{result.brandNote}</p>
         ) : null}
 
-        {result.provisionadas > 0 ? (
+        {result.procesos > 0 ? (
           <p className="text-sm text-success">
-            ⚡ {result.provisionadas} automatización{result.provisionadas === 1 ? "" : "es"}{" "}
-            provisionada{result.provisionadas === 1 ? "" : "s"} y activa
-            {result.provisionadas === 1 ? "" : "s"} en n8n.
+            ⚡ {result.procesos} proceso{result.procesos === 1 ? "" : "s"} corriendo desde el día uno.
           </p>
         ) : null}
 

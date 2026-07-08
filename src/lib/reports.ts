@@ -13,9 +13,9 @@ export type ReportContent = {
 /** Genera (o regenera) el reporte mensual de un cliente con datos reales. */
 export async function generateMonthlyReport(clientId: string, period?: string): Promise<{ reportId: string }> {
   const p = period ?? currentPeriod();
-  const [client, automations, usage] = await Promise.all([
+  const [client, procesos, usage] = await Promise.all([
     db.client.findUniqueOrThrow({ where: { id: clientId } }),
-    db.automation.findMany({ where: { clientId } }),
+    db.proceso.findMany({ where: { clientId }, orderBy: { orden: "asc" } }),
     db.usage.findUnique({ where: { clientId_period: { clientId, period: p } } }),
   ]);
 
@@ -28,14 +28,19 @@ export async function generateMonthlyReport(clientId: string, period?: string): 
     db.appointment.count({ where: { clientId, createdAt: { gte: from, lt: to } } }),
   ]);
 
-  const active = automations.filter((a) => a.status === "ACTIVE").length;
+  const active = procesos.filter((a) => a.estado === "ACTIVO").length;
   const content: ReportContent = {
     period: p,
-    automations: automations.map((a) => ({ name: a.name, status: a.status, health: a.health })),
+    // Se mantiene la clave "automations" para no romper reportes ya guardados.
+    automations: procesos.map((a) => ({
+      name: a.nombre,
+      status: a.estado === "ACTIVO" ? "ACTIVE" : "PAUSED",
+      health: a.estado === "ACTIVO" ? "OK" : "UNKNOWN",
+    })),
     messages: usage?.messages ?? 0,
     leadsCaptured,
     appointments,
-    summary: `En ${p}, ${client.name} tuvo ${active} automatización(es) activa(s), ${usage?.messages ?? 0} mensajes atendidos, ${leadsCaptured} contactos nuevos y ${appointments} turnos registrados.`,
+    summary: `En ${p}, ${client.name} tuvo ${active} proceso(s) funcionando, ${usage?.messages ?? 0} mensajes atendidos, ${leadsCaptured} contactos nuevos y ${appointments} turnos registrados.`,
   };
 
   const report = await db.report.upsert({

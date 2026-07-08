@@ -43,10 +43,7 @@ export default async function PresentacionPage({
   const client = await db.client.findUnique({
     where: { id },
     include: {
-      automations: {
-        orderBy: { createdAt: "asc" },
-        include: { recipe: { select: { name: true, area: true, solves: true } } },
-      },
+      procesos: { orderBy: [{ orden: "asc" }, { createdAt: "asc" }] },
       leads: {
         orderBy: { createdAt: "desc" },
         include: { blueprints: { orderBy: { createdAt: "desc" }, take: 1 } },
@@ -295,31 +292,27 @@ export default async function PresentacionPage({
             )}
           </div>
 
-          {/* (c) Automatizaciones */}
+          {/* (c) Procesos */}
           <div className="avoid-break">
-            <Pata num="c" accent={accent} title="Tus automatizaciones" />
-            {client.automations.length > 0 ? (
+            <Pata num="c" accent={accent} title="Tus procesos" />
+            {client.procesos.length > 0 ? (
               <ul className="mt-3 space-y-2.5">
-                {client.automations.map((a) => (
-                  <li key={a.id} className="flex gap-3">
+                {client.procesos.map((p) => (
+                  <li key={p.id} className="flex gap-3">
                     <span className="mt-1 text-base">⚡</span>
                     <div>
-                      <p className="font-semibold text-gray-900">{a.name}</p>
-                      {a.recipe?.solves ? (
-                        <p className="text-gray-600">{a.recipe.solves}</p>
-                      ) : null}
-                      {a.recipe?.area ? (
-                        <p className="mt-0.5 text-xs uppercase tracking-wide text-gray-400">
-                          {AREA_LABELS[a.recipe.area] ?? a.recipe.area}
-                        </p>
-                      ) : null}
+                      <p className="font-semibold text-gray-900">{p.nombre}</p>
+                      <p className="text-gray-600">{p.queHace}</p>
+                      <p className="mt-0.5 text-xs uppercase tracking-wide text-gray-400">
+                        {p.cuando}
+                      </p>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="mt-2 text-gray-700">
-                Flujos que hacen el trabajo solos: responder consultas, avisar de cada oportunidad y
+                Procesos que hacen el trabajo solos: responder consultas, avisar de cada oportunidad y
                 cargar todo en tu sistema sin que toques nada.
               </p>
             )}

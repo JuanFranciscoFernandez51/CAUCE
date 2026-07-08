@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import type { BizArea, Recipe } from "@prisma/client";
-import { db } from "@/lib/db";
+import type { BizArea } from "@prisma/client";
 import { getPricing, usdToArs, fmtUsd, fmtArs, type PackKey } from "@/lib/pricing";
 import { AREA_LABELS, CASOS } from "@/lib/casos";
+import { catalogoPorArea } from "@/lib/procesos-catalogo";
 import { PublicShell } from "@/components/public/shell";
 import { CurrentLines } from "@/components/public/cauce-mark";
 import { SemanaEnVivo } from "@/components/public/semana-en-vivo";
@@ -29,7 +29,7 @@ const PASOS = [
     n: 2,
     titulo: "Diagnóstico con IA",
     detalle:
-      "Nuestra IA cruza tu caso contra el recetario completo de automatizaciones y arma tu plan a medida.",
+      "Nuestra IA cruza tu caso contra los procesos que ya funcionan en negocios reales y arma tu plan a medida.",
   },
   {
     n: 3,
@@ -72,20 +72,8 @@ function setupLine(p: { setupUsd: number | null; setupFrom: boolean }): string {
 }
 
 export default async function LandingPage() {
-  let recipes: Recipe[] = [];
-  try {
-    recipes = await db.recipe.findMany({ where: { active: true } });
-  } catch (e) {
-    console.error("landing: error leyendo recetas", e);
-  }
   const pricing = await getPricing();
-
-  const byArea = new Map<BizArea, Recipe[]>();
-  for (const r of recipes) {
-    const list = byArea.get(r.area) ?? [];
-    list.push(r);
-    byArea.set(r.area, list);
-  }
+  const byArea = catalogoPorArea();
 
   const packOrder: PackKey[] = ["starter", "pro", "scale", "custom"];
 
@@ -182,12 +170,12 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <h2 className="text-center text-3xl font-bold">Resolvemos todas las áreas</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-muted-foreground">
-          Estas son automatizaciones reales de nuestro recetario, listas para
-          adaptarse a tu negocio.
+          Estos son procesos reales, funcionando hoy en negocios reales,
+          listos para adaptarse al tuyo.
         </p>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AREA_ORDER.map((area) => {
-            const areaRecipes = (byArea.get(area) ?? []).slice(0, 2);
+            const procesos = (byArea.get(area) ?? []).slice(0, 2);
             const caso = CASOS.find((c) => c.area === area);
             return (
               <Card key={area} className="flex flex-col p-5">
@@ -196,11 +184,11 @@ export default async function LandingPage() {
                   <h3 className="font-semibold">{AREA_LABELS[area]}</h3>
                 </div>
                 <ul className="mt-3 flex-1 space-y-2 text-sm text-muted-foreground">
-                  {areaRecipes.length > 0 ? (
-                    areaRecipes.map((r) => (
-                      <li key={r.id} className="flex gap-2">
+                  {procesos.length > 0 ? (
+                    procesos.map((p) => (
+                      <li key={p.key} className="flex gap-2">
                         <span aria-hidden className="text-primary">✓</span>
-                        <span>{r.solves}</span>
+                        <span>{p.queHace}</span>
                       </li>
                     ))
                   ) : (
