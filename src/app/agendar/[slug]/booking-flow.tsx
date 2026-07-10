@@ -270,9 +270,7 @@ export function BookingFlow({
               <Spinner /> Buscando horarios libres…
             </div>
           ) : slots.length === 0 ? (
-            <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-              No quedan horarios libres ese día. Probá con otro.
-            </p>
+            <WaitlistForm slug={slug} fecha={date} />
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {slots.map((t) => (
@@ -354,6 +352,70 @@ export function BookingFlow({
           </form>
         </Card>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Día lleno → lista de espera: nombre + teléfono y listo.
+ * Si se libera un lugar, el negocio te avisa por WhatsApp.
+ */
+function WaitlistForm({ slug, fecha }: { slug: string; fecha: string }) {
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [listo, setListo] = useState(false);
+
+  async function anotarme(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/public/agendar/${slug}/espera`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, telefono, fecha }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "No pudimos anotarte");
+      setListo(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error de conexión");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (listo) {
+    return (
+      <p className="rounded-md border border-success/40 bg-success/10 px-3 py-6 text-center text-sm">
+        ¡Listo! Estás en la lista de espera. Si se libera un lugar ese día, te avisamos
+        por WhatsApp. 🙌
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-dashed px-4 py-5">
+      <p className="text-center text-sm text-muted-foreground">
+        No quedan horarios libres ese día. Podés probar con otro,{" "}
+        <span className="font-medium text-foreground">
+          o anotarte y te avisamos si se libera un lugar:
+        </span>
+      </p>
+      <form onSubmit={anotarme} className="mt-4 flex flex-wrap items-end justify-center gap-3">
+        <Field label="Tu nombre">
+          <Input value={nombre} onChange={(e) => setNombre(e.target.value)} required className="w-44" />
+        </Field>
+        <Field label="Tu WhatsApp">
+          <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} required className="w-44" />
+        </Field>
+        <Button type="submit" disabled={saving} size="sm">
+          {saving ? <Spinner /> : null} Anotarme
+        </Button>
+      </form>
+      {error ? <div className="mt-3"><ErrorState message={error} /></div> : null}
     </div>
   );
 }

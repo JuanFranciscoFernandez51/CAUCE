@@ -77,6 +77,15 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
     area: "TURNOS",
     rubros: ["escuela", "clase", "gimnas", "instructor", "reserva", "evento"],
   },
+  {
+    key: "lista-espera",
+    nombre: "Lista de espera que avisa sola",
+    queHace:
+      "Si un día está lleno, el cliente se anota desde la web. Cuando alguien cancela, te aparece el aviso con el WhatsApp listo para ofrecerle el lugar al primero de la fila.",
+    cuando: "Cuando se libera un lugar",
+    area: "TURNOS",
+    rubros: ["turno", "peluquer", "estetic", "salud", "clinic", "clínic", "dental", "gimnas", "escuela", "taller", "service", "moto", "scooter"],
+  },
 
   // ── Postventa y cobranzas ──────────────────────────────
   {

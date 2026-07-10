@@ -94,6 +94,7 @@ model Client {
   cashMovements CashMovement[]
   cajaDias     CajaDia[]
   outreach     OutreachTarea[]
+  listaEspera  ListaEspera[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -518,6 +519,28 @@ model CashMovement {
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+}
+
+// Lista de espera (patrón La Base): cuando un día está lleno el cliente final
+// se anota; al liberarse un lugar (turno cancelado) se genera el aviso con
+// WhatsApp listo para el primero de la fila.
+enum EsperaEstado {
+  ESPERANDO
+  AVISADO
+  BAJA
+}
+
+model ListaEspera {
+  id        String       @id @default(cuid())
+  clientId  String
+  client    Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fecha     String // "2026-07-15" — el día que buscaba
+  nombre    String
+  telefono  String
+  estado    EsperaEstado @default(ESPERANDO)
+  createdAt DateTime     @default(now())
+
+  @@index([clientId, fecha, estado])
 }
 
 // Outreach (patrón Motos Fernández): tareas de contacto generadas por los

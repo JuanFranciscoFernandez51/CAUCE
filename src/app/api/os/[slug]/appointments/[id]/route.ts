@@ -121,7 +121,42 @@ export async function PATCH(
   if (result.count === 0) {
     return NextResponse.json({ error: "Turno no encontrado" }, { status: 404 });
   }
+
+  // Se liberó un lugar → avisamos al primero de la lista de espera de ese día
+  // (queda como tarea en "Para hoy" con el WhatsApp listo).
+  if (d.status === "CANCELLED" && current.status !== "CANCELLED") {
+    await avisarListaEspera(tenantId, current.startsAt).catch(() => undefined);
+  }
+
   return NextResponse.json({ ok: true });
+}
+
+/** Genera el aviso de lugar liberado para el primero que esperaba ese día. */
+async function avisarListaEspera(clientId: string, startsAt: Date) {
+  const fecha = startsAt.toLocaleDateString("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
+  const primero = await db.listaEspera.findFirst({
+    where: { clientId, fecha, estado: "ESPERANDO" },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!primero) return;
+
+  const hoy = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
+  const [, mm, dd] = fecha.split("-");
+  await db.outreachTarea.create({
+    data: {
+      clientId,
+      tipo: "aviso-lista-espera",
+      nombre: primero.nombre,
+      telefono: primero.telefono,
+      mensaje: `Hola ${primero.nombre.split(" ")[0]}! Se liberó un lugar para el ${dd}/${mm} que estabas esperando. ¿Lo querés? Avisanos y te lo reservamos 🙌`,
+      fechaProgramada: hoy,
+    },
+  });
+  await db.listaEspera.update({ where: { id: primero.id }, data: { estado: "AVISADO" } });
 }
 
 /** Como hasOverlap, pero ignorando el propio turno que se está moviendo. */

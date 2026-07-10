@@ -16,6 +16,7 @@ export type TareaData = {
 const TIPO_LABEL: Record<string, string> = {
   "recordatorio-turno": "Recordatorio de turno",
   "seguimiento-consulta": "Seguimiento",
+  "aviso-lista-espera": "Se liberó un lugar",
 };
 
 /** Normaliza un teléfono argentino a formato wa.me (solo dígitos, con 549). */
