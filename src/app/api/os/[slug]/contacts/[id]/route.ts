@@ -8,6 +8,7 @@ const patchSchema = z.object({
   phone: z.string().trim().max(50).nullable().optional(),
   email: z.string().trim().max(200).nullable().optional(),
   stage: z.string().trim().min(1).max(50).optional(),
+  temperatura: z.enum(["caliente", "tibio", "frio"]).optional(),
   notes: z.string().max(5000).nullable().optional(),
   custom: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
@@ -38,6 +39,7 @@ export async function PATCH(
       ...(d.phone !== undefined ? { phone: d.phone || null } : {}),
       ...(d.email !== undefined ? { email: d.email || null } : {}),
       ...(d.stage !== undefined ? { stage: d.stage } : {}),
+      ...(d.temperatura !== undefined ? { temperatura: d.temperatura } : {}),
       ...(d.notes !== undefined ? { notes: d.notes || null } : {}),
       ...(d.custom !== undefined ? { custom: cleanCustom(d.custom) } : {}),
       lastTouchAt: new Date(),

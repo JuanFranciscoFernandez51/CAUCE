@@ -12,14 +12,45 @@ export type BoardContact = {
   name: string;
   phone: string | null;
   stage: string;
+  temperatura: string;
   source: string | null;
   lastTouchAt: string | null;
 };
+
+/** Ciclo de temperatura al clic: caliente → tibio → frío → caliente. */
+const TEMPS = ["caliente", "tibio", "frio"] as const;
+const TEMP_UI: Record<string, { emoji: string; label: string }> = {
+  caliente: { emoji: "🔥", label: "Caliente" },
+  tibio: { emoji: "🟡", label: "Tibio" },
+  frio: { emoji: "🔵", label: "Frío" },
+};
+
+/** Teléfono argentino → formato wa.me. */
+function waNumber(tel: string): string {
+  let d = tel.replace(/\D/g, "");
+  if (d.startsWith("0")) d = d.slice(1);
+  if (!d.startsWith("54")) d = `54${d}`;
+  if (!d.startsWith("549")) d = `549${d.slice(2)}`;
+  return d;
+}
 
 export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardContact[] }) {
   const router = useRouter();
   const [movingId, setMovingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  async function cycleTemp(contact: BoardContact) {
+    const idx = TEMPS.indexOf(contact.temperatura as (typeof TEMPS)[number]);
+    const next = TEMPS[(idx + 1) % TEMPS.length];
+    setError("");
+    const res = await fetch(`/api/os/${slug}/contacts/${contact.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ temperatura: next }),
+    });
+    if (res.ok) router.refresh();
+    else setError("No se pudo cambiar la temperatura");
+  }
 
   async function moveStage(contact: BoardContact, dir: -1 | 1) {
     const idx = CRM_STAGES.indexOf(contact.stage as (typeof CRM_STAGES)[number]);
@@ -73,14 +104,35 @@ export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardCont
                     const busy = movingId === c.id;
                     return (
                       <Card key={c.id} className={`p-2.5 ${busy ? "opacity-50" : ""}`}>
-                        <Link
-                          href={`/os/${slug}/crm/${c.id}`}
-                          className="block truncate text-sm font-medium hover:text-primary hover:underline"
-                        >
-                          {c.name}
-                        </Link>
+                        <div className="flex items-start justify-between gap-1">
+                          <Link
+                            href={`/os/${slug}/crm/${c.id}`}
+                            className="block truncate text-sm font-medium hover:text-primary hover:underline"
+                          >
+                            {c.name}
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => void cycleTemp(c)}
+                            title={`${TEMP_UI[c.temperatura]?.label ?? "Tibio"} — clic para cambiar`}
+                            aria-label={`Temperatura de ${c.name}: ${TEMP_UI[c.temperatura]?.label ?? "tibio"}. Clic para cambiar.`}
+                            className="shrink-0 rounded px-1 text-sm hover:bg-muted"
+                          >
+                            {TEMP_UI[c.temperatura]?.emoji ?? "🟡"}
+                          </button>
+                        </div>
                         {c.phone ? (
-                          <p className="truncate text-xs text-muted-foreground">{c.phone}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            <a
+                              href={`https://wa.me/${waNumber(c.phone)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-success hover:underline"
+                              title="Abrir WhatsApp"
+                            >
+                              💬 {c.phone}
+                            </a>
+                          </p>
                         ) : null}
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                           {c.source === "bot" ? (

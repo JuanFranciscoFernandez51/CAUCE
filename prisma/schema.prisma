@@ -376,6 +376,7 @@ model Contact {
   phone       String?
   email       String?
   stage       String   @default("nuevo") // pipeline simple configurable
+  temperatura String   @default("tibio") // caliente | tibio | frio (urgencia comercial)
   source      String? // bot | manual | web
   notes       String?
   custom      Json? // campos custom del tenant

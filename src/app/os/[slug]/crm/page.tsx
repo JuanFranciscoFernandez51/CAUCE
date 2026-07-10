@@ -39,6 +39,7 @@ export default async function CrmPage({
       name: true,
       phone: true,
       stage: true,
+      temperatura: true,
       source: true,
       lastTouchAt: true,
     },
@@ -50,6 +51,7 @@ export default async function CrmPage({
     name: c.name,
     phone: c.phone,
     stage: c.stage,
+    temperatura: c.temperatura,
     source: c.source,
     lastTouchAt: c.lastTouchAt ? c.lastTouchAt.toISOString() : null,
   }));
