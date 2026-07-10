@@ -34,12 +34,16 @@ export default async function CatalogoPage({
       priceUsd: true,
       stock: true,
       minStock: true,
+      talles: true,
       active: true,
     },
   });
 
   const base = `/os/${tenant.slug}`;
-  const rows: CatalogProduct[] = products;
+  const rows: CatalogProduct[] = products.map((p) => ({
+    ...p,
+    talles: (p.talles as Record<string, number> | null) ?? null,
+  }));
 
   return (
     <div className="space-y-4">

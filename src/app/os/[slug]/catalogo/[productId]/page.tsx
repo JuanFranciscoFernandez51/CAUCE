@@ -27,6 +27,7 @@ export default async function EditarProductoPage({
       priceUsd: true,
       stock: true,
       minStock: true,
+      talles: true,
       custom: true,
     },
   });
@@ -50,6 +51,7 @@ export default async function EditarProductoPage({
           priceUsd: product.priceUsd,
           stock: product.stock,
           minStock: product.minStock,
+          talles: (product.talles as Record<string, number> | null) ?? null,
           custom: customToValues(product.custom),
         }}
       />

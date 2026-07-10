@@ -460,6 +460,7 @@ model Product {
   priceArs  Float?
   stock     Int      @default(0)
   minStock  Int      @default(0)
+  talles    Json? // stock por talle: { "S": 3, "M": 5 } — si existe, stock = suma
   photo     String?
   active    Boolean  @default(true)
   custom    Json?

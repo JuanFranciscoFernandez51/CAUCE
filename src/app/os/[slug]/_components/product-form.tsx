@@ -21,8 +21,11 @@ export type ProductFormInitial = {
   priceUsd: number | null;
   stock: number;
   minStock: number;
+  talles: Record<string, number> | null;
   custom: CustomValues;
 };
+
+type TalleRow = { talle: string; cantidad: string };
 
 /** Alta y edición de producto. Si viene `product`, hace PATCH; si no, POST. */
 export function ProductForm({
@@ -40,6 +43,13 @@ export function ProductForm({
   const [priceUsd, setPriceUsd] = useState(product?.priceUsd != null ? String(product.priceUsd) : "");
   const [stock, setStock] = useState(String(product?.stock ?? 0));
   const [minStock, setMinStock] = useState(String(product?.minStock ?? 0));
+  const [talles, setTalles] = useState<TalleRow[]>(
+    product?.talles
+      ? Object.entries(product.talles).map(([talle, cantidad]) => ({ talle, cantidad: String(cantidad) }))
+      : []
+  );
+  const usaTalles = talles.length > 0;
+  const stockPorTalles = talles.reduce((s, t) => s + (Number.parseInt(t.cantidad || "0", 10) || 0), 0);
   const [custom, setCustom] = useState<CustomValues>(product?.custom ?? {});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -83,8 +93,15 @@ export function ProductForm({
           name: name.trim(),
           priceArs: ars,
           priceUsd: usd,
-          stock: stockN,
+          stock: usaTalles ? stockPorTalles : stockN,
           minStock: minStockN,
+          talles: usaTalles
+            ? Object.fromEntries(
+                talles
+                  .filter((t) => t.talle.trim())
+                  .map((t) => [t.talle.trim().toUpperCase(), Number.parseInt(t.cantidad || "0", 10) || 0])
+              )
+            : null,
           custom,
         }),
       });
@@ -130,13 +147,17 @@ export function ProductForm({
           </Field>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Stock">
+          <Field
+            label={usaTalles ? "Stock (suma de talles)" : "Stock"}
+            help={usaTalles ? "Se calcula solo con los talles de abajo." : undefined}
+          >
             <Input
               type="number"
               min={0}
               step={1}
-              value={stock}
+              value={usaTalles ? String(stockPorTalles) : stock}
               onChange={(e) => setStock(e.target.value)}
+              disabled={usaTalles}
             />
           </Field>
           <Field label="Stock mínimo" help="Si el stock baja de acá, te avisamos con un badge.">
@@ -148,6 +169,62 @@ export function ProductForm({
               onChange={(e) => setMinStock(e.target.value)}
             />
           </Field>
+        </div>
+
+        {/* Stock por talle (ropa, cascos, calzado): cada talle con su cantidad. */}
+        <div className="rounded-md border p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-medium">Stock por talle</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setTalles((ts) => [...ts, { talle: "", cantidad: "0" }])}
+            >
+              + Talle
+            </Button>
+          </div>
+          {talles.length === 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Solo si el producto viene por talle (ropa, cascos). Si no, usá el stock de arriba.
+            </p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {talles.map((t, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Input
+                    value={t.talle}
+                    onChange={(e) =>
+                      setTalles((ts) => ts.map((x, j) => (j === i ? { ...x, talle: e.target.value } : x)))
+                    }
+                    placeholder="S / M / 42…"
+                    className="w-28"
+                    aria-label={`Talle ${i + 1}`}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={t.cantidad}
+                    onChange={(e) =>
+                      setTalles((ts) => ts.map((x, j) => (j === i ? { ...x, cantidad: e.target.value } : x)))
+                    }
+                    className="w-24"
+                    aria-label={`Cantidad talle ${t.talle || i + 1}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTalles((ts) => ts.filter((_, j) => j !== i))}
+                    aria-label={`Quitar talle ${t.talle || i + 1}`}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <CustomFieldsInputs defs={customDefs} values={custom} onChange={setCustom} />
         <div className="flex flex-wrap gap-2 pt-1">

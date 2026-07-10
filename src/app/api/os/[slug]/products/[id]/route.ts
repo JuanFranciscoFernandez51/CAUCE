@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardOsApi, cleanCustom } from "../../_guard";
@@ -9,6 +10,7 @@ const patchSchema = z.object({
   priceUsd: z.number().nonnegative("El precio no puede ser negativo").nullable().optional(),
   stock: z.number().int("El stock debe ser un entero").min(0).optional(),
   minStock: z.number().int("El mínimo debe ser un entero").min(0).optional(),
+  talles: z.record(z.string(), z.number().int().min(0)).nullable().optional(),
   photo: z.string().trim().max(500).nullable().optional(),
   active: z.boolean().optional(),
   custom: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
@@ -40,6 +42,13 @@ export async function PATCH(
       ...(d.priceArs !== undefined ? { priceArs: d.priceArs } : {}),
       ...(d.priceUsd !== undefined ? { priceUsd: d.priceUsd } : {}),
       ...(d.stock !== undefined ? { stock: d.stock } : {}),
+      // Con talles cargados, el stock total es SIEMPRE la suma de los talles.
+      ...(d.talles !== undefined
+        ? {
+            talles: d.talles === null ? Prisma.DbNull : d.talles,
+            stock: d.talles ? Object.values(d.talles).reduce((a, b) => a + b, 0) : (d.stock ?? 0),
+          }
+        : {}),
       ...(d.minStock !== undefined ? { minStock: d.minStock } : {}),
       ...(d.photo !== undefined ? { photo: d.photo || null } : {}),
       ...(d.active !== undefined ? { active: d.active } : {}),

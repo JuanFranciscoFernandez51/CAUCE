@@ -13,6 +13,7 @@ export type CatalogProduct = {
   priceUsd: number | null;
   stock: number;
   minStock: number;
+  talles: Record<string, number> | null;
   active: boolean;
 };
 
@@ -171,27 +172,47 @@ export function CatalogTable({
                   ) : null}
                 </Td>
                 <Td>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={drafts[p.id] ?? String(p.stock)}
-                      onChange={(e) => setDrafts((d) => ({ ...d, [p.id]: e.target.value }))}
-                      onBlur={() => commitStock(p)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") e.currentTarget.blur();
-                        if (e.key === "Escape") {
-                          setDrafts((d) => {
-                            const { [p.id]: _omit, ...rest } = d;
-                            return rest;
-                          });
-                        }
-                      }}
-                      disabled={busy}
-                      aria-label={`Stock de ${p.name}`}
-                      className="h-8 w-16 rounded-md border border-input bg-card px-2 text-sm tabular-nums text-card-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
-                    />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {p.talles ? (
+                      // Con talles, el total se edita entrando al producto.
+                      <Link
+                        href={`/os/${slug}/catalogo/${p.id}`}
+                        title="Editar stock por talle"
+                        className="flex flex-wrap items-center gap-1"
+                      >
+                        {Object.entries(p.talles).map(([t, n]) => (
+                          <span
+                            key={t}
+                            className={`rounded border px-1.5 py-0.5 font-mono text-xs tabular-nums ${
+                              n === 0 ? "text-destructive" : ""
+                            }`}
+                          >
+                            {t}:{n}
+                          </span>
+                        ))}
+                      </Link>
+                    ) : (
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={drafts[p.id] ?? String(p.stock)}
+                        onChange={(e) => setDrafts((d) => ({ ...d, [p.id]: e.target.value }))}
+                        onBlur={() => commitStock(p)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                          if (e.key === "Escape") {
+                            setDrafts((d) => {
+                              const { [p.id]: _omit, ...rest } = d;
+                              return rest;
+                            });
+                          }
+                        }}
+                        disabled={busy}
+                        aria-label={`Stock de ${p.name}`}
+                        className="h-8 w-16 rounded-md border border-input bg-card px-2 text-sm tabular-nums text-card-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
+                      />
+                    )}
                     {low ? <Badge variant="warning">Stock bajo</Badge> : null}
                   </div>
                 </Td>
