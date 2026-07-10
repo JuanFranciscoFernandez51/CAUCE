@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Tab = "saldos" | "mes" | "ano";
+type Tab = "dia" | "saldos" | "mes" | "ano";
 
 const TABS: { key: Tab; label: string }[] = [
+  { key: "dia", label: "Caja del día" },
   { key: "saldos", label: "Saldos" },
   { key: "mes", label: "Mes" },
   { key: "ano", label: "Año" },

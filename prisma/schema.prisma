@@ -92,6 +92,7 @@ model Client {
   employees    Employee[]
   timeEntries  TimeEntry[]
   cashMovements CashMovement[]
+  cajaDias     CajaDia[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -515,6 +516,38 @@ model CashMovement {
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+}
+
+// Arqueo de caja diario (patrón La Base): abrís con saldo inicial por moneda,
+// el día suma el efectivo que entra/sale, cerrás contando lo real y queda la
+// diferencia registrada. Un arqueo por día por cliente.
+model CajaDia {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fecha     String // "2026-07-08" (día argentino)
+  abiertaEl DateTime  @default(now())
+  cerradaEl DateTime?
+  usuario   String? // quién abrió/cerró
+
+  saldos CajaSaldo[]
+
+  @@unique([clientId, fecha])
+  @@index([clientId, fecha])
+}
+
+model CajaSaldo {
+  id           String  @id @default(cuid())
+  cajaDiaId    String
+  cajaDia      CajaDia @relation(fields: [cajaDiaId], references: [id], onDelete: Cascade)
+  moneda       String // ARS | USD
+  saldoInicial Float   @default(0)
+  ingresos     Float   @default(0) // efectivo entrado (foto al cierre)
+  egresos      Float   @default(0) // efectivo salido (foto al cierre)
+  contado      Float? // lo contado real al cerrar
+  diferencia   Float? // contado − esperado
+
+  @@unique([cajaDiaId, moneda])
 }
 
 // Módulo Finanzas — cuentas/billeteras del negocio con saldo propio

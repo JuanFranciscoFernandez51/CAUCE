@@ -10,7 +10,9 @@ import { storageAvailable } from "@/lib/storage";
 import { AccountsSection } from "../_components/finanzas/accounts-section";
 import { MonthSection } from "../_components/finanzas/month-section";
 import { YearSection } from "../_components/finanzas/year-section";
+import { ArqueoSection, type ArqueoHistItem } from "../_components/finanzas/arqueo-section";
 import { FinanzasTabs } from "../_components/finanzas/tabs";
+import { argDateStr, dayRange } from "../_lib/dates";
 import { fmtArs } from "../_components/money";
 
 const MONTH_RE = /^\d{4}-\d{2}$/;
@@ -93,7 +95,7 @@ export default async function CajaPage({
     );
   }
 
-  const tab = sp.tab === "mes" || sp.tab === "ano" ? sp.tab : "saldos";
+  const tab = sp.tab === "mes" || sp.tab === "ano" || sp.tab === "saldos" ? sp.tab : "dia";
   const month = sp.month && MONTH_RE.test(sp.month) ? sp.month : argMonthStr();
   const year = sp.year && YEAR_RE.test(sp.year) ? sp.year : argMonthStr().slice(0, 4);
   const accountFilter = sp.account || "";
@@ -111,6 +113,40 @@ export default async function CajaPage({
     .filter((a) => a.active && a.currency === "USD")
     .reduce((s, a) => s + a.balance, 0);
   const hasUsd = accounts.some((a) => a.currency === "USD");
+
+  // ── Arqueo del día (tab Caja del día) ──
+  const hoyStr = argDateStr();
+  const hoyRange = dayRange(hoyStr);
+  const [arqueoHoy, arqueoHist, efectivoMovs] = await Promise.all([
+    db.cajaDia.findUnique({
+      where: { clientId_fecha: { clientId: tenant.id, fecha: hoyStr } },
+      include: { saldos: true },
+    }),
+    db.cajaDia.findMany({
+      where: { clientId: tenant.id, cerradaEl: { not: null }, fecha: { not: hoyStr } },
+      include: { saldos: true },
+      orderBy: { fecha: "desc" },
+      take: 7,
+    }),
+    db.cashMovement.findMany({
+      where: { clientId: tenant.id, method: "efectivo", date: { gte: hoyRange.start, lt: hoyRange.end } },
+      select: { kind: true, amountArs: true },
+    }),
+  ]);
+  const efectivoHoy = totals(efectivoMovs);
+  const tieneUsd = accounts.some((a) => a.active && a.currency === "USD");
+  const historial: ArqueoHistItem[] = arqueoHist.map((h) => ({
+    fecha: h.fecha,
+    usuario: h.usuario,
+    saldos: h.saldos.map((s) => ({
+      moneda: s.moneda,
+      saldoInicial: s.saldoInicial,
+      ingresos: s.ingresos,
+      egresos: s.egresos,
+      contado: s.contado,
+      diferencia: s.diferencia,
+    })),
+  }));
 
   // ── Movimientos del mes (para tab Mes) ──
   const mRange = monthRange(month);
@@ -230,6 +266,32 @@ export default async function CajaPage({
       </div>
 
       <FinanzasTabs slug={tenant.slug} active={tab} month={month} year={year}>
+        {tab === "dia" ? (
+          <ArqueoSection
+            slug={tenant.slug}
+            hoy={
+              arqueoHoy
+                ? {
+                    fecha: arqueoHoy.fecha,
+                    abierta: true,
+                    cerrada: Boolean(arqueoHoy.cerradaEl),
+                    usuario: arqueoHoy.usuario,
+                    saldos: arqueoHoy.saldos.map((s) => ({
+                      moneda: s.moneda,
+                      saldoInicial: s.saldoInicial,
+                      ingresos: s.ingresos,
+                      egresos: s.egresos,
+                      contado: s.contado,
+                      diferencia: s.diferencia,
+                    })),
+                  }
+                : null
+            }
+            efectivoHoy={{ ingresos: efectivoHoy.ingresos, egresos: efectivoHoy.egresos }}
+            tieneUsd={tieneUsd}
+            historial={historial}
+          />
+        ) : null}
         {tab === "saldos" ? (
           <AccountsSection slug={tenant.slug} accounts={accountsLite} arsTotal={arsTotal} />
         ) : null}
