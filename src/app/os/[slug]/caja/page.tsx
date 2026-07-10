@@ -11,6 +11,7 @@ import { AccountsSection } from "../_components/finanzas/accounts-section";
 import { MonthSection } from "../_components/finanzas/month-section";
 import { YearSection } from "../_components/finanzas/year-section";
 import { ArqueoSection, type ArqueoHistItem } from "../_components/finanzas/arqueo-section";
+import { CostosSection } from "../_components/finanzas/costos-section";
 import { FinanzasTabs } from "../_components/finanzas/tabs";
 import { argDateStr, dayRange } from "../_lib/dates";
 import { fmtArs } from "../_components/money";
@@ -95,7 +96,10 @@ export default async function CajaPage({
     );
   }
 
-  const tab = sp.tab === "mes" || sp.tab === "ano" || sp.tab === "saldos" ? sp.tab : "dia";
+  const tab =
+    sp.tab === "mes" || sp.tab === "ano" || sp.tab === "saldos" || sp.tab === "costos"
+      ? sp.tab
+      : "dia";
   const month = sp.month && MONTH_RE.test(sp.month) ? sp.month : argMonthStr();
   const year = sp.year && YEAR_RE.test(sp.year) ? sp.year : argMonthStr().slice(0, 4);
   const accountFilter = sp.account || "";
@@ -135,6 +139,10 @@ export default async function CajaPage({
   ]);
   const efectivoHoy = totals(efectivoMovs);
   const tieneUsd = accounts.some((a) => a.active && a.currency === "USD");
+  const costosFijos = await db.costoFijo.findMany({
+    where: { clientId: tenant.id },
+    orderBy: [{ orden: "asc" }, { createdAt: "asc" }],
+  });
   const historial: ArqueoHistItem[] = arqueoHist.map((h) => ({
     fecha: h.fecha,
     usuario: h.usuario,
@@ -308,6 +316,14 @@ export default async function CajaPage({
         ) : null}
         {tab === "ano" ? (
           <YearSection slug={tenant.slug} year={year} months={months} totals={yearTotals} byMethod={byMethod} />
+        ) : null}
+        {tab === "costos" ? (
+          <CostosSection
+            slug={tenant.slug}
+            costos={costosFijos.map((c) => ({ id: c.id, concepto: c.concepto, montoArs: c.montoArs }))}
+            ingresosMes={monthTotals.ingresos}
+            mesLabel={month}
+          />
         ) : null}
       </FinanzasTabs>
     </div>

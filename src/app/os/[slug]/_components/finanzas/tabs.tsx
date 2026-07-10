@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Tab = "dia" | "saldos" | "mes" | "ano";
+type Tab = "dia" | "saldos" | "mes" | "ano" | "costos";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "dia", label: "Caja del día" },
   { key: "saldos", label: "Saldos" },
   { key: "mes", label: "Mes" },
   { key: "ano", label: "Año" },
+  { key: "costos", label: "Costos fijos" },
 ];
 
 /** Tabs de Finanzas: navegación por query param, preserva mes/año elegidos. */

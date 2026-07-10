@@ -95,6 +95,7 @@ model Client {
   cajaDias     CajaDia[]
   outreach     OutreachTarea[]
   listaEspera  ListaEspera[]
+  costosFijos  CostoFijo[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -519,6 +520,21 @@ model CashMovement {
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+}
+
+// Costos fijos del negocio (patrón MF/VB): alquiler, sueldos, servicios.
+// Contra el balance del mes dan el punto de equilibrio real.
+model CostoFijo {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  concepto  String // "Alquiler", "Sueldos", "Luz y gas"...
+  montoArs  Float
+  orden     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId, orden])
 }
 
 // Lista de espera (patrón La Base): cuando un día está lleno el cliente final
