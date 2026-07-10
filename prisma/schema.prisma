@@ -93,6 +93,7 @@ model Client {
   timeEntries  TimeEntry[]
   cashMovements CashMovement[]
   cajaDias     CajaDia[]
+  outreach     OutreachTarea[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -516,6 +517,34 @@ model CashMovement {
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+}
+
+// Outreach (patrón Motos Fernández): tareas de contacto generadas por los
+// procesos (cron diario) con el mensaje de WhatsApp pre-armado. El dueño
+// las despacha a 1 clic y quedan marcadas.
+enum OutreachEstado {
+  PROGRAMADA
+  ENVIADA
+  DESCARTADA
+}
+
+model OutreachTarea {
+  id              String         @id @default(cuid())
+  clientId        String
+  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tipo            String // "recordatorio-turno" | "seguimiento-consulta" | ...
+  contactId       String?
+  appointmentId   String?
+  nombre          String // a quién
+  telefono        String?
+  mensaje         String // texto exacto listo para mandar
+  fechaProgramada String // "2026-07-10" (día argentino)
+  estado          OutreachEstado @default(PROGRAMADA)
+  enviadaAt       DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([clientId, estado, fechaProgramada])
+  @@index([clientId, tipo, fechaProgramada])
 }
 
 // Arqueo de caja diario (patrón La Base): abrís con saldo inicial por moneda,

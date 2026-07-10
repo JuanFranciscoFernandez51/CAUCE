@@ -150,6 +150,7 @@ export default async function OsLayout({
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [
     { label: "Dashboard", href: base, icon: "🏁", exact: true },
+    { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
     ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(owner ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
