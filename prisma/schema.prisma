@@ -96,6 +96,7 @@ model Client {
   outreach     OutreachTarea[]
   listaEspera  ListaEspera[]
   costosFijos  CostoFijo[]
+  ordenesTrabajo OrdenTrabajo[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -389,6 +390,7 @@ model Contact {
   appointments Appointment[]
   tasks        CrmTask[]
   records      ContactRecord[]
+  ordenesTrabajo OrdenTrabajo[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -521,6 +523,42 @@ model CashMovement {
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+}
+
+// Taller — órdenes de trabajo (patrón MF/VB): ingreso → diagnóstico →
+// aprobado → en reparación → lista → entregada. Items de repuestos y mano
+// de obra, total/pagado/saldo, y aviso automático al cliente cuando está lista.
+enum OtEstado {
+  INGRESADA
+  EN_DIAGNOSTICO
+  APROBADA
+  EN_REPARACION
+  LISTA
+  ENTREGADA
+  CANCELADA
+}
+
+model OrdenTrabajo {
+  id            String   @id @default(cuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero        Int // secuencial por tenant (OT-0042)
+  contactId     String?
+  contact       Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  equipo        String // "Vespa Primavera 150 · AB123CD", "Bici MTB rodado 29"...
+  motivoIngreso String
+  diagnostico   String?
+  trabajos      String? // qué se le hizo
+  items         Json? // [{descripcion, cantidad, precioArs, tipo: "repuesto"|"mano_obra"}]
+  totalArs      Float    @default(0)
+  pagadoArs     Float    @default(0)
+  estado        OtEstado @default(INGRESADA)
+  entregadaAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
 }
 
 // Costos fijos del negocio (patrón MF/VB): alquiler, sueldos, servicios.

@@ -28,13 +28,14 @@ export type TenantCustomFields = {
   product?: CustomFieldDef[];
 };
 
-export const OS_MODULES = ["crm", "turnos", "catalogo", "rrhh", "caja", "proyectos", "sitio"] as const;
+export const OS_MODULES = ["crm", "turnos", "catalogo", "taller", "rrhh", "caja", "proyectos", "sitio"] as const;
 export type OsModule = (typeof OS_MODULES)[number];
 
 export const MODULE_LABELS: Record<OsModule, string> = {
   crm: "CRM",
   turnos: "Turnos & Agenda",
   catalogo: "Catálogo & Stock",
+  taller: "Taller",
   rrhh: "RRHH",
   caja: "Caja & Reportes",
   proyectos: "Proyectos",

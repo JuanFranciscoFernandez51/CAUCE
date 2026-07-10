@@ -116,6 +116,16 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
     rubros: ["tienda", "indument", "ropa", "ecommerce", "comercio", "bazar", "accesorio"],
   },
 
+  {
+    key: "trabajo-listo",
+    nombre: "Aviso de trabajo listo",
+    queHace:
+      "Cuando marcás una orden de trabajo como lista, el aviso al cliente aparece armado con el WhatsApp a un clic: 'tu equipo está para retirar'.",
+    cuando: "Cuando el trabajo está listo",
+    area: "ATENCION",
+    rubros: ["taller", "moto", "vespa", "scooter", "bici", "service", "mecanic", "reparac"],
+  },
+
   // ── Operaciones ────────────────────────────────────────
   {
     key: "stock-minimo",
