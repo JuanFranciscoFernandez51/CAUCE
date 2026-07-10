@@ -73,6 +73,7 @@ const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: str
   turnos: { path: "turnos", label: "Turnos & Agenda", icon: "📅" },
   catalogo: { path: "catalogo", label: "Catálogo & Stock", icon: "📦" },
   taller: { path: "taller", label: "Taller", icon: "🔧" },
+  ventas: { path: "ventas", label: "Ventas", icon: "🤝" },
   sitio: { path: "propiedades", label: "Propiedades", icon: "🏠" },
   proyectos: { path: "proyectos", label: "Proyectos", icon: "📁" },
   rrhh: { path: "rrhh", label: "RRHH", icon: "👥" },
@@ -80,7 +81,7 @@ const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: str
 };
 
 /** Orden de los módulos operativos dentro del grupo. */
-const OPS_ORDER: OsModule[] = ["turnos", "catalogo", "taller", "sitio", "proyectos", "rrhh", "caja"];
+const OPS_ORDER: OsModule[] = ["ventas", "turnos", "catalogo", "taller", "sitio", "proyectos", "rrhh", "caja"];
 
 export default async function OsLayout({
   children,

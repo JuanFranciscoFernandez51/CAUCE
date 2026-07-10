@@ -97,6 +97,7 @@ model Client {
   listaEspera  ListaEspera[]
   costosFijos  CostoFijo[]
   ordenesTrabajo OrdenTrabajo[]
+  ventas       Venta[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -391,6 +392,7 @@ model Contact {
   tasks        CrmTask[]
   records      ContactRecord[]
   ordenesTrabajo OrdenTrabajo[]
+  ventas       Venta[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -556,6 +558,38 @@ model OrdenTrabajo {
   entregadaAt   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
+}
+
+// Ventas (patrón MF): la operación grande con seña, permuta y cuotas.
+// El saldo vivo = precio − seña − permuta − pagos.
+enum VentaEstado {
+  SENADA
+  ENTREGADA
+  CANCELADA
+}
+
+model Venta {
+  id              String      @id @default(cuid())
+  clientId        String
+  client          Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero          Int // secuencial por tenant (V-0012)
+  contactId       String?
+  contact         Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  descripcion     String // "Vespa Primavera 150 0km roja"
+  precioArs       Float
+  senaArs         Float       @default(0)
+  permutaDetalle  String? // qué entregó en parte de pago
+  permutaValorArs Float       @default(0)
+  pagos           Json? // [{fecha: "2026-07-10", montoArs, medio}]
+  cuotas          Json? // {cantidad, valorArs, diaVencimiento} — financiación propia
+  estado          VentaEstado @default(SENADA)
+  entregadaAt     DateTime?
+  notas           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@unique([clientId, numero])
   @@index([clientId, estado])

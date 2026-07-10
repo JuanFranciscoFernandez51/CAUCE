@@ -95,6 +95,7 @@ export const DEFAULT_PRICING: PricingData = {
     turnos: { label: "Turnos & Agenda", monthlyUsd: 80 },
     catalogo: { label: "Catálogo & Stock", monthlyUsd: 90 },
     taller: { label: "Taller (órdenes de trabajo)", monthlyUsd: 90 },
+    ventas: { label: "Ventas (señas, permutas y cuotas)", monthlyUsd: 90 },
     rrhh: { label: "RRHH", monthlyUsd: 90 },
     caja: { label: "Caja & Reportes", monthlyUsd: 90 },
   },

@@ -24,6 +24,7 @@ const MODULE_BLURB: Record<OsModule, string> = {
   turnos: "Agenda online: tus clientes reservan solos y vos ves el día de un vistazo.",
   catalogo: "Tu catálogo y tu stock siempre al día, con precios y fotos.",
   taller: "Órdenes de trabajo del ingreso a la entrega, con aviso automático al cliente.",
+  ventas: "Ventas con seña, permuta y cuotas: cada operación con su saldo al día.",
   rrhh: "Tu equipo, sus horarios y sus fichadas, ordenados.",
   caja: "Ingresos, gastos y cuentas con reportes claros de cómo viene el mes.",
   proyectos: "Tus proyectos y tareas, de la propuesta a la entrega.",

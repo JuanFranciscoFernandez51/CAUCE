@@ -18,6 +18,7 @@ const TIPO_LABEL: Record<string, string> = {
   "seguimiento-consulta": "Seguimiento",
   "aviso-lista-espera": "Se liberó un lugar",
   "trabajo-listo": "Trabajo listo",
+  "aviso-cuota": "Cuota por vencer",
 };
 
 /** Normaliza un teléfono argentino a formato wa.me (solo dígitos, con 549). */

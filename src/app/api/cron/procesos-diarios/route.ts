@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { tenantBranding } from "@/lib/tenant";
 import { argDateStr, addDays, dayRange, fmtTime } from "@/app/os/[slug]/_lib/dates";
@@ -114,6 +115,42 @@ export async function GET(req: Request) {
         seguimientos++;
       }
       await db.proceso.update({ where: { id: pSeguimiento.id }, data: { ultimaCorrida: new Date() } });
+    }
+
+    // ── Aviso de cuotas (ventas con financiación propia) ──
+    const pCuotas = tiene("Aviso de cuotas");
+    if (pCuotas) {
+      const diaHoy = Number(hoy.slice(8, 10));
+      const ventas = await db.venta.findMany({
+        where: { clientId: c.id, estado: { not: "CANCELADA" }, cuotas: { not: Prisma.DbNull } },
+        include: { contact: { select: { id: true, name: true, phone: true } } },
+      });
+      const yaCreadas = await db.outreachTarea.findMany({
+        where: { clientId: c.id, tipo: "aviso-cuota", fechaProgramada: hoy },
+        select: { contactId: true },
+      });
+      const hechas = new Set(yaCreadas.map((t) => t.contactId));
+
+      for (const v of ventas) {
+        const cuotas = v.cuotas as { cantidad: number; valorArs: number; diaVencimiento: number } | null;
+        if (!cuotas || !v.contact || hechas.has(v.contact.id)) continue;
+        // Avisamos 3 días antes del vencimiento (con vuelta de mes simple).
+        const diasHasta = (cuotas.diaVencimiento - diaHoy + 31) % 31;
+        if (diasHasta !== 3) continue;
+        const mensaje = `Hola ${v.contact.name.split(" ")[0]}! Te recordamos que el ${cuotas.diaVencimiento} vence tu cuota de $${Math.round(cuotas.valorArs).toLocaleString("es-AR")} (${v.descripcion}). ¡Gracias! 🙌`;
+        await db.outreachTarea.create({
+          data: {
+            clientId: c.id,
+            tipo: "aviso-cuota",
+            contactId: v.contact.id,
+            nombre: v.contact.name,
+            telefono: v.contact.phone,
+            mensaje,
+            fechaProgramada: hoy,
+          },
+        });
+      }
+      await db.proceso.update({ where: { id: pCuotas.id }, data: { ultimaCorrida: new Date() } });
     }
 
     // Los procesos "de fondo" (CRM, resumen) también marcan que corrieron.
