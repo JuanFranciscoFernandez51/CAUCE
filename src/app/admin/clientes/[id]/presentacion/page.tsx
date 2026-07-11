@@ -25,6 +25,7 @@ const MODULE_BLURB: Record<OsModule, string> = {
   catalogo: "Tu catálogo y tu stock siempre al día, con precios y fotos.",
   taller: "Órdenes de trabajo del ingreso a la entrega, con aviso automático al cliente.",
   ventas: "Ventas con seña, permuta y cuotas: cada operación con su saldo al día.",
+  eventos: "Eventos con inscripción online, cronómetro y ranking en vivo.",
   rrhh: "Tu equipo, sus horarios y sus fichadas, ordenados.",
   caja: "Ingresos, gastos y cuentas con reportes claros de cómo viene el mes.",
   proyectos: "Tus proyectos y tareas, de la propuesta a la entrega.",

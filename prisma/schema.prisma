@@ -98,6 +98,7 @@ model Client {
   costosFijos  CostoFijo[]
   ordenesTrabajo OrdenTrabajo[]
   ventas       Venta[]
+  eventos      Evento[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -561,6 +562,44 @@ model OrdenTrabajo {
 
   @@unique([clientId, numero])
   @@index([clientId, estado])
+}
+
+// Eventos deportivos con cronometraje (patrón Vespa Club): inscripción
+// pública con número elegido, cronómetro con penalizaciones y ranking
+// en vivo en la web del negocio.
+model Evento {
+  id                    String   @id @default(cuid())
+  clientId              String
+  client                Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre                String // "1ª Gymkhana Oficial"
+  fecha                 String // "2026-08-15"
+  lugar                 String?
+  categorias            String[] @default([]) // ["Clásica", "Moderna", "Libre"]
+  cupo                  Int      @default(100)
+  inscripcionesAbiertas Boolean  @default(true)
+  activo                Boolean  @default(true) // el que se muestra en la web pública
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  competidores Competidor[]
+
+  @@index([clientId, activo])
+}
+
+model Competidor {
+  id        String   @id @default(cuid())
+  eventoId  String
+  evento    Evento   @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  numero    Int // 1-999, elegido por el piloto
+  nombre    String
+  telefono  String?
+  categoria String
+  intentos  Json     @default("[]") // [{ms, penalSeg, dsq}]
+  fuente    String   @default("admin") // admin | publica
+  createdAt DateTime @default(now())
+
+  @@unique([eventoId, numero])
+  @@index([eventoId])
 }
 
 // Ventas (patrón MF): la operación grande con seña, permuta y cuotas.
