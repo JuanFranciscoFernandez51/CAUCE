@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardOsApi } from "../../_guard";
+import { registrarActividad } from "@/lib/actividad";
 
 const itemSchema = z.object({
   descripcion: z.string().trim().min(1).max(300),
@@ -56,6 +57,10 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
       ...(d.pagadoArs !== undefined ? { pagadoArs: d.pagadoArs } : {}),
     },
   });
+
+  if (d.estado !== undefined && d.estado !== ot.estado) {
+    void registrarActividad(g.tenant.id, "ot_estado", `OT-${String(ot.numero).padStart(4, "0")} → ${d.estado}`);
+  }
 
   // Pasó a LISTA → aviso automático al cliente con el WhatsApp armado.
   if (d.estado === "LISTA" && ot.estado !== "LISTA" && ot.contact) {

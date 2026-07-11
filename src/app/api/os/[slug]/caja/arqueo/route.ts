@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { guardOsApi } from "../../_guard";
 import { resolveOsRole, isOsOwner } from "@/app/os/[slug]/_components/os-role";
 import { argDateStr, dayRange } from "@/app/os/[slug]/_lib/dates";
+import { registrarActividad } from "@/lib/actividad";
 
 const abrirSchema = z.object({
   action: z.literal("abrir"),
@@ -94,6 +95,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
       },
       include: { saldos: true },
     });
+    void registrarActividad(g.tenant.id, "caja_abierta", `Caja del ${fecha}`);
     return NextResponse.json({ ok: true, caja });
   }
 
@@ -130,5 +132,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
     data: { cerradaEl: new Date(), usuario },
     include: { saldos: true },
   });
+  void registrarActividad(g.tenant.id, "caja_cerrada", `Caja del ${fecha}`);
   return NextResponse.json({ ok: true, caja: cerrada });
 }

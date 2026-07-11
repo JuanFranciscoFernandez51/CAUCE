@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardOsApi } from "../../_guard";
 import { Prisma } from "@prisma/client";
+import { registrarActividad } from "@/lib/actividad";
 
 const pagoSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -52,6 +53,12 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
       ...(d.notas !== undefined ? { notas: d.notas || null } : {}),
     },
   });
+
+  if (d.estado === "ENTREGADA") {
+    void registrarActividad(g.tenant.id, "venta_entregada", `V-${String(venta.numero).padStart(4, "0")} ${venta.descripcion}`);
+  } else if (d.estado === "CANCELADA") {
+    void registrarActividad(g.tenant.id, "venta_cancelada", `V-${String(venta.numero).padStart(4, "0")} ${venta.descripcion}`);
+  }
 
   // La entrega concreta la venta: el contacto pasa a "cliente" en el CRM.
   if (d.estado === "ENTREGADA" && venta.contactId) {

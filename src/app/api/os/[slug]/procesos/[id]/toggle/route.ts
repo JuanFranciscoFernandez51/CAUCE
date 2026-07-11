@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { guardOsApi } from "../../../_guard";
 import { resolveOsRole, isOsOwner } from "@/app/os/[slug]/_components/os-role";
+import { registrarActividad } from "@/lib/actividad";
 
 /** Pausa/reactiva un proceso del cliente. Solo el dueño. */
 export async function POST(
@@ -23,5 +24,6 @@ export async function POST(
     where: { id: proceso.id },
     data: { estado: proceso.estado === "ACTIVO" ? "PAUSADO" : "ACTIVO" },
   });
+  void registrarActividad(g.tenant.id, "proceso_toggle", `${proceso.nombre} → ${updated.estado}`);
   return NextResponse.json({ ok: true, estado: updated.estado });
 }

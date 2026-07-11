@@ -157,6 +157,7 @@ export default async function OsLayout({
     ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(owner ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
+    ...(owner ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
     ...(owner
       ? [
           { label: "Configuración de la página", href: `${base}/config`, icon: "⚙️" },

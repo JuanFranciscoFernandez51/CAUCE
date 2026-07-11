@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardOsApi } from "../_guard";
+import { registrarActividad } from "@/lib/actividad";
 
 const createSchema = z.object({
   nombre: z.string().trim().min(1, "El nombre del cliente es obligatorio").max(200),
@@ -64,5 +65,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
       motivoIngreso: d.motivoIngreso,
     },
   });
+  void registrarActividad(g.tenant.id, "ot_creada", `OT-${String(ot.numero).padStart(4, "0")} ${d.equipo}`);
   return NextResponse.json({ ok: true, id: ot.id, numero: ot.numero }, { status: 201 });
 }

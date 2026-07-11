@@ -99,6 +99,7 @@ model Client {
   ordenesTrabajo OrdenTrabajo[]
   ventas       Venta[]
   eventos      Evento[]
+  actividad    Actividad[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -562,6 +563,20 @@ model OrdenTrabajo {
 
   @@unique([clientId, numero])
   @@index([clientId, estado])
+}
+
+// Actividad (patrón La Base): registro inmutable de acciones sensibles.
+// Quién hizo qué y cuándo — caja, ventas, taller, procesos, equipo.
+model Actividad {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  usuario   String?
+  accion    String // "caja_abierta" | "venta_entregada" | ...
+  detalle   String?
+  createdAt DateTime @default(now())
+
+  @@index([clientId, createdAt])
 }
 
 // Eventos deportivos con cronometraje (patrón Vespa Club): inscripción
