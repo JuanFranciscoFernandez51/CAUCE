@@ -74,6 +74,11 @@ export default async function OsHomePage({
   );
   const alerts = alertResults.filter((a): a is AlertResult => a !== null);
 
+  // Franja "hoy": mensajes por mandar (los genera el cron de procesos).
+  const mensajesPendientes = await db.outreachTarea
+    .count({ where: { clientId: tenant.id, estado: "PROGRAMADA" } })
+    .catch(() => 0);
+
   const alertToneCls: Record<NonNullable<AlertResult["tone"]>, string> = {
     default: "border-border",
     success: "border-success/40 bg-success/5",
@@ -99,6 +104,19 @@ export default async function OsHomePage({
           </div>
         ) : null}
       </div>
+
+      {mensajesPendientes > 0 ? (
+        <Link
+          href={`${base}/hoy`}
+          className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary-soft px-4 py-3 transition-opacity hover:opacity-90"
+        >
+          <p className="text-sm font-medium">
+            ☀️ Tenés <span className="font-bold">{mensajesPendientes}</span> mensaje
+            {mensajesPendientes === 1 ? "" : "s"} para mandar hoy — cada uno con el WhatsApp armado.
+          </p>
+          <span className="shrink-0 text-sm font-semibold text-primary">Ir a Para hoy →</span>
+        </Link>
+      ) : null}
 
       {kpiDefs.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
