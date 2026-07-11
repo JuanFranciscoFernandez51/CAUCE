@@ -16,11 +16,12 @@ import {
   fmtMonthLabel,
   fmtTime,
   monthGrid,
+  weekdayOf,
 } from "../_lib/dates";
 import { APPT_STATUS } from "../_lib/labels";
 import { MonthCalendar, type CalAppt } from "../_components/month-calendar";
 
-type Vista = "calendario" | "lista";
+type Vista = "calendario" | "semana" | "lista";
 
 export default async function TurnosPage({
   params,
@@ -38,7 +39,8 @@ export default async function TurnosPage({
   }
 
   const base = `/os/${tenant.slug}`;
-  const vista: Vista = sp.vista === "lista" ? "lista" : "calendario";
+  const vista: Vista =
+    sp.vista === "lista" ? "lista" : sp.vista === "semana" ? "semana" : "calendario";
   const today = argDateStr();
 
   // Recursos del tenant (empleados activos). Si no hay, no se muestra el filtro.
@@ -71,7 +73,11 @@ export default async function TurnosPage({
         <div>
           <h1 className="text-2xl font-semibold">Turnos &amp; Agenda</h1>
           <p className="text-sm text-muted-foreground">
-            {vista === "calendario" ? "Vista mensual de tus turnos." : "Agenda por día."}
+            {vista === "calendario"
+              ? "Vista mensual de tus turnos."
+              : vista === "semana"
+                ? "La semana de un vistazo, por recurso."
+                : "Agenda por día."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -98,6 +104,16 @@ export default async function TurnosPage({
             }`}
           >
             📅 Calendario
+          </Link>
+          <Link
+            href={withParams({ vista: "semana" })}
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+              vista === "semana"
+                ? "bg-primary text-primary-foreground"
+                : "bg-card text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            🗓️ Semana
           </Link>
           <Link
             href={withParams({ vista: "lista" })}
@@ -130,10 +146,130 @@ export default async function TurnosPage({
           today={today}
           withParams={withParams}
         />
+      ) : vista === "semana" ? (
+        <WeekView
+          slug={tenant.slug}
+          base={base}
+          where={apptWhere}
+          fecha={sp.fecha && /^\d{4}-\d{2}-\d{2}$/.test(sp.fecha) ? sp.fecha : today}
+          today={today}
+          withParams={withParams}
+        />
       ) : (
         <ListView slug={tenant.slug} where={apptWhere} today={today} />
       )}
     </div>
+  );
+}
+
+// ── Vista semanal (grilla Lun-Dom con chips por estado) ─────
+async function WeekView({
+  slug,
+  base,
+  where,
+  fecha,
+  today,
+  withParams,
+}: {
+  slug: string;
+  base: string;
+  where: { clientId: string; employeeId?: string };
+  fecha: string;
+  today: string;
+  withParams: (next: Partial<{ vista: Vista; fecha: string; recurso: string }>) => string;
+}) {
+  // Lunes de la semana de `fecha`.
+  const wd = weekdayOf(fecha); // 0=Dom … 6=Sáb
+  const lunes = addDays(fecha, wd === 0 ? -6 : 1 - wd);
+  const dias = Array.from({ length: 7 }, (_, i) => addDays(lunes, i));
+
+  const { start } = dayRange(dias[0]);
+  const { end } = dayRange(dias[6]);
+  const appts = await db.appointment.findMany({
+    where: { ...where, startsAt: { gte: start, lt: end }, status: { not: "CANCELLED" } },
+    orderBy: { startsAt: "asc" },
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      status: true,
+      contact: { select: { name: true } },
+      employee: { select: { name: true } },
+    },
+  });
+  const porDia = new Map<string, typeof appts>();
+  for (const a of appts) {
+    const d = argDateStr(a.startsAt);
+    porDia.set(d, [...(porDia.get(d) ?? []), a]);
+  }
+
+  const STATUS_CHIP: Record<string, string> = {
+    PENDING: "border-warning/50 bg-warning/10",
+    CONFIRMED: "border-primary/50 bg-primary-soft",
+    DONE: "border-success/50 bg-success/10",
+  };
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <ButtonLink href={withParams({ vista: "semana", fecha: addDays(lunes, -7) })} variant="ghost" size="sm">
+          ← Semana anterior
+        </ButtonLink>
+        <h2 className="text-sm font-semibold">
+          Semana del {dias[0].slice(8)}/{dias[0].slice(5, 7)} al {dias[6].slice(8)}/{dias[6].slice(5, 7)}
+        </h2>
+        <ButtonLink href={withParams({ vista: "semana", fecha: addDays(lunes, 7) })} variant="ghost" size="sm">
+          Semana siguiente →
+        </ButtonLink>
+      </div>
+
+      <div
+        className="grid gap-1.5 overflow-x-auto"
+        style={{ gridTemplateColumns: "repeat(7, minmax(130px, 1fr))" }}
+      >
+        {dias.map((d) => {
+          const turnos = porDia.get(d) ?? [];
+          const esHoy = d === today;
+          return (
+            <div
+              key={d}
+              className={`rounded-lg border p-1.5 ${esHoy ? "border-primary bg-primary-soft/40" : "bg-muted/40"}`}
+            >
+              <p className={`px-1 pb-1 text-xs font-semibold capitalize ${esHoy ? "text-primary" : "text-muted-foreground"}`}>
+                {fmtDayLabel(d)}
+              </p>
+              <div className="space-y-1">
+                {turnos.length === 0 ? (
+                  <p className="px-1 py-2 text-center text-[11px] text-muted-foreground">—</p>
+                ) : (
+                  turnos.map((t) => (
+                    <Link
+                      key={t.id}
+                      href={`${base}/turnos?vista=lista&fecha=${d}`}
+                      className={`block rounded border px-1.5 py-1 text-[11px] leading-tight transition-opacity hover:opacity-80 ${
+                        STATUS_CHIP[t.status] ?? "bg-card"
+                      }`}
+                      title={`${fmtTime(t.startsAt)} h · ${t.contact?.name ?? t.title}${t.employee ? ` · ${t.employee.name}` : ""} (${APPT_STATUS[t.status]?.label ?? t.status})`}
+                    >
+                      <span className="font-mono font-semibold tabular-nums">{fmtTime(t.startsAt)}</span>{" "}
+                      {t.contact?.name ?? t.title}
+                      {t.employee ? (
+                        <span className="block truncate text-muted-foreground">{t.employee.name}</span>
+                      ) : null}
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        <span className="mr-3">🟡 pendiente</span>
+        <span className="mr-3">🔵 confirmado</span>
+        <span>🟢 hecho</span> · Filtrá por recurso arriba para ver la semana de cada uno.
+      </p>
+    </section>
   );
 }
 
