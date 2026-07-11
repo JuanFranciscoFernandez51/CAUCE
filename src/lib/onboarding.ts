@@ -24,6 +24,7 @@ type RubroKey =
   | "tienda"
   | "taller"
   | "gimnasio"
+  | "club"
   | "generico";
 
 interface RubroProfile {
@@ -112,8 +113,8 @@ const PROFILES: RubroProfile[] = [
   },
   {
     key: "taller",
-    match: ["taller", "mecanic", "service", "scooter", "moto", "automotor", "vehicul", "gomeria", "chapa", "pintura", "lubricentro"],
-    modules: ["crm", "turnos", "caja", "sitio"],
+    match: ["taller", "mecanic", "service", "scooter", "moto", "automotor", "vehicul", "gomeria", "chapa", "pintura", "lubricentro", "bicicleter", "concesionar"],
+    modules: ["crm", "ventas", "taller", "turnos", "catalogo", "caja", "sitio"],
     servicios: [
       { nombre: "Service general", detalle: "Mantenimiento preventivo completo de tu vehículo." },
       { nombre: "Diagnóstico", detalle: "Detectamos la falla y te pasamos presupuesto claro." },
@@ -133,6 +134,18 @@ const PROFILES: RubroProfile[] = [
     ],
     sobre:
       "Vení a entrenar con nosotros. Reservá tu clase, sumate a la comunidad y recibí seguimiento para no aflojar.",
+  },
+  {
+    key: "club",
+    match: ["club", "evento", "carrera", "gymkhana", "competencia", "federacion", "asociacion"],
+    modules: ["crm", "eventos", "caja", "sitio"],
+    servicios: [
+      { nombre: "Eventos y fechas", detalle: "Calendario de encuentros y competencias del año." },
+      { nombre: "Inscripciones online", detalle: "Anotate desde el celular con tu número y categoría." },
+      { nombre: "Resultados en vivo", detalle: "Ranking actualizado al instante durante la fecha." },
+    ],
+    sobre:
+      "Una comunidad que se junta a correr y compartir. Mirá las próximas fechas, inscribite online y seguí los resultados en vivo.",
   },
 ];
 
