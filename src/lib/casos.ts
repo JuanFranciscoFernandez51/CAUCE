@@ -105,7 +105,7 @@ export type Shot = {
 };
 
 /** Slugs de tenants que destacamos como negocios reales, en orden. */
-export const NEGOCIOS_DESTACADOS = ["vespabahia"] as const;
+export const NEGOCIOS_DESTACADOS = ["vespabahia", "bahiamotos", "escuelaolas", "clubpiston"] as const;
 
 /**
  * Frase honesta de "qué se logró", derivada del rubro cuando no hay una a mano.

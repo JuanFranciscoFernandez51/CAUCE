@@ -12,7 +12,7 @@ import { uploadToTenant } from "../src/lib/storage";
 
 const db = new PrismaClient();
 const BASE = process.env.BASE ?? "http://localhost:3000";
-const DEFAULT = ["marenco-propiedades", "pulso-studio", "lume-studio", "clinicadentaliriarte", "distribuidoracarusomayorista"];
+const DEFAULT = ["vespabahia", "bahiamotos", "escuelaolas", "clubpiston"];
 
 type Shot = { titulo: string; grupo: "web" | "sistema"; url: string };
 
@@ -53,6 +53,7 @@ async function capturarTenant(ctx: BrowserContext, slug: string) {
   shots.push(await shot(ctx, slug, `/sitio/${slug}`, "Tu página web", "web"));
   if (mods.includes("sitio")) shots.push(await shot(ctx, slug, `/sitio/${slug}/propiedades`, "Tu catálogo online", "web"));
   if (mods.includes("turnos")) shots.push(await shot(ctx, slug, `/agendar/${slug}`, "Reserva de turnos online", "web"));
+  if (mods.includes("eventos")) shots.push(await shot(ctx, slug, `/evento/${slug}`, "Ranking en vivo del evento", "web"));
 
   // ── Cauce OS (sistema) ──
   shots.push(await shot(ctx, slug, `/os/${slug}`, "Tu panel de control", "sistema"));
@@ -60,6 +61,9 @@ async function capturarTenant(ctx: BrowserContext, slug: string) {
   if (mods.includes("proyectos")) shots.push(await shot(ctx, slug, `/os/${slug}/proyectos`, "Tus proyectos", "sistema"));
   else if (mods.includes("turnos")) shots.push(await shot(ctx, slug, `/os/${slug}/turnos`, "Tu agenda", "sistema"));
   else if (mods.includes("caja")) shots.push(await shot(ctx, slug, `/os/${slug}/caja`, "Tus finanzas", "sistema"));
+  if (mods.includes("ventas")) shots.push(await shot(ctx, slug, `/os/${slug}/ventas`, "Tus ventas y saldos", "sistema"));
+  if (mods.includes("taller")) shots.push(await shot(ctx, slug, `/os/${slug}/taller`, "Tu taller", "sistema"));
+  shots.push(await shot(ctx, slug, `/os/${slug}/hoy`, "Tu día armado", "sistema"));
 
   const ok = shots.filter((s): s is Shot => s !== null);
   const settings = (c.settings as Record<string, unknown> | null) ?? {};
