@@ -84,6 +84,11 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Propuesta comercial enviable: el cliente la abre y acepta sin sesión.
+  if (pathname.startsWith("/p/") || pathname.startsWith("/api/public/propuesta")) {
+    return NextResponse.next();
+  }
+
   // El manifest de la PWA debe ser público (el navegador lo lee sin cookies).
   // Solo expone nombre/color/íconos del tenant, nada sensible.
   if (pathname.endsWith("/manifest.webmanifest") || pathname === "/sw.js") {

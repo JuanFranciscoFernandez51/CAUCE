@@ -23,11 +23,16 @@ export function PresupuestoBuilder({
   procesos: ProcesoCatalogo[];
 }) {
   const [negocio, setNegocio] = useState("");
+  const [contacto, setContacto] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [pack, setPack] = useState<PackKey>("scale");
   const [mods, setMods] = useState<string[]>([]);
   const [procs, setProcs] = useState<string[]>([]);
   const [conIva, setConIva] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [propuestaUrl, setPropuestaUrl] = useState("");
+  const [generando, setGenerando] = useState(false);
+  const [genError, setGenError] = useState("");
 
   const p = pricing.packs[pack];
   const moduleEntries = Object.entries(pricing.modulePricing);
@@ -92,18 +97,65 @@ export function PresupuestoBuilder({
     setTimeout(() => setCopiado(false), 2000);
   }
 
+  /** Crea la propuesta enviable (link público con botón de aceptar). */
+  async function generarPropuesta() {
+    setGenerando(true);
+    setGenError("");
+    try {
+      const res = await fetch("/api/admin/propuestas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          negocio: negocio.trim() || "Tu negocio",
+          contactoNombre: contacto.trim(),
+          whatsapp: whatsapp.trim(),
+          pack: pack.toUpperCase(),
+          setupUsd: calc.aCotizar ? 0 : p.setupUsd ?? 0,
+          monthlyUsd: calc.aCotizar
+            ? 0
+            : (p.monthlyUsd ?? 0) +
+              (pack === "scale" || pack === "custom"
+                ? mods.reduce((acc, m) => acc + (pricing.modulePricing[m]?.monthlyUsd ?? 0), 0)
+                : 0),
+          dolarArs: pricing.dolarArs,
+          conIva,
+          ivaPct: pricing.ivaPct,
+          modulos: mods,
+          procesoKeys: procs,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo generar");
+      const url = `${window.location.origin}${data.url}`;
+      setPropuestaUrl(url);
+      await navigator.clipboard.writeText(url).catch(() => undefined);
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : "Error de conexión");
+    } finally {
+      setGenerando(false);
+    }
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       {/* Columna izquierda: elegir */}
       <div className="space-y-5">
         <Card className="p-5">
-          <Field label="Negocio" help="Para el encabezado del presupuesto.">
-            <Input
-              value={negocio}
-              onChange={(e) => setNegocio(e.target.value)}
-              placeholder="Ej: Bicicletería Ruta 3"
-            />
-          </Field>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Negocio" help="Para el encabezado.">
+              <Input
+                value={negocio}
+                onChange={(e) => setNegocio(e.target.value)}
+                placeholder="Ej: Bicicletería Ruta 3"
+              />
+            </Field>
+            <Field label="Contacto">
+              <Input value={contacto} onChange={(e) => setContacto(e.target.value)} placeholder="Nombre" />
+            </Field>
+            <Field label="WhatsApp">
+              <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="291..." />
+            </Field>
+          </div>
         </Card>
 
         <Card className="p-5">
@@ -222,6 +274,26 @@ export function PresupuestoBuilder({
           <p className="mt-2 text-xs text-muted-foreground">
             Dólar de referencia: ${pricing.dolarArs.toLocaleString("es-AR")} (se cambia en Configuración).
           </p>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="mb-1 font-semibold">Propuesta enviable</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Un link con esta propuesta y botón de aceptar. Si el cliente la abre o acepta, lo ves
+            en Propuestas.
+          </p>
+          <Button size="sm" variant="secondary" onClick={() => void generarPropuesta()} disabled={generando}>
+            {generando ? "Generando…" : "🔗 Generar link de propuesta"}
+          </Button>
+          {propuestaUrl ? (
+            <p className="mt-2 break-all rounded-md bg-muted/50 px-3 py-2 text-xs">
+              Copiado ✓ —{" "}
+              <a href={propuestaUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                {propuestaUrl}
+              </a>
+            </p>
+          ) : null}
+          {genError ? <p className="mt-2 text-xs text-destructive">{genError}</p> : null}
         </Card>
 
         <Card className="p-5">

@@ -565,6 +565,41 @@ model OrdenTrabajo {
   @@index([clientId, estado])
 }
 
+// Propuesta comercial enviable: link público con el presupuesto armado
+// y botón de aceptar. Cuando el cliente la abre queda VISTA; si acepta,
+// entra como lead ganado al pipeline de Cauce.
+enum PropuestaEstado {
+  ENVIADA
+  VISTA
+  ACEPTADA
+  RECHAZADA
+}
+
+model Propuesta {
+  id             String          @id @default(cuid())
+  token          String          @unique @default(cuid()) // /p/<token>
+  negocio        String
+  contactoNombre String?
+  whatsapp       String?
+  rubro          String?
+  pack           Pack
+  setupUsd       Float
+  monthlyUsd     Float
+  dolarArs       Float           @default(0) // cotización al momento de armarla
+  conIva         Boolean         @default(false)
+  ivaPct         Float           @default(21)
+  modulos        String[]        @default([])
+  procesoKeys    String[]        @default([])
+  nota           String?
+  estado         PropuestaEstado @default(ENVIADA)
+  vistaAt        DateTime?
+  respondidaAt   DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([estado, createdAt])
+}
+
 // Actividad (patrón La Base): registro inmutable de acciones sensibles.
 // Quién hizo qué y cuándo — caja, ventas, taller, procesos, equipo.
 model Actividad {
