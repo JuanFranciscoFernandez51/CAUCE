@@ -112,9 +112,46 @@ export default function EstilosPage() {
         </div>
       </section>
 
-      {/* 3 — Densidad */}
+      {/* 3 — Secciones del menú */}
       <section className="space-y-3">
-        <h2 className="font-semibold">3 · Densidad — cuánta info por pantalla</h2>
+        <h2 className="font-semibold">3 · Secciones del menú — cómo se agrupan las pestañas</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <figure>
+            <div className="flex h-36 w-full overflow-hidden rounded-lg border bg-background" aria-hidden>
+              <div className="flex w-24 shrink-0 flex-col gap-1 border-r bg-card p-1.5 text-[9px]">
+                <div className="h-2 w-2/3 rounded bg-muted" />
+                <div className="flex items-center justify-between rounded bg-primary/15 px-1 py-0.5 font-semibold">Operaciones <span>›</span></div>
+                <div className="h-2 w-2/3 rounded bg-muted" />
+                <div className="h-2 w-1/2 rounded bg-muted" />
+              </div>
+              <div className="flex-1 p-2"><div className="h-full rounded border bg-card" /></div>
+            </div>
+            <figcaption className="mt-2">
+              <p className="text-sm font-semibold">Desplegables</p>
+              <p className="text-xs text-muted-foreground">«Operaciones» es una pestaña que se abre al tocar y muestra todo lo suyo adentro. Menú corto y limpio.</p>
+            </figcaption>
+          </figure>
+          <figure>
+            <div className="flex h-36 w-full overflow-hidden rounded-lg border bg-background" aria-hidden>
+              <div className="flex w-24 shrink-0 flex-col gap-1 border-r bg-card p-1.5 text-[9px]">
+                <div className="h-2 w-2/3 rounded bg-muted" />
+                <div className="font-semibold uppercase text-muted-foreground">Operaciones</div>
+                {[1,2,3].map((i) => <div key={i} className="ml-1 h-2 w-2/3 rounded bg-muted" />)}
+                <div className="h-2 w-1/2 rounded bg-muted" />
+              </div>
+              <div className="flex-1 p-2"><div className="h-full rounded border bg-card" /></div>
+            </div>
+            <figcaption className="mt-2">
+              <p className="text-sm font-semibold">Siempre abiertas</p>
+              <p className="text-xs text-muted-foreground">Todas las secciones a la vista, todo a un clic. Para equipos que usan todo, todos los días.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      {/* 4 — Densidad */}
+      <section className="space-y-3">
+        <h2 className="font-semibold">4 · Densidad — cuánta info por pantalla</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {[
             { label: "Cómoda", detalle: "Más aire. Fácil de leer, ideal en el celular.", compacta: false },

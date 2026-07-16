@@ -64,12 +64,15 @@ export type TenantEstilo = {
   esquinas: "rectas" | "suaves" | "redondeadas";
   nav: "izquierda" | "arriba";
   densidad: "comoda" | "compacta";
+  /** Grupos del menú (ej. Operaciones): siempre abiertos o desplegables. */
+  grupos: "abierto" | "desplegable";
 };
 
 export const ESTILO_DEFAULT: TenantEstilo = {
   esquinas: "suaves",
   nav: "izquierda",
   densidad: "comoda",
+  grupos: "desplegable",
 };
 
 /** Estilo elegido por el tenant (branding.estilo), con defaults sanos. */
@@ -80,6 +83,7 @@ export function tenantEstilo(client: Client): TenantEstilo {
     esquinas: e.esquinas === "rectas" || e.esquinas === "redondeadas" ? e.esquinas : "suaves",
     nav: e.nav === "arriba" ? "arriba" : "izquierda",
     densidad: e.densidad === "compacta" ? "compacta" : "comoda",
+    grupos: e.grupos === "abierto" ? "abierto" : "desplegable",
   };
 }
 

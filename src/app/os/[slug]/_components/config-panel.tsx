@@ -21,6 +21,7 @@ type Estilo = {
   esquinas: "rectas" | "suaves" | "redondeadas";
   nav: "izquierda" | "arriba";
   densidad: "comoda" | "compacta";
+  grupos: "abierto" | "desplegable";
 };
 type Branding = { displayName: string; primary: string; accent: string; estilo: Estilo };
 
@@ -304,6 +305,17 @@ export function BrandingSection({ slug, initial }: { slug: string; initial: Bran
             >
               <option value="izquierda">A la izquierda</option>
               <option value="arriba">Arriba</option>
+            </Select>
+          </Field>
+          <Field label="Secciones del menú" help="Cómo se comporta el grupo Operaciones.">
+            <Select
+              value={form.estilo.grupos}
+              onChange={(e) =>
+                setForm({ ...form, estilo: { ...form.estilo, grupos: e.target.value as Estilo["grupos"] } })
+              }
+            >
+              <option value="desplegable">Desplegables (se abren al tocar)</option>
+              <option value="abierto">Siempre abiertas</option>
             </Select>
           </Field>
           <Field label="Densidad" help="Cuánta información por pantalla.">

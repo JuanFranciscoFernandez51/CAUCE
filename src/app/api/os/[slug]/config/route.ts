@@ -15,6 +15,7 @@ const schema = z.object({
       esquinas: z.enum(["rectas", "suaves", "redondeadas"]),
       nav: z.enum(["izquierda", "arriba"]),
       densidad: z.enum(["comoda", "compacta"]),
+      grupos: z.enum(["abierto", "desplegable"]),
     })
     .optional(),
 });

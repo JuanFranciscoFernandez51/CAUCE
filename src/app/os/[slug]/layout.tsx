@@ -191,6 +191,7 @@ export default async function OsLayout({
         initial={branding.displayName.charAt(0).toUpperCase()}
         nav={nav}
         posicion={estilo.nav}
+        grupos={estilo.grupos}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>

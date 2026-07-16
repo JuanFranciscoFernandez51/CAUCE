@@ -31,15 +31,26 @@ export function OsSidebar({
   initial,
   nav,
   posicion = "izquierda",
+  grupos = "desplegable",
 }: {
   displayName: string;
   logo: string | null;
   initial: string;
   nav: NavEntry[];
   posicion?: "izquierda" | "arriba";
+  grupos?: "abierto" | "desplegable";
 }) {
   const [open, setOpen] = useState(false); // drawer en mobile
   const active = useActive();
+
+  // Grupos desplegables: arrancan abiertos solo si tienen la página activa.
+  const [abiertos, setAbiertos] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const e of nav) {
+      if (isGroup(e)) init[e.label] = e.items.some((it) => active(it.href, it.exact));
+    }
+    return init;
+  });
 
   const brand = (
     <div className="flex items-center gap-2.5 px-3 py-4">
@@ -78,21 +89,57 @@ export function OsSidebar({
 
   const navContent = (
     <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
-      {nav.map((e) =>
-        isGroup(e) ? (
-          <div key={e.label} className="mt-3">
-            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <span className="mr-1.5" aria-hidden>
+      {nav.map((e) => {
+        if (!isGroup(e)) return link(e);
+
+        if (grupos === "abierto") {
+          return (
+            <div key={e.label} className="mt-3">
+              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="mr-1.5" aria-hidden>
+                  {e.icon}
+                </span>
+                {e.label}
+              </p>
+              <div className="flex flex-col gap-0.5">{e.items.map(link)}</div>
+            </div>
+          );
+        }
+
+        // Grupo desplegable: una pestaña que se abre/cierra con todo lo suyo.
+        const abierto = abiertos[e.label] ?? false;
+        const hijoActivo = e.items.some((it) => active(it.href, it.exact));
+        return (
+          <div key={e.label} className="mt-1">
+            <button
+              type="button"
+              onClick={() => setAbiertos((a) => ({ ...a, [e.label]: !abierto }))}
+              aria-expanded={abierto}
+              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                hijoActivo && !abierto
+                  ? "bg-primary-soft text-foreground"
+                  : "text-muted-foreground hover:bg-primary-soft hover:text-foreground"
+              }`}
+            >
+              <span className="w-5 shrink-0 text-center" aria-hidden>
                 {e.icon}
               </span>
-              {e.label}
-            </p>
-            <div className="flex flex-col gap-0.5">{e.items.map(link)}</div>
+              <span className="flex-1 truncate text-left">{e.label}</span>
+              <span
+                aria-hidden
+                className={`shrink-0 text-xs transition-transform ${abierto ? "rotate-90" : ""}`}
+              >
+                ›
+              </span>
+            </button>
+            {abierto ? (
+              <div className="ml-3 mt-0.5 flex flex-col gap-0.5 border-l pl-2">
+                {e.items.map(link)}
+              </div>
+            ) : null}
           </div>
-        ) : (
-          link(e)
-        )
-      )}
+        );
+      })}
     </nav>
   );
 
