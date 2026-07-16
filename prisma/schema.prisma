@@ -100,6 +100,7 @@ model Client {
   ventas       Venta[]
   eventos      Evento[]
   actividad    Actividad[]
+  presupuestosTaller PresupuestoTaller[]
   accounts     Account[]
   records      ContactRecord[]
   attachments  Attachment[]
@@ -395,6 +396,7 @@ model Contact {
   records      ContactRecord[]
   ordenesTrabajo OrdenTrabajo[]
   ventas       Venta[]
+  presupuestosTaller PresupuestoTaller[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -679,6 +681,36 @@ model Venta {
   notas           String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
+}
+
+// Presupuestos del taller (patrón MF): cotizar SIN ingresar el equipo.
+// Si el cliente acepta, se convierte en OT con un clic (items incluidos).
+enum PresupuestoEstado {
+  BORRADOR
+  ENVIADO
+  ACEPTADO
+  RECHAZADO
+}
+
+model PresupuestoTaller {
+  id          String            @id @default(cuid())
+  clientId    String
+  client      Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero      Int // P-0007, secuencial por tenant
+  contactId   String?
+  contact     Contact?          @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  equipo      String
+  detalle     String // qué se cotiza
+  items       Json? // [{descripcion, cantidad, precioArs, tipo}]
+  totalArs    Float             @default(0)
+  validezDias Int               @default(15)
+  estado      PresupuestoEstado @default(BORRADOR)
+  otId        String? // OT generada al aceptar
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@unique([clientId, numero])
   @@index([clientId, estado])

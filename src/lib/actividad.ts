@@ -16,6 +16,8 @@ export const ACCION_LABELS: Record<string, string> = {
   usuario_creado: "Creó un usuario",
   usuario_borrado: "Quitó un acceso",
   marca_editada: "Cambió la marca del sistema",
+  presupuesto_creado: "Creó un presupuesto",
+  presupuesto_aceptado: "Presupuesto aceptado (pasó a OT)",
 };
 
 /**

@@ -59,9 +59,14 @@ export default async function TallerPage({
             Órdenes de trabajo: del ingreso a la entrega, con el aviso al cliente automático.
           </p>
         </div>
-        <ButtonLink href={`${base}/nueva`} size="sm">
-          + Ingreso
-        </ButtonLink>
+        <div className="flex flex-wrap gap-2">
+          <ButtonLink href={`${base}/presupuestos`} variant="secondary" size="sm">
+            🧾 Presupuestos
+          </ButtonLink>
+          <ButtonLink href={`${base}/nueva`} size="sm">
+            + Ingreso
+          </ButtonLink>
+        </div>
       </div>
 
       <div className="-mx-1 flex items-center gap-1 overflow-x-auto border-b pb-px">

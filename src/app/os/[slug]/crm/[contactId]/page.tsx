@@ -155,6 +155,14 @@ export default async function ContactoDetallePage({
             🔧 Ingreso al taller
           </Link>
         ) : null}
+        {hasModule(tenant, "taller") ? (
+          <Link
+            href={`${base}/taller/presupuestos/nuevo?${prefill}`}
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            🧾 Presupuesto
+          </Link>
+        ) : null}
         {hasModule(tenant, "turnos") ? (
           <Link
             href={`${base}/turnos/nuevo`}
