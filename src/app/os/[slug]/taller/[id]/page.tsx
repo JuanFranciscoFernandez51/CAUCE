@@ -7,6 +7,7 @@ import { ModuleDisabled } from "../../_components/module-disabled";
 import { fmtDateShort } from "../../_lib/dates";
 import { OT_ESTADOS } from "../estados";
 import { OtDetail, type OtData } from "./ot-detail";
+import { Adjuntos, type AdjuntoData } from "../../_components/adjuntos";
 
 export default async function OtPage({
   params,
@@ -25,6 +26,13 @@ export default async function OtPage({
     include: { contact: { select: { id: true, name: true, phone: true } } },
   });
   if (!ot) notFound();
+
+  const adjuntos: AdjuntoData[] = (
+    await db.attachment.findMany({
+      where: { clientId: tenant.id, refType: "ot", refId: ot.id },
+      orderBy: { createdAt: "asc" },
+    })
+  ).map((a) => ({ id: a.id, url: a.url, name: a.name, mime: a.mime }));
 
   const e = OT_ESTADOS[ot.estado];
   const data: OtData = {
@@ -72,6 +80,15 @@ export default async function OtPage({
       </div>
 
       <OtDetail slug={tenant.slug} ot={data} />
+
+      <Adjuntos
+        slug={tenant.slug}
+        refType="ot"
+        refId={ot.id}
+        titulo="Fotos y archivos del trabajo"
+        ayuda="Cómo entró el equipo, el diagnóstico, los repuestos: todo queda en la OT."
+        adjuntos={adjuntos}
+      />
     </div>
   );
 }

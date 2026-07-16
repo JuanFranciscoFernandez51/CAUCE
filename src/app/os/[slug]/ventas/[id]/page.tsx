@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui";
 import { ModuleDisabled } from "../../_components/module-disabled";
 import { fmtDateShort } from "../../_lib/dates";
 import { VentaDetail, type VentaData } from "./venta-detail";
+import { Adjuntos, type AdjuntoData } from "../../_components/adjuntos";
 import type { PagoVenta } from "../saldo";
 
 const ESTADOS: Record<string, { label: string; variant: "default" | "success" | "warning" | "destructive" }> = {
@@ -31,6 +32,13 @@ export default async function VentaPage({
     include: { contact: { select: { id: true, name: true, phone: true } } },
   });
   if (!venta) notFound();
+
+  const adjuntos: AdjuntoData[] = (
+    await db.attachment.findMany({
+      where: { clientId: tenant.id, refType: "venta", refId: venta.id },
+      orderBy: { createdAt: "asc" },
+    })
+  ).map((a) => ({ id: a.id, url: a.url, name: a.name, mime: a.mime }));
 
   const e = ESTADOS[venta.estado];
   const data: VentaData = {
@@ -81,6 +89,15 @@ export default async function VentaPage({
       </div>
 
       <VentaDetail slug={tenant.slug} venta={data} />
+
+      <Adjuntos
+        slug={tenant.slug}
+        refType="venta"
+        refId={venta.id}
+        titulo="Comprobantes y documentación"
+        ayuda="Transferencias, boleto firmado, DNI, título: todo lo de la operación, junto."
+        adjuntos={adjuntos}
+      />
     </div>
   );
 }

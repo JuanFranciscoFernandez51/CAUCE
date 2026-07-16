@@ -828,6 +828,9 @@ model Attachment {
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   recordId  String?
   record    ContactRecord? @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  // Adjunto genérico: cuelga de cualquier entidad del OS por referencia.
+  refType   String? // "ot" | "venta" | "contact" | ...
+  refId     String?
   url       String
   publicId  String? // id en Cloudinary (para borrar)
   name      String
@@ -837,6 +840,7 @@ model Attachment {
 
   @@index([clientId])
   @@index([recordId])
+  @@index([clientId, refType, refId])
 }
 
 // Propiedades de la inmobiliaria (catálogo público). Reutilizable como listing genérico.
