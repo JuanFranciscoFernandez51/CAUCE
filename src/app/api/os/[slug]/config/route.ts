@@ -10,6 +10,13 @@ const schema = z.object({
   displayName: z.string().trim().min(1).max(80),
   primary: hex,
   accent: hex,
+  estilo: z
+    .object({
+      esquinas: z.enum(["rectas", "suaves", "redondeadas"]),
+      nav: z.enum(["izquierda", "arriba"]),
+      densidad: z.enum(["comoda", "compacta"]),
+    })
+    .optional(),
 });
 
 /** Editar la marca del tenant (nombre visible + colores). Solo el dueño. */
@@ -42,6 +49,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ slug: string }>
         displayName: parsed.data.displayName,
         primary: parsed.data.primary,
         accent: parsed.data.accent,
+        ...(parsed.data.estilo ? { estilo: parsed.data.estilo } : {}),
       },
     },
   });

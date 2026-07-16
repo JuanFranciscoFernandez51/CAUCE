@@ -59,6 +59,30 @@ export function tenantBranding(client: Client): Required<TenantBranding> {
   };
 }
 
+// ── Estilo del sistema: las "terminaciones" que elige cada cliente ──
+export type TenantEstilo = {
+  esquinas: "rectas" | "suaves" | "redondeadas";
+  nav: "izquierda" | "arriba";
+  densidad: "comoda" | "compacta";
+};
+
+export const ESTILO_DEFAULT: TenantEstilo = {
+  esquinas: "suaves",
+  nav: "izquierda",
+  densidad: "comoda",
+};
+
+/** Estilo elegido por el tenant (branding.estilo), con defaults sanos. */
+export function tenantEstilo(client: Client): TenantEstilo {
+  const b = (client.branding as (TenantBranding & { estilo?: Partial<TenantEstilo> }) | null) ?? {};
+  const e = b.estilo ?? {};
+  return {
+    esquinas: e.esquinas === "rectas" || e.esquinas === "redondeadas" ? e.esquinas : "suaves",
+    nav: e.nav === "arriba" ? "arriba" : "izquierda",
+    densidad: e.densidad === "compacta" ? "compacta" : "comoda",
+  };
+}
+
 export function tenantModules(client: Client): OsModule[] {
   return (client.modules as OsModule[]).filter((m) => OS_MODULES.includes(m));
 }

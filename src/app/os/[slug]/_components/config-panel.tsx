@@ -17,7 +17,12 @@ import {
 } from "@/components/ui";
 
 type OsUser = { id: string; name: string; username: string; osRole: string; createdAt: string };
-type Branding = { displayName: string; primary: string; accent: string };
+type Estilo = {
+  esquinas: "rectas" | "suaves" | "redondeadas";
+  nav: "izquierda" | "arriba";
+  densidad: "comoda" | "compacta";
+};
+type Branding = { displayName: string; primary: string; accent: string; estilo: Estilo };
 
 export function ConfigPanel({
   slug,
@@ -275,6 +280,45 @@ export function BrandingSection({ slug, initial }: { slug: string; initial: Bran
         </Field>
         {colorRow("primary", "Color principal")}
         {colorRow("accent", "Color de acento")}
+
+        {/* Las terminaciones: cómo se ve y se acomoda el sistema */}
+        <div className="sm:col-span-3 grid gap-4 border-t pt-4 sm:grid-cols-3">
+          <Field label="Esquinas" help="El acabado de tarjetas y botones.">
+            <Select
+              value={form.estilo.esquinas}
+              onChange={(e) =>
+                setForm({ ...form, estilo: { ...form.estilo, esquinas: e.target.value as Estilo["esquinas"] } })
+              }
+            >
+              <option value="rectas">Rectas (sobrio)</option>
+              <option value="suaves">Suaves (equilibrado)</option>
+              <option value="redondeadas">Redondeadas (amigable)</option>
+            </Select>
+          </Field>
+          <Field label="Menú" help="Dónde vive la navegación.">
+            <Select
+              value={form.estilo.nav}
+              onChange={(e) =>
+                setForm({ ...form, estilo: { ...form.estilo, nav: e.target.value as Estilo["nav"] } })
+              }
+            >
+              <option value="izquierda">A la izquierda</option>
+              <option value="arriba">Arriba</option>
+            </Select>
+          </Field>
+          <Field label="Densidad" help="Cuánta información por pantalla.">
+            <Select
+              value={form.estilo.densidad}
+              onChange={(e) =>
+                setForm({ ...form, estilo: { ...form.estilo, densidad: e.target.value as Estilo["densidad"] } })
+              }
+            >
+              <option value="comoda">Cómoda (más aire)</option>
+              <option value="compacta">Compacta (más info)</option>
+            </Select>
+          </Field>
+        </div>
+
         <div className="flex items-center gap-3 sm:col-span-3">
           <Button type="submit" disabled={busy} size="sm">
             {busy ? <Spinner /> : null} Guardar marca

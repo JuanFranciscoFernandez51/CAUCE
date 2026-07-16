@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getTenantBySlug, tenantBranding } from "@/lib/tenant";
+import { getTenantBySlug, tenantBranding, tenantEstilo } from "@/lib/tenant";
 import { resolveOsRole, isOsOwner } from "../_components/os-role";
 import { ModuleDisabled } from "../_components/module-disabled";
 import { BrandingSection } from "../_components/config-panel";
@@ -37,7 +37,12 @@ export default async function ConfigPage({ params }: { params: Promise<{ slug: s
       </div>
       <BrandingSection
         slug={slug}
-        initial={{ displayName: brandingRaw.displayName, primary: brandingRaw.primary, accent: brandingRaw.accent }}
+        initial={{
+          displayName: brandingRaw.displayName,
+          primary: brandingRaw.primary,
+          accent: brandingRaw.accent,
+          estilo: tenantEstilo(tenant),
+        }}
       />
     </div>
   );

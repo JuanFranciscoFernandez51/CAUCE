@@ -15,6 +15,7 @@ const NAV = [
   { href: "/admin/consultorias", label: "Consultorías", icon: "🗓️" },
   { href: "/admin/pricing", label: "Presupuestos", icon: "💵" },
   { href: "/admin/propuestas", label: "Propuestas", icon: "📨" },
+  { href: "/admin/estilos", label: "Estilos", icon: "🎨" },
 ] as const;
 
 function isActive(pathname: string, href: string) {

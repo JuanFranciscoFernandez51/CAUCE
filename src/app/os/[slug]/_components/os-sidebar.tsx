@@ -21,19 +21,22 @@ function useActive() {
 }
 
 /**
- * Barra de navegación vertical (izquierda) del Cauce OS del cliente.
- * Usa SIEMPRE los colores de la marca del tenant (tokens aplicados por el layout).
+ * Navegación del Cauce OS del cliente: vertical (izquierda) u horizontal
+ * (arriba), según el estilo elegido por el tenant. Usa SIEMPRE los colores
+ * de la marca (tokens aplicados por el layout).
  */
 export function OsSidebar({
   displayName,
   logo,
   initial,
   nav,
+  posicion = "izquierda",
 }: {
   displayName: string;
   logo: string | null;
   initial: string;
   nav: NavEntry[];
+  posicion?: "izquierda" | "arriba";
 }) {
   const [open, setOpen] = useState(false); // drawer en mobile
   const active = useActive();
@@ -124,12 +127,60 @@ export function OsSidebar({
         </button>
       </div>
 
-      {/* Sidebar fijo en desktop */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r bg-card lg:flex">
-        {brand}
-        {navContent}
-        {footer}
-      </aside>
+      {/* Desktop: sidebar a la izquierda o barra horizontal arriba */}
+      {posicion === "arriba" ? (
+        <header className="sticky top-0 z-30 hidden border-b bg-card lg:block">
+          <div className="mx-auto flex max-w-6xl items-center gap-4 px-4">
+            <div className="flex shrink-0 items-center gap-2 py-2.5">
+              {logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logo} alt={displayName} className="h-8 w-8 rounded-full border object-cover" />
+              ) : (
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {initial}
+                </span>
+              )}
+              <span className="max-w-40 truncate text-sm font-semibold">{displayName}</span>
+            </div>
+            <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1.5">
+              {nav
+                .flatMap((e) => (isGroup(e) ? e.items : [e]))
+                .map((it) => {
+                  const on = active(it.href, it.exact);
+                  return (
+                    <Link
+                      key={it.href}
+                      href={it.href}
+                      className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors ${
+                        on
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:bg-primary-soft hover:text-foreground"
+                      }`}
+                    >
+                      <span aria-hidden>{it.icon}</span>
+                      <span>{it.label}</span>
+                    </Link>
+                  );
+                })}
+            </nav>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <ThemeToggle />
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="rounded-md px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Salir
+              </button>
+            </div>
+          </div>
+        </header>
+      ) : (
+        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r bg-card lg:flex">
+          {brand}
+          {navContent}
+          {footer}
+        </aside>
+      )}
 
       {/* Drawer en mobile */}
       {open ? (

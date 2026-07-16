@@ -6,6 +6,7 @@ import {
   assertTenantAccess,
   getTenantBySlug,
   tenantBranding,
+  tenantEstilo,
   tenantModules,
   type OsModule,
 } from "@/lib/tenant";
@@ -167,13 +168,29 @@ export default async function OsLayout({
     { label: "Asistente IA", href: `${base}/asistente`, icon: "✨" },
   ];
 
+  // Las "terminaciones" elegidas por el cliente (esquinas, nav, densidad).
+  const estilo = tenantEstilo(tenant);
+  const estiloCls = [
+    estilo.esquinas === "rectas" ? "os-esquinas-rectas" : "",
+    estilo.esquinas === "redondeadas" ? "os-esquinas-redondeadas" : "",
+    estilo.densidad === "compacta" ? "os-densidad-compacta" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div style={themeVars} className="flex min-h-screen bg-background text-foreground lg:flex-row flex-col">
+    <div
+      style={themeVars}
+      className={`flex min-h-screen bg-background text-foreground flex-col ${
+        estilo.nav === "arriba" ? "" : "lg:flex-row"
+      } ${estiloCls}`}
+    >
       <OsSidebar
         displayName={branding.displayName}
         logo={branding.logo || null}
         initial={branding.displayName.charAt(0).toUpperCase()}
         nav={nav}
+        posicion={estilo.nav}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
