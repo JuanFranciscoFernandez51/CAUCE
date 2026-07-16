@@ -8,6 +8,7 @@ import { ModuleDisabled } from "../_components/module-disabled";
 import { fmtDateShort } from "../_lib/dates";
 import { fmtArs } from "../_components/money";
 import { saldoDeVenta, type PagoVenta } from "./saldo";
+import { VentaAccionesFila } from "./venta-acciones-fila";
 
 const ESTADOS: Record<string, { label: string; variant: "default" | "success" | "warning" | "destructive" }> = {
   SENADA: { label: "Señada", variant: "warning" },
@@ -36,7 +37,7 @@ export default async function VentasPage({
 
   const ventas = await db.venta.findMany({
     where: { clientId: tenant.id, estado: { in: estados } },
-    include: { contact: { select: { name: true } } },
+    include: { contact: { select: { name: true, phone: true } } },
     orderBy: { numero: "desc" },
     take: 100,
   });
@@ -109,33 +110,40 @@ export default async function VentasPage({
             const saldo = saldoDeVenta(v.precioArs, v.senaArs, v.permutaValorArs, v.pagos as PagoVenta[] | null);
             return (
               <li key={v.id}>
-                <Link href={`${base}/${v.id}`} className="block">
-                  <Card className="flex flex-wrap items-center justify-between gap-3 p-4 transition-colors hover:bg-muted/50">
-                    <div className="min-w-0">
-                      <p className="font-semibold">
-                        <span className="font-mono text-sm text-muted-foreground">
-                          V-{String(v.numero).padStart(4, "0")}
-                        </span>{" "}
-                        · {v.descripcion}
-                      </p>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {v.contact?.name ?? "Sin cliente"} · {fmtArs(v.precioArs)}
-                        {v.permutaValorArs > 0 ? ` · permuta ${fmtArs(v.permutaValorArs)}` : ""}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {saldo > 0 ? (
-                        <span className="text-sm font-medium tabular-nums text-warning">
-                          debe {fmtArs(saldo)}
-                        </span>
-                      ) : (
-                        <span className="text-sm font-medium text-success">saldada ✓</span>
-                      )}
-                      <Badge variant={e.variant}>{e.label}</Badge>
-                      <span className="text-xs text-muted-foreground">{fmtDateShort(v.createdAt)}</span>
-                    </div>
-                  </Card>
-                </Link>
+                <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <Link href={`${base}/${v.id}`} className="font-semibold hover:text-primary hover:underline">
+                      <span className="font-mono text-sm text-muted-foreground">
+                        V-{String(v.numero).padStart(4, "0")}
+                      </span>{" "}
+                      · {v.descripcion}
+                    </Link>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {v.contact?.name ?? "Sin cliente"} · {fmtArs(v.precioArs)}
+                      {v.permutaValorArs > 0 ? ` · permuta ${fmtArs(v.permutaValorArs)}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {saldo > 0 ? (
+                      <span className="text-sm font-medium tabular-nums text-warning">
+                        debe {fmtArs(saldo)}
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-success">saldada ✓</span>
+                    )}
+                    <Badge variant={e.variant}>{e.label}</Badge>
+                    <VentaAccionesFila
+                      slug={tenant.slug}
+                      ventaId={v.id}
+                      nombre={v.contact?.name ?? null}
+                      telefono={v.contact?.phone ?? null}
+                      descripcion={v.descripcion}
+                      saldo={saldo}
+                      abierta={v.estado === "SENADA"}
+                    />
+                    <span className="text-xs text-muted-foreground">{fmtDateShort(v.createdAt)}</span>
+                  </div>
+                </Card>
               </li>
             );
           })}

@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import type { OtEstado } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
-import { Badge, ButtonLink, Card, EmptyState } from "@/components/ui";
+import { ButtonLink, Card, EmptyState } from "@/components/ui";
 import { ModuleDisabled } from "../_components/module-disabled";
 import { fmtDateShort } from "../_lib/dates";
 import { fmtArs } from "../_components/money";
-import { OT_ESTADOS } from "./estados";
+import { OtEstadoSelect } from "./ot-estado-select";
 
 /**
  * Taller — el tablero de órdenes de trabajo: qué está adentro, qué está
@@ -90,37 +90,34 @@ export default async function TallerPage({
       ) : (
         <ul className="space-y-2">
           {ots.map((ot) => {
-            const e = OT_ESTADOS[ot.estado];
             const saldo = ot.totalArs - ot.pagadoArs;
             return (
               <li key={ot.id}>
-                <Link href={`${base}/${ot.id}`} className="block">
-                  <Card className="flex flex-wrap items-center justify-between gap-3 p-4 transition-colors hover:bg-muted/50">
-                    <div className="min-w-0">
-                      <p className="font-semibold">
-                        <span className="font-mono text-sm text-muted-foreground">
-                          OT-{String(ot.numero).padStart(4, "0")}
-                        </span>{" "}
-                        · {ot.equipo}
-                      </p>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {ot.contact?.name ?? "Sin cliente"} · {ot.motivoIngreso}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {ot.totalArs > 0 ? (
-                        <span className="text-sm tabular-nums">
-                          {fmtArs(ot.totalArs)}
-                          {saldo > 0 ? (
-                            <span className="ml-1 text-xs text-warning">(debe {fmtArs(saldo)})</span>
-                          ) : null}
-                        </span>
-                      ) : null}
-                      <Badge variant={e.variant}>{e.label}</Badge>
-                      <span className="text-xs text-muted-foreground">{fmtDateShort(ot.createdAt)}</span>
-                    </div>
-                  </Card>
-                </Link>
+                <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <Link href={`${base}/${ot.id}`} className="font-semibold hover:text-primary hover:underline">
+                      <span className="font-mono text-sm text-muted-foreground">
+                        OT-{String(ot.numero).padStart(4, "0")}
+                      </span>{" "}
+                      · {ot.equipo}
+                    </Link>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {ot.contact?.name ?? "Sin cliente"} · {ot.motivoIngreso}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {ot.totalArs > 0 ? (
+                      <span className="text-sm tabular-nums">
+                        {fmtArs(ot.totalArs)}
+                        {saldo > 0 ? (
+                          <span className="ml-1 text-xs text-warning">(debe {fmtArs(saldo)})</span>
+                        ) : null}
+                      </span>
+                    ) : null}
+                    <OtEstadoSelect slug={tenant.slug} otId={ot.id} estado={ot.estado} />
+                    <span className="text-xs text-muted-foreground">{fmtDateShort(ot.createdAt)}</span>
+                  </div>
+                </Card>
               </li>
             );
           })}
