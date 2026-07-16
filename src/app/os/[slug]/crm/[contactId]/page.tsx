@@ -133,9 +133,38 @@ export default async function ContactoDetallePage({
   };
 
   const base = `/os/${tenant.slug}`;
+  const prefill = `nombre=${encodeURIComponent(contact.name)}&telefono=${encodeURIComponent(contact.phone ?? "")}`;
 
   return (
     <div className="space-y-4">
+      {/* Acciones rápidas: arrancar una operación con esta persona ya cargada */}
+      <div className="flex flex-wrap gap-2">
+        {hasModule(tenant, "ventas") ? (
+          <Link
+            href={`${base}/ventas/nueva?${prefill}`}
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            🤝 Nueva venta
+          </Link>
+        ) : null}
+        {hasModule(tenant, "taller") ? (
+          <Link
+            href={`${base}/taller/nueva?${prefill}`}
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            🔧 Ingreso al taller
+          </Link>
+        ) : null}
+        {hasModule(tenant, "turnos") ? (
+          <Link
+            href={`${base}/turnos/nuevo`}
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            📅 Nuevo turno
+          </Link>
+        ) : null}
+      </div>
+
       <ContactDetail slug={tenant.slug} contact={data} customDefs={customDefs} />
 
       {/* Historial comercial: todo lo que este cliente hizo con el negocio */}

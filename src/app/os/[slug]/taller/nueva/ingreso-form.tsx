@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, ButtonLink, Card, ErrorState, Field, Input, Spinner, Textarea } from "@/components/ui";
 
 /** Ingreso al taller: cliente + equipo + motivo. Tres campos y adentro. */
 export function IngresoForm({ slug }: { slug: string }) {
   const router = useRouter();
-  const [nombre, setNombre] = useState("");
-  const [telefono, setTelefono] = useState("");
+  const sp = useSearchParams();
+  const [nombre, setNombre] = useState(sp.get("nombre") ?? "");
+  const [telefono, setTelefono] = useState(sp.get("telefono") ?? "");
   const [equipo, setEquipo] = useState("");
   const [motivo, setMotivo] = useState("");
   const [saving, setSaving] = useState(false);
