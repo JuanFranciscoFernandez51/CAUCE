@@ -52,12 +52,22 @@ export default async function OtPage({
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div>
-        <Link
-          href={`/os/${tenant.slug}/taller`}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Taller
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/os/${tenant.slug}/taller`}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Taller
+          </Link>
+          <a
+            href={`/os/${tenant.slug}/taller/${ot.id}/imprimir`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            🖨️ Imprimir OT
+          </a>
+        </div>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">
             OT-{String(ot.numero).padStart(4, "0")} · {ot.equipo}

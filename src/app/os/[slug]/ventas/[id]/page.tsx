@@ -61,12 +61,22 @@ export default async function VentaPage({
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div>
-        <Link
-          href={`/os/${tenant.slug}/ventas`}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Ventas
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/os/${tenant.slug}/ventas`}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Ventas
+          </Link>
+          <a
+            href={`/os/${tenant.slug}/ventas/${venta.id}/boleto`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            🖨️ Boleto
+          </a>
+        </div>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">
             V-{String(venta.numero).padStart(4, "0")} · {venta.descripcion}
