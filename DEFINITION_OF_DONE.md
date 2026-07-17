@@ -1,5 +1,15 @@
 # DEFINITION OF DONE — Cauce v2
 
+> **⚡ ENFORCEMENT (12-jul-2026):** este documento dejó de ser una promesa.
+> El mínimo entregable está **codificado en `src/lib/entregable.ts`** y se ve como
+> **semáforo en la ficha de cada cliente** (admin → Clientes → Cómo está armado →
+> "Checklist de entrega"). Chequea automáticamente: marca real (logo + colores),
+> estilo elegido, web con 3+ servicios / sobre / horarios / contacto / 3+ fotos,
+> CRM con 5+ contactos, 3+ procesos activos, **cada módulo activo con datos**
+> (nada de pantallas vacías), capturas de presentación y acceso del dueño.
+> **Regla de la casa: no se entrega ni se cobra con rojos.** Si un check nuevo
+> se vuelve estándar, se agrega al código, no solo acá.
+
 Nada se reporta "listo" si no cumple TODO:
 
 - [ ] **Modo claro y oscuro** funcionando (toggle visible, persiste, cubre el 100% de la pantalla)
