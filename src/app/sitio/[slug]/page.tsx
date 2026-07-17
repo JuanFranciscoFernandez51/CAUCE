@@ -64,6 +64,17 @@ export default async function SitioHome({
   const tieneCatalogo = hasModule(tenant, "catalogo") && !esInmobiliaria;
   const tieneTurnos = hasModule(tenant, "turnos");
 
+  // Contenido extra de settings: fotos reales y horarios.
+  const settings = (tenant.settings as { fotos?: string[]; horarios?: string } | null) ?? {};
+  const fotos = (settings.fotos ?? []).filter(Boolean);
+  const horarios = settings.horarios?.trim() ?? "";
+  const eventoActivo = hasModule(tenant, "eventos")
+    ? await db.evento.findFirst({
+        where: { clientId: tenant.id, activo: true },
+        select: { nombre: true, fecha: true, lugar: true },
+      })
+    : null;
+
   // Cargas condicionales, todas scopeadas por clientId, nunca rompen si no hay datos.
   const [featuredListings, featuredProducts] = await Promise.all([
     esInmobiliaria
@@ -215,6 +226,77 @@ export default async function SitioHome({
             <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">
               {content.sobre}
             </p>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Galería de fotos reales (settings.fotos) ── */}
+      {fotos.length > 0 ? (
+        <section className="border-t bg-muted/40">
+          <div className="mx-auto max-w-6xl px-4 py-14">
+            <h2 className="text-center text-2xl font-semibold tracking-tight">El local, por dentro</h2>
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {fotos.slice(0, 6).map((f, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={f}
+                  alt={`${branding.displayName} — foto ${i + 1}`}
+                  loading="lazy"
+                  className={`w-full rounded-xl border object-cover ${i === 0 ? "col-span-2 row-span-2 h-full min-h-64" : "h-40 sm:h-48"}`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Horarios + ubicación ── */}
+      {horarios || contact.address ? (
+        <section className="border-t">
+          <div className="mx-auto grid max-w-4xl gap-8 px-4 py-14 sm:grid-cols-2">
+            {horarios ? (
+              <div className="rounded-xl border bg-card p-6">
+                <h2 className="text-lg font-semibold">🕒 Horarios</h2>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {horarios}
+                </p>
+              </div>
+            ) : null}
+            {contact.address ? (
+              <div className="rounded-xl border bg-card p-6">
+                <h2 className="text-lg font-semibold">📍 Dónde estamos</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{contact.address}</p>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+                >
+                  Cómo llegar (Google Maps) →
+                </a>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* ── Evento activo (si el módulo está) ── */}
+      {eventoActivo ? (
+        <section className="border-t bg-primary-soft">
+          <div className="mx-auto max-w-3xl px-4 py-14 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Próximo evento</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight">{eventoActivo.nombre}</h2>
+            <p className="mt-1 text-muted-foreground">
+              {eventoActivo.fecha.split("-").reverse().join("/")}
+              {eventoActivo.lugar ? ` · ${eventoActivo.lugar}` : ""}
+            </p>
+            <Link
+              href={`/evento/${tenant.slug}`}
+              className="mt-5 inline-flex h-12 items-center rounded-md bg-primary px-8 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Inscribirme / Ver ranking en vivo →
+            </Link>
           </div>
         </section>
       ) : null}

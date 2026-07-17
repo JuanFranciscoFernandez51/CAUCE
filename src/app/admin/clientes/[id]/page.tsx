@@ -10,6 +10,7 @@ import {
   PACK_BADGE,
   PACK_LABELS,
 } from "../../_components/format";
+import { checklistEntrega } from "@/lib/entregable";
 import { ClientEditForm } from "./client-edit-form";
 import { FichaTabs } from "./ficha-tabs";
 import { ProcesosSection, type ProcesoData } from "./procesos-section";
@@ -38,7 +39,8 @@ export default async function ClienteDetailPage({
   });
   if (!client) notFound();
 
-  const fairUse = await getFairUse(client.id);
+  const [fairUse, checklist] = await Promise.all([getFairUse(client.id), checklistEntrega(client)]);
+  const rojos = checklist.filter((c) => !c.ok);
 
   const procesos: ProcesoData[] = client.procesos.map((p) => ({
     id: p.id,
@@ -63,6 +65,34 @@ export default async function ClienteDetailPage({
   // ── Pestaña 1: CÓMO ESTÁ ARMADO (lo primero que se ve) ──
   const armado = (
     <div className="space-y-6">
+      {/* EL SEMÁFORO: el mínimo entregable, codificado. Sin verdes no se entrega. */}
+      <Card className={`p-5 ${rojos.length === 0 ? "border-success/50" : "border-warning/50"}`}>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-semibold">Checklist de entrega</h2>
+          <Badge variant={rojos.length === 0 ? "success" : "warning"}>
+            {rojos.length === 0
+              ? "✅ Entregable"
+              : `${checklist.length - rojos.length}/${checklist.length} — faltan ${rojos.length}`}
+          </Badge>
+        </div>
+        <ul className="grid gap-1.5 sm:grid-cols-2">
+          {checklist.map((c) => (
+            <li key={c.key} className="flex items-start gap-2 text-sm">
+              <span aria-hidden className="mt-0.5 shrink-0">{c.ok ? "✅" : "🔴"}</span>
+              <span>
+                <span className={c.ok ? "" : "font-medium"}>{c.label}</span>
+                <span className="block text-xs text-muted-foreground">{c.detalle}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        {rojos.length > 0 ? (
+          <p className="mt-3 rounded-md bg-warning/10 px-3 py-2 text-xs font-medium text-warning">
+            Regla de la casa: no se entrega ni se cobra con rojos en esta lista.
+          </p>
+        ) : null}
+      </Card>
+
       {/* Las tres patas de la entrega, con sus links directos */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="p-4">
