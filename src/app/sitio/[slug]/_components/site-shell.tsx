@@ -18,11 +18,17 @@ export function siteContact(client: Client): SiteContact {
     const v = cfg[k];
     return typeof v === "string" && v.trim() ? v.trim() : undefined;
   };
+  // datosNegocio.{direccion,telefono} es donde escriben el portal y el onboarding.
+  const dn = (cfg.datosNegocio ?? {}) as Record<string, unknown>;
+  const getDn = (k: string) => {
+    const v = dn[k];
+    return typeof v === "string" && v.trim() ? v.trim() : undefined;
+  };
   return {
-    phone: client.phone?.trim() || get("phone") || get("telefono"),
+    phone: client.phone?.trim() || get("phone") || get("telefono") || getDn("telefono"),
     whatsapp: client.whatsapp?.trim() || get("whatsapp"),
     email: client.email?.trim() || get("email"),
-    address: get("address") || get("direccion") || get("domicilio"),
+    address: get("address") || get("direccion") || get("domicilio") || getDn("direccion"),
   };
 }
 
