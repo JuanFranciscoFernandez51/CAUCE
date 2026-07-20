@@ -17,6 +17,9 @@ const createSchema = z.object({
   ivaPct: z.number().min(0).max(100).default(21),
   modulos: z.array(z.string()).default([]),
   procesoKeys: z.array(z.string()).default([]),
+  piezas: z.array(z.string()).default([]),
+  horasSemana: z.number().min(0).max(200).default(0),
+  casoEspejo: z.string().max(40).optional().default(""),
   nota: z.string().trim().max(2000).optional().default(""),
 });
 
@@ -42,6 +45,9 @@ export async function POST(req: Request) {
         ivaPct: data.ivaPct,
         modulos: data.modulos,
         procesoKeys: data.procesoKeys,
+        piezas: data.piezas,
+        horasSemana: data.horasSemana,
+        casoEspejo: data.casoEspejo || null,
         nota: data.nota || null,
       },
     });

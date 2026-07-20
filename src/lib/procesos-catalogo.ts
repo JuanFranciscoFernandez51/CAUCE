@@ -23,12 +23,15 @@ export type ProcesoCatalogo = {
   rubros: string[];
   /** Va en toda entrega, sin importar el rubro. */
   base?: boolean;
+  /** Horas por semana que le ahorra al negocio (estimación honesta). */
+  horasSemana: number;
 };
 
 export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Base: van en toda entrega ──────────────────────────
   {
     key: "consulta-al-crm",
+    horasSemana: 2,
     nombre: "Toda consulta entra al CRM",
     queHace:
       "Cada consulta —web, WhatsApp, Instagram o mostrador— queda registrada como cliente, con respuesta de bienvenida al instante. Nada se pierde en el teléfono.",
@@ -39,6 +42,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "resumen-del-dia",
+    horasSemana: 1,
     nombre: "Resumen del día",
     queHace:
       "Todas las mañanas te llega el día armado: turnos de hoy, tareas pendientes y pagos por vencer. Empezás sabiendo qué hay.",
@@ -49,6 +53,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "seguimiento-consultas",
+    horasSemana: 1.5,
     nombre: "Seguimiento de consultas frías",
     queHace:
       "Si una consulta queda sin respuesta del cliente unos días, te avisa y te deja el WhatsApp armado con un clic para retomarla.",
@@ -61,6 +66,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Turnos y reservas ──────────────────────────────────
   {
     key: "recordatorio-turno",
+    horasSemana: 2,
     nombre: "Recordatorio de turno",
     queHace:
       "Le recuerda el turno al cliente el día anterior por WhatsApp y email. Las ausencias se desploman.",
@@ -70,6 +76,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "reserva-vence-24h",
+    horasSemana: 1,
     nombre: "Reservas que vencen solas",
     queHace:
       "Una reserva sin pagar se cancela sola a las 24 horas y el lugar se libera. Si hay lista de espera, se le avisa al primero.",
@@ -79,6 +86,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "lista-espera",
+    horasSemana: 0.5,
     nombre: "Lista de espera que avisa sola",
     queHace:
       "Si un día está lleno, el cliente se anota desde la web. Cuando alguien cancela, te aparece el aviso con el WhatsApp listo para ofrecerle el lugar al primero de la fila.",
@@ -90,6 +98,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Postventa y cobranzas ──────────────────────────────
   {
     key: "recordatorio-service",
+    horasSemana: 2,
     nombre: "Recordatorio de service",
     queHace:
       "A los meses de la compra, le avisa al cliente que le toca el service y le ofrece agendar turno. Es el mensaje que más plata recupera.",
@@ -99,6 +108,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "aviso-cuota",
+    horasSemana: 1,
     nombre: "Aviso de cuotas",
     queHace:
       "Avisa 3 días antes del vencimiento de cada cuota y reclama las atrasadas, con el mensaje de WhatsApp listo para mandar.",
@@ -108,6 +118,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "carrito-abandonado",
+    horasSemana: 0.5,
     nombre: "Rescate de carrito",
     queHace:
       "Si alguien carga el carrito y no termina la compra, a las 4 horas le llega un email con su carrito listo para pagar.",
@@ -118,6 +129,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
 
   {
     key: "trabajo-listo",
+    horasSemana: 1,
     nombre: "Aviso de trabajo listo",
     queHace:
       "Cuando marcás una orden de trabajo como lista, el aviso al cliente aparece armado con el WhatsApp a un clic: 'tu equipo está para retirar'.",
@@ -129,6 +141,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Operaciones ────────────────────────────────────────
   {
     key: "stock-minimo",
+    horasSemana: 0.5,
     nombre: "Alerta de stock mínimo",
     queHace:
       "Cuando un producto llega al mínimo, te avisa antes de que te quedes sin mercadería.",
@@ -138,6 +151,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   },
   {
     key: "confirmacion-pedido",
+    horasSemana: 1.5,
     nombre: "Confirmaciones automáticas",
     queHace:
       "Cada pedido, reserva o turno dispara su email de confirmación al cliente y el aviso a vos. Nadie queda esperando una respuesta.",
@@ -149,6 +163,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Finanzas y fiscal ──────────────────────────────────
   {
     key: "vencimientos-fiscales",
+    horasSemana: 0.5,
     nombre: "Avisos de vencimientos",
     queHace:
       "Te avisa 7, 3 y 1 día antes de cada vencimiento (IVA, IIBB, cargas sociales) para que ninguno te agarre dormido.",
@@ -160,6 +175,7 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
   // ── Eventos deportivos ─────────────────────────────────
   {
     key: "inscripcion-evento",
+    horasSemana: 3,
     nombre: "Inscripciones que se cobran solas",
     queHace:
       "El competidor se inscribe desde la web, paga con Mercado Pago y queda confirmado con su comprobante por email. Si no paga en 45 minutos, el lugar se libera.",

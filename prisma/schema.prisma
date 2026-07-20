@@ -592,6 +592,9 @@ model Propuesta {
   ivaPct         Float           @default(21)
   modulos        String[]        @default([])
   procesoKeys    String[]        @default([])
+  piezas         String[]        @default([]) // keys de src/lib/piezas.ts
+  horasSemana    Float           @default(0) // horas/semana que recupera
+  casoEspejo     String? // key de ESPEJOS
   nota           String?
   estado         PropuestaEstado @default(ENVIADA)
   vistaAt        DateTime?
