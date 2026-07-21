@@ -66,9 +66,14 @@ export default async function CrmPage({
             {query ? ` para “${query}”` : " en tu pipeline"}
           </p>
         </div>
-        <ButtonLink href={`${base}/crm/nuevo`} size="sm">
-          + Contacto
-        </ButtonLink>
+        <div className="flex gap-2">
+          <ButtonLink href={`${base}/crm/importar`} variant="secondary" size="sm">
+            ⬆ Importar
+          </ButtonLink>
+          <ButtonLink href={`${base}/crm/nuevo`} size="sm">
+            + Contacto
+          </ButtonLink>
+        </div>
       </div>
 
       <form method="GET" className="flex max-w-md gap-2">
