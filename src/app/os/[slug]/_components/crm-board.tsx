@@ -37,6 +37,7 @@ function waNumber(tel: string): string {
 export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardContact[] }) {
   const router = useRouter();
   const [movingId, setMovingId] = useState<string | null>(null);
+  const [dropStage, setDropStage] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function cycleTemp(contact: BoardContact) {
@@ -52,11 +53,8 @@ export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardCont
     else setError("No se pudo cambiar la temperatura");
   }
 
-  async function moveStage(contact: BoardContact, dir: -1 | 1) {
-    const idx = CRM_STAGES.indexOf(contact.stage as (typeof CRM_STAGES)[number]);
-    const safeIdx = idx === -1 ? 0 : idx;
-    const next = CRM_STAGES[safeIdx + dir];
-    if (!next) return;
+  async function setStage(contact: BoardContact, next: string) {
+    if (next === contact.stage) return;
     setMovingId(contact.id);
     setError("");
     try {
@@ -77,6 +75,12 @@ export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardCont
     }
   }
 
+  function moveStage(contact: BoardContact, dir: -1 | 1) {
+    const idx = CRM_STAGES.indexOf(contact.stage as (typeof CRM_STAGES)[number]);
+    const next = CRM_STAGES[(idx === -1 ? 0 : idx) + dir];
+    if (next) void setStage(contact, next);
+  }
+
   return (
     <div className="space-y-3">
       {error ? <ErrorState message={error} /> : null}
@@ -86,7 +90,24 @@ export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardCont
             (c) => c.stage === stage || (stage === "nuevo" && !STAGE_LABELS[c.stage])
           );
           return (
-            <div key={stage} className="rounded-lg bg-muted/60 p-2">
+            <div
+              key={stage}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDropStage(stage);
+              }}
+              onDragLeave={() => setDropStage((d) => (d === stage ? null : d))}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDropStage(null);
+                const id = e.dataTransfer.getData("text/contact-id");
+                const c = contacts.find((x) => x.id === id);
+                if (c) void setStage(c, stage);
+              }}
+              className={`rounded-lg p-2 transition-colors ${
+                dropStage === stage ? "bg-primary-soft ring-2 ring-primary/40" : "bg-muted/60"
+              }`}
+            >
               <div className="flex items-center justify-between px-1 pb-2 pt-1">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {STAGE_LABELS[stage]}
@@ -103,7 +124,12 @@ export function CrmBoard({ slug, contacts }: { slug: string; contacts: BoardCont
                     const idx = CRM_STAGES.indexOf(stage);
                     const busy = movingId === c.id;
                     return (
-                      <Card key={c.id} className={`p-2.5 ${busy ? "opacity-50" : ""}`}>
+                      <Card
+                        key={c.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/contact-id", c.id)}
+                        className={`cursor-grab p-2.5 active:cursor-grabbing ${busy ? "opacity-50" : ""}`}
+                      >
                         <div className="flex items-start justify-between gap-1">
                           <Link
                             href={`/os/${slug}/crm/${c.id}`}
