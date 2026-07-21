@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
 import { Card, EmptyState, Table, Td, Th } from "@/components/ui";
@@ -127,7 +128,15 @@ export default async function RrhhPage({
             <tbody>
               {activeEmployees.map((emp) => (
                 <tr key={emp.id}>
-                  <Td className="font-medium">{emp.name}</Td>
+                  <Td className="font-medium">
+                    <Link
+                      href={`/os/${tenant.slug}/rrhh/${emp.id}`}
+                      className="hover:text-primary hover:underline"
+                      title="Ver fichadas y planilla del mes"
+                    >
+                      {emp.name}
+                    </Link>
+                  </Td>
                   <Td className="text-right tabular-nums">
                     {fmtHours(weekMs.get(emp.id) ?? 0)}
                   </Td>

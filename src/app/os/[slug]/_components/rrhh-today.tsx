@@ -54,7 +54,13 @@ export function RrhhToday({ slug, rows }: { slug: string; rows: TodayRow[] }) {
               className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:px-4"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{r.name}</p>
+                <a
+                  href={`/os/${slug}/rrhh/${r.id}`}
+                  className="block truncate text-sm font-medium hover:text-primary hover:underline"
+                  title="Ver fichadas y planilla del mes"
+                >
+                  {r.name}
+                </a>
                 {r.role ? (
                   <p className="truncate text-xs text-muted-foreground">{r.role}</p>
                 ) : null}
