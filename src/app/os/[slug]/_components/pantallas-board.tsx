@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Badge, Button, Card, EmptyState, ErrorState, Input, Spinner, Stat } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, EmptyState, ErrorState, Input, Spinner, Stat } from "@/components/ui";
 
 export type ContratoView = {
   id: string;
@@ -67,9 +67,14 @@ export function PantallasBoard({
             Disponibilidad del circuito y anunciantes por pantalla.
           </p>
         </div>
-        <Button size="sm" onClick={() => setNueva((v) => !v)}>
-          {nueva ? "Cancelar" : "+ Pantalla"}
-        </Button>
+        <div className="flex gap-2">
+          <ButtonLink href={`/os/${slug}/pantallas/clientes`} variant="secondary" size="sm">
+            📇 Anunciantes
+          </ButtonLink>
+          <Button size="sm" onClick={() => setNueva((v) => !v)}>
+            {nueva ? "Cancelar" : "+ Pantalla"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
