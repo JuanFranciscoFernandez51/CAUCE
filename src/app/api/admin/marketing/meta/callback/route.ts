@@ -77,7 +77,7 @@ export async function GET(req: Request) {
           try {
             const r = (await get(`/${b.id}/${edge}`, {
               access_token: userToken,
-              fields: "id,name,access_token",
+              fields: "id,name",
             })) as { data?: Page[] };
             pages.push(...(r.data ?? []));
           } catch {
@@ -86,6 +86,22 @@ export async function GET(req: Request) {
         }
       }
       pages = pages.filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+      // Página de Business Manager sin token en el edge: pedirlo directo a la página.
+      for (const p of pages) {
+        if (!p.access_token) {
+          try {
+            const r = (await get(`/${p.id}`, {
+              access_token: userToken,
+              fields: "access_token,name",
+            })) as { access_token?: string; name?: string };
+            p.access_token = r.access_token;
+            p.name = p.name || r.name || "";
+          } catch {
+            // sin rol suficiente sobre esa página
+          }
+        }
+      }
+      pages = pages.filter((p) => p.access_token);
     }
     const page = pages[0];
     if (!page?.access_token) {
