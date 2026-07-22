@@ -948,3 +948,81 @@ model ProyectoTarea {
   @@index([clientId])
   @@index([proyectoId])
 }
+
+// ── Marketing de Cauce: publicaciones IG/FB + Meta Ads del propio negocio ──
+
+/// Conexión con Meta (fila única id="default"). Tokens cifrados con crypto.ts.
+model MktConfig {
+  id               String    @id @default("default")
+  userId           String?
+  userName         String?
+  pageId           String?
+  pageName         String?
+  pageAccessToken  String?   @db.Text // cifrado AES-256-GCM
+  igUserId         String?
+  igUsername       String?
+  expiresAt        DateTime?
+  scope            String?
+  apiVersion       String    @default("v25.0")
+  lastTokenCheckAt DateTime?
+  adAccountId      String? // "act_XXXX"
+  businessId       String?
+  pixelId          String?
+  adsTokenScopes   Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+/// Publicación propia (feed/reel) — borrador, programada o publicada.
+model MktPost {
+  id            String    @id @default(cuid())
+  titulo        String // nombre interno para la lista
+  caption       String    @db.Text
+  idea          String?   @db.Text // brief visual para diseñar la pieza (Claude design)
+  mediaType     String    @default("PHOTO") // PHOTO | PHOTO_CAROUSEL | VIDEO | REEL
+  imageUrls     String[]  @default([])
+  videoUrls     String[]  @default([])
+  platforms     String[]  @default(["IG"]) // IG | FB
+  scheduledAt   DateTime? // null = borrador sin fecha
+  status        String    @default("DRAFT") // DRAFT|PENDING|PROCESSING|PUBLISHED|PARTIAL|FAILED|CANCELLED
+  publishedAt   DateTime?
+  publishedRefs Json? // { ig: {postId, permalink}, fb: {...} }
+  errorMessage  String?   @db.Text
+  retryCount    Int       @default(0)
+  lockedAt      DateTime?
+  lockedBy      String?
+  origen        String    @default("manual") // manual | ia
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status, scheduledAt])
+}
+
+/// Campaña de Meta Ads (1 campaña = 1 adset + 1 ad, como la v1 de MF).
+model MktCampaign {
+  id                   String    @id @default(cuid())
+  name                 String
+  objective            String // OUTCOME_TRAFFIC|OUTCOME_ENGAGEMENT|OUTCOME_LEADS|OUTCOME_AWARENESS
+  metaCampaignId       String?   @unique
+  metaAdSetId          String?   @unique
+  metaAdId             String?   @unique
+  metaCreativeId       String?
+  dailyBudgetCents     Int // centavos ARS
+  startDate            DateTime
+  endDate              DateTime
+  status               String    @default("DRAFT") // DRAFT|IN_META_PAUSED|ACTIVE|PAUSED_BY_USER|COMPLETED|FAILED|DELETED
+  audienceConfig       Json // { ageMin, ageMax, genders, countries, cities, interests }
+  creativeMediaType    String    @default("PHOTO") // PHOTO|PHOTO_CAROUSEL|VIDEO|REEL
+  creativeImageUrls    String[]  @default([])
+  creativeVideoUrl     String?   @db.Text
+  creativeCaption      String    @db.Text
+  creativeCallToAction String    @default("LEARN_MORE")
+  destinationUrl       String?   @db.Text
+  insightsCache        Json? // { reach, impressions, clicks, ctr, cpm, cpc, spend, syncedAt }
+  lastSyncedAt         DateTime?
+  errorMessage         String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([status, endDate])
+}
