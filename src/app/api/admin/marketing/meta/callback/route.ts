@@ -98,9 +98,27 @@ export async function GET(req: Request) {
         })) as { data?: { scopes?: string[] } };
         const scopes = dbg.data?.scopes ?? [];
         const bizs =
-          ((await get("/me/businesses", { access_token: userToken })) as { data?: unknown[] })
-            .data ?? [];
-        detalle = ` [permisos otorgados: ${scopes.join(", ") || "ninguno"} · páginas visibles: ${pages.length} · negocios visibles: ${bizs.length}]`;
+          (
+            (await get("/me/businesses", { access_token: userToken, fields: "id,name" })) as {
+              data?: { id: string; name: string }[];
+            }
+          ).data ?? [];
+        // Qué páginas viven dentro de cada negocio (aunque la app no tenga acceso).
+        const enNegocios: string[] = [];
+        for (const b of bizs) {
+          for (const edge of ["owned_pages", "client_pages"]) {
+            try {
+              const r = (await get(`/${b.id}/${edge}`, {
+                access_token: userToken,
+                fields: "id,name",
+              })) as { data?: { id: string; name: string }[] };
+              for (const p of r.data ?? []) enNegocios.push(`${p.name} (${edge})`);
+            } catch {
+              enNegocios.push(`${b.name}/${edge}: sin acceso`);
+            }
+          }
+        }
+        detalle = ` [permisos otorgados: ${scopes.join(", ") || "ninguno"} · páginas visibles: ${pages.length} · negocios: ${bizs.map((b) => b.name).join(", ") || "0"} · páginas en negocios: ${enNegocios.join(" | ") || "ninguna"}]`;
       } catch (dbgErr) {
         detalle = ` [diagnóstico falló: ${dbgErr instanceof Error ? dbgErr.message : "?"}]`;
       }
