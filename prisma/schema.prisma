@@ -133,10 +133,13 @@ enum LeadSource {
   CONSULTORIA
   MANUAL
   BOT
+  WHATSAPP
+  ADS
 }
 
 enum LeadStatus {
   NEW
+  RESPONDIDO
   QUALIFIED
   CONVERTED
   LOST
@@ -153,6 +156,7 @@ model Lead {
   phone     String?
   whatsapp  String?
   score     Int        @default(0) // 0-100
+  temperatura String? // frio | tibio | caliente
   intake    Json? // respuestas del scorecard: dolor, frecuencia, apps, urgencia, presupuesto
   clientId  String? // si se convirtió
   client    Client?    @relation(fields: [clientId], references: [id])

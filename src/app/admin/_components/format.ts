@@ -71,6 +71,8 @@ export const LEAD_SOURCE_LABELS: Record<string, string> = {
   CONSULTORIA: "Consultoría",
   MANUAL: "Manual",
   BOT: "Bot",
+  WHATSAPP: "WhatsApp",
+  ADS: "Publicidad",
 };
 export const LEAD_SOURCE_BADGE: Record<string, BadgeVariant> = {
   INTAKE: "primary",
@@ -80,8 +82,9 @@ export const LEAD_SOURCE_BADGE: Record<string, BadgeVariant> = {
 };
 export const LEAD_STATUS_LABELS: Record<string, string> = {
   NEW: "Nuevo",
+  RESPONDIDO: "Respondido",
   QUALIFIED: "Calificado",
-  CONVERTED: "Convertido",
+  CONVERTED: "Cliente",
   LOST: "Perdido",
 };
 export const LEAD_STATUS_BADGE: Record<string, BadgeVariant> = {
