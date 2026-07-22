@@ -89,7 +89,22 @@ export async function GET(req: Request) {
     }
     const page = pages[0];
     if (!page?.access_token) {
-      throw new Error("No se encontró ninguna página de Facebook con token — revisá permisos");
+      // Diagnóstico: qué permisos otorgó realmente este login y qué vio Meta.
+      let detalle = "";
+      try {
+        const dbg = (await get("/debug_token", {
+          input_token: userToken,
+          access_token: `${appId}|${appSecret}`,
+        })) as { data?: { scopes?: string[] } };
+        const scopes = dbg.data?.scopes ?? [];
+        const bizs =
+          ((await get("/me/businesses", { access_token: userToken })) as { data?: unknown[] })
+            .data ?? [];
+        detalle = ` [permisos otorgados: ${scopes.join(", ") || "ninguno"} · páginas visibles: ${pages.length} · negocios visibles: ${bizs.length}]`;
+      } catch (dbgErr) {
+        detalle = ` [diagnóstico falló: ${dbgErr instanceof Error ? dbgErr.message : "?"}]`;
+      }
+      throw new Error(`No se encontró ninguna página de Facebook con token.${detalle}`);
     }
 
     // 4. IG Business vinculada a la página
