@@ -29,6 +29,7 @@ export default async function AdsPage() {
     insights: (c.insightsCache as Record<string, string> | null) ?? null,
     errorMessage: c.errorMessage,
     enMeta: Boolean(c.metaCampaignId),
+    adNames: ((c.adItems as { nombre: string }[] | null) ?? []).map((a) => a.nombre),
   }));
 
   return (

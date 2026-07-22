@@ -1025,6 +1025,8 @@ model MktCampaign {
   insightsCache        Json? // { reach, impressions, clicks, ctr, cpm, cpc, spend, syncedAt }
   lastSyncedAt         DateTime?
   errorMessage         String?   @db.Text
+  /// Múltiples anuncios en el mismo conjunto: [{nombre, videoUrl?, imageUrl?, caption, metaCreativeId?, metaAdId?}]
+  adItems              Json?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 

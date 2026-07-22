@@ -29,6 +29,7 @@ export type CampaignView = {
   insights: Record<string, string> | null;
   errorMessage: string | null;
   enMeta: boolean;
+  adNames: string[];
 };
 
 const OBJETIVOS: { value: string; label: string }[] = [
@@ -172,6 +173,15 @@ export function AdsClient({
                         CTR {ins.ctr ? `${Number(ins.ctr).toFixed(2)}%` : "—"} · gastado $
                         {ins.spend ?? "0"}
                       </p>
+                    ) : null}
+                    {c.adNames.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {c.adNames.map((n) => (
+                          <span key={n} className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
+                            🎬 {n}
+                          </span>
+                        ))}
+                      </div>
                     ) : null}
                     {c.errorMessage ? (
                       <p className="text-xs text-destructive">{c.errorMessage}</p>
