@@ -5,7 +5,7 @@
  */
 import { db } from "../src/lib/db";
 
-const WA = "https://wa.me/5492915757101?text=Hola,%20vi%20el%20video%20de%20Cauce%20y%20quiero%20saber%20m%C3%A1s";
+const WA = "https://wa.me/5492915757101?text=Hola!%20Vi%20el%20video%20de%20Cauce.%20Tengo%20un%20negocio%20de...";
 
 const ADS = [
   {
