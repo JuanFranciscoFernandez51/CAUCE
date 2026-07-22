@@ -81,6 +81,7 @@ model Client {
   procesos     Proceso[]
   pantallas         Pantalla[]
   pantallaContratos PantallaContrato[]
+  proveedores       Proveedor[]
   usages       Usage[]
   subscriptions Subscription[]
   invoices     Invoice[]
@@ -1071,4 +1072,25 @@ model PantallaContrato {
   @@index([clientId])
   @@index([pantallaId])
   @@index([contactId])
+}
+
+/// Proveedor del negocio: a quién se le paga, cuánto por mes y cuándo.
+model Proveedor {
+  id           String  @id @default(cuid())
+  clientId     String
+  client       Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre       String
+  categoria    String  @default("servicio") // servicio | alquiler | impuestos | contenido | insumos | otro
+  detalle      String? // qué provee ("Luz de las pantallas", "Alquiler local Alsina"…)
+  telefono     String?
+  email        String?
+  montoMensual Float   @default(0) // ARS estimado por mes
+  diaPago      Int? // día del mes en que se suele pagar
+  activo       Boolean @default(true)
+  orden        Int     @default(0)
+  notas        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([clientId])
 }

@@ -244,11 +244,19 @@ export default async function CajaPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Finanzas</h1>
-        <p className="text-sm text-muted-foreground">
-          Cuentas, movimientos y reportes de tu negocio.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Finanzas</h1>
+          <p className="text-sm text-muted-foreground">
+            Cuentas, movimientos y reportes de tu negocio.
+          </p>
+        </div>
+        <a
+          href={`/os/${tenant.slug}/caja/proveedores`}
+          className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
+          🏭 Proveedores
+        </a>
       </div>
 
       {/* Total consolidado arriba */}
