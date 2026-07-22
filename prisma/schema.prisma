@@ -79,6 +79,8 @@ model Client {
   leads        Lead[]
   projects     Project[]
   procesos     Proceso[]
+  pantallas         Pantalla[]
+  pantallaContratos PantallaContrato[]
   usages       Usage[]
   subscriptions Subscription[]
   invoices     Invoice[]
@@ -397,6 +399,7 @@ model Contact {
   ordenesTrabajo OrdenTrabajo[]
   ventas       Venta[]
   presupuestosTaller PresupuestoTaller[]
+  pantallaContratos PantallaContrato[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -1025,4 +1028,47 @@ model MktCampaign {
   updatedAt            DateTime  @updatedAt
 
   @@index([status, endDate])
+}
+
+// ── Pantallas LED (rubro DOOH — Ave Fénix) ──────────────────────────────
+
+/// Una pantalla física del circuito: ubicación, medidas y capacidad de spots.
+model Pantalla {
+  id         String  @id @default(cuid())
+  clientId   String
+  client     Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre     String // "Zelarrayán e Yrigoyen"
+  zona       String? // "Microcentro", "Monte Hermoso"…
+  medidas    String? // "6x3 m"
+  resolucion String? // "800x480 px"
+  fotoUrl    String?
+  slotsTotal Int     @default(30) // spots de 15s que entran en la rotación
+  activa     Boolean @default(true)
+  orden      Int     @default(0)
+
+  contratos PantallaContrato[]
+
+  @@index([clientId])
+}
+
+/// Contrato de un anunciante en una pantalla: N spots por un monto mensual.
+model PantallaContrato {
+  id           String    @id @default(cuid())
+  clientId     String
+  client       Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  pantallaId   String
+  pantalla     Pantalla  @relation(fields: [pantallaId], references: [id], onDelete: Cascade)
+  contactId    String?
+  contact      Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  slots        Int       @default(1)
+  montoMensual Float     @default(0) // ARS por mes
+  estado       String    @default("activo") // activo | pausado | baja
+  inicio       DateTime?
+  fin          DateTime?
+  notas        String?
+  createdAt    DateTime  @default(now())
+
+  @@index([clientId])
+  @@index([pantallaId])
+  @@index([contactId])
 }

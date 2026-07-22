@@ -117,6 +117,16 @@ export const PROCESOS_CATALOGO: ProcesoCatalogo[] = [
     rubros: ["moto", "financia", "cuota", "credito", "crédito", "concesionar"],
   },
   {
+    key: "aviso-cobro-mensual",
+    horasSemana: 2,
+    nombre: "Aviso de cobro mensual",
+    queHace:
+      "Del 1 al 5 de cada mes arma la lista de clientes con abono activo y el WhatsApp de cobro listo para mandar, con el monto de cada uno. Nadie se queda sin avisar.",
+    cuando: "Del 1 al 5 de cada mes, a las 9:00",
+    area: "FINANZAS",
+    rubros: ["pantalla", "publicidad", "abono", "mensual", "suscrip", "gimnasio", "led"],
+  },
+  {
     key: "carrito-abandonado",
     horasSemana: 0.5,
     nombre: "Rescate de carrito",

@@ -78,12 +78,13 @@ const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: str
   eventos: { path: "eventos", label: "Eventos & Cronómetro", icon: "⏱️" },
   sitio: { path: "propiedades", label: "Propiedades", icon: "🏠" },
   proyectos: { path: "proyectos", label: "Proyectos", icon: "📁" },
+  pantallas: { path: "pantallas", label: "Pantallas LED", icon: "🖥️" },
   rrhh: { path: "rrhh", label: "RRHH", icon: "👥" },
   caja: { path: "caja", label: "Finanzas", icon: "💵" },
 };
 
 /** Orden de los módulos operativos dentro del grupo. */
-const OPS_ORDER: OsModule[] = ["ventas", "turnos", "catalogo", "taller", "eventos", "sitio", "proyectos", "rrhh", "caja"];
+const OPS_ORDER: OsModule[] = ["pantallas", "ventas", "turnos", "catalogo", "taller", "eventos", "sitio", "proyectos", "rrhh", "caja"];
 
 export default async function OsLayout({
   children,

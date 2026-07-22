@@ -29,6 +29,7 @@ const MODULE_BLURB: Record<OsModule, string> = {
   rrhh: "Tu equipo, sus horarios y sus fichadas, ordenados.",
   caja: "Ingresos, gastos y cuentas con reportes claros de cómo viene el mes.",
   proyectos: "Tus proyectos y tareas, de la propuesta a la entrega.",
+  pantallas: "Tu circuito de pantallas: disponibilidad, anunciantes y facturación por pantalla.",
   sitio: "Tu página web pública, lista para mostrar y vender.",
 };
 

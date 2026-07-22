@@ -77,7 +77,7 @@ export interface TenantCtx {
   modules: TenantModule[];
 }
 
-type TenantModule = "crm" | "turnos" | "catalogo" | "taller" | "ventas" | "eventos" | "rrhh" | "caja" | "proyectos" | "sitio";
+type TenantModule = "crm" | "turnos" | "catalogo" | "taller" | "ventas" | "eventos" | "rrhh" | "caja" | "proyectos" | "pantallas" | "sitio";
 
 export type KpiValue = number | string;
 

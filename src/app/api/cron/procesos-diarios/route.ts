@@ -36,6 +36,7 @@ export async function GET(req: Request) {
 
   let recordatorios = 0;
   let seguimientos = 0;
+  let avisosCobro = 0;
 
   for (const c of clientes) {
     const negocio = tenantBranding(c).displayName;
@@ -153,10 +154,76 @@ export async function GET(req: Request) {
       await db.proceso.update({ where: { id: pCuotas.id }, data: { ultimaCorrida: new Date() } });
     }
 
+    // ── Aviso de cobro mensual (abonos: pantallas LED, etc.) ──
+    // Del 1 al 5 arma el WhatsApp de cobro por cliente con su total del mes.
+    const pCobro = tiene("Aviso de cobro mensual");
+    if (pCobro) {
+      const diaHoy = Number(hoy.slice(8, 10));
+      if (diaHoy >= 1 && diaHoy <= 5) {
+        const contratos = await db.pantallaContrato.findMany({
+          where: { clientId: c.id, estado: "activo", contactId: { not: null } },
+          include: {
+            contact: { select: { id: true, name: true, phone: true } },
+            pantalla: { select: { nombre: true } },
+          },
+        });
+        // Total mensual por contacto (un cliente puede estar en varias pantallas).
+        const porContacto = new Map<
+          string,
+          { nombre: string; telefono: string | null; total: number; pantallas: string[] }
+        >();
+        for (const ct of contratos) {
+          if (!ct.contact) continue;
+          const acc = porContacto.get(ct.contact.id) ?? {
+            nombre: ct.contact.name,
+            telefono: ct.contact.phone,
+            total: 0,
+            pantallas: [],
+          };
+          acc.total += ct.montoMensual;
+          if (!acc.pantallas.includes(ct.pantalla.nombre)) acc.pantallas.push(ct.pantalla.nombre);
+          porContacto.set(ct.contact.id, acc);
+        }
+        // Dedup por MES: si ya se le avisó algún día de este mes, no se repite.
+        const mesActual = hoy.slice(0, 7);
+        const yaAvisados = await db.outreachTarea.findMany({
+          where: {
+            clientId: c.id,
+            tipo: "aviso-cobro",
+            fechaProgramada: { startsWith: mesActual },
+          },
+          select: { contactId: true },
+        });
+        const hechos = new Set(yaAvisados.map((t) => t.contactId));
+        const mesNombre = new Date().toLocaleDateString("es-AR", {
+          month: "long",
+          timeZone: "America/Argentina/Buenos_Aires",
+        });
+
+        for (const [contactId, info] of porContacto) {
+          if (hechos.has(contactId) || info.total <= 0) continue;
+          const mensaje = `Hola ${info.nombre.split(" ")[0]}! Te escribimos de ${negocio} 👋 Te pasamos el detalle de ${mesNombre}: $${Math.round(info.total).toLocaleString("es-AR")} por tu pauta en ${info.pantallas.length === 1 ? info.pantallas[0] : `${info.pantallas.length} pantallas`}. ¡Gracias por seguir con nosotros!`;
+          await db.outreachTarea.create({
+            data: {
+              clientId: c.id,
+              tipo: "aviso-cobro",
+              contactId,
+              nombre: info.nombre,
+              telefono: info.telefono,
+              mensaje,
+              fechaProgramada: hoy,
+            },
+          });
+          avisosCobro++;
+        }
+      }
+      await db.proceso.update({ where: { id: pCobro.id }, data: { ultimaCorrida: new Date() } });
+    }
+
     // Los procesos "de fondo" (CRM, resumen) también marcan que corrieron.
     const pCrm = tiene("Toda consulta entra al CRM");
     if (pCrm) await db.proceso.update({ where: { id: pCrm.id }, data: { ultimaCorrida: new Date() } });
   }
 
-  return NextResponse.json({ ok: true, fecha: hoy, recordatorios, seguimientos, clientes: clientes.length });
+  return NextResponse.json({ ok: true, fecha: hoy, recordatorios, seguimientos, avisosCobro, clientes: clientes.length });
 }

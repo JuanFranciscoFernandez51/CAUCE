@@ -9,6 +9,7 @@ import { PropertyCard, type PublicListing } from "./_components/property-card";
 import { ProductCard, type PublicProduct } from "./_components/product-card";
 import { ConsultaForm } from "./_components/consulta-form";
 import { siteContent } from "./_lib/site-content";
+import { DoohSite } from "./_components/dooh-site";
 
 export const revalidate = 300; // ISR: cachea 5 min (gru1 + esto = páginas casi instantáneas)
 
@@ -53,6 +54,32 @@ export default async function SitioHome({
   const { slug } = await params;
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !hasModule(tenant, "sitio")) notFound();
+
+  // Template DOOH (pantallas LED): página propia, dark, con disponibilidad en vivo.
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "dooh") {
+    const pantallasDb = await db.pantalla.findMany({
+      where: { clientId: tenant.id, activa: true },
+      orderBy: { orden: "asc" },
+      include: {
+        contratos: { where: { estado: "activo" }, select: { slots: true } },
+      },
+    });
+    return (
+      <DoohSite
+        tenant={tenant}
+        pantallas={pantallasDb.map((p) => ({
+          id: p.id,
+          nombre: p.nombre,
+          zona: p.zona,
+          medidas: p.medidas,
+          resolucion: p.resolucion,
+          fotoUrl: p.fotoUrl,
+          libres: Math.max(0, p.slotsTotal - p.contratos.reduce((a, c) => a + c.slots, 0)),
+        }))}
+      />
+    );
+  }
 
   const branding = tenantBranding(tenant);
   const contact = siteContact(tenant);
