@@ -20,14 +20,14 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted)
-    return <button className="h-9 w-9 rounded-md border" aria-label="Cambiar tema" />;
+    return <button className="h-9 w-9 rounded-md" aria-label="Cambiar tema" />;
   const dark = resolvedTheme === "dark";
   return (
     <button
       onClick={() => setTheme(dark ? "light" : "dark")}
       aria-label="Cambiar tema"
       title={dark ? "Modo claro" : "Modo oscuro"}
-      className="flex h-9 w-9 items-center justify-center rounded-md border bg-card text-lg transition-colors hover:bg-muted"
+      className="flex h-9 w-9 items-center justify-center rounded-md text-lg transition-colors hover:bg-muted"
     >
       {dark ? "☀️" : "🌙"}
     </button>

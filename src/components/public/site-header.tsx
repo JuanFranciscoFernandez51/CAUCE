@@ -43,7 +43,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
-          <ButtonLink href="/login" variant="secondary" size="sm">
+          <ButtonLink href="/login" variant="ghost" size="sm">
             Entrar
           </ButtonLink>
         </div>
@@ -55,7 +55,7 @@ export function SiteHeader() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={open}
-            className="flex h-9 w-9 items-center justify-center rounded-md border bg-card transition-colors hover:bg-muted"
+            className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-muted"
           >
             <span aria-hidden className="text-lg leading-none">
               {open ? "✕" : "☰"}
@@ -85,7 +85,7 @@ export function SiteHeader() {
             <li className="mt-2">
               <ButtonLink
                 href="/login"
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 className="w-full"
                 onClick={() => setOpen(false)}

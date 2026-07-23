@@ -266,7 +266,7 @@ export default async function LandingPage() {
           })}
         </div>
         <div className="mt-10 text-center">
-          <ButtonLink href="/casos" variant="secondary">
+          <ButtonLink href="/casos" variant="ghost">
             Ver negocios reales que ya funcionan con Cauce →
           </ButtonLink>
         </div>
