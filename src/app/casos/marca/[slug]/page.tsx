@@ -7,6 +7,7 @@ import { shotsDeSettings } from "@/lib/casos";
 import { PublicShell } from "@/components/public/shell";
 import { Badge, Card } from "@/components/ui";
 import { PrintFicha } from "./print-ficha";
+import { Galeria } from "./galeria";
 
 export function generateStaticParams() {
   return CASOS_REALES.map((c) => ({ slug: c.slug }));
@@ -33,7 +34,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
   if (!caso) notFound();
 
   // Prioridad: capturas de SU web real; si no hay, las del tenant en Cauce.
-  let shots: { titulo: string; url: string }[] = caso.shotsReales ?? [];
+  let shots: { titulo: string; url: string; href?: string }[] = caso.shotsReales ?? [];
   if (shots.length === 0) {
     const tenant = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
     shots = shotsDeSettings(tenant?.settings).slice(0, 6);
@@ -112,6 +113,23 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
           ))}
         </div>
 
+        {/* Proceso paso a paso */}
+        {caso.proceso?.length ? (
+          <>
+            <h2 className="mt-10 text-xl font-bold">Cómo trabaja, paso a paso</h2>
+            <ol className="mt-4 space-y-3">
+              {caso.proceso.map((paso, i) => (
+                <li key={paso} className="flex gap-3 text-sm">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
+                    {i + 1}
+                  </span>
+                  <span className="text-muted-foreground">{paso}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : null}
+
         {/* Capturas reales */}
         {shots.length > 0 ? (
           <>
@@ -119,17 +137,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
             <p className="mt-1 text-sm text-muted-foreground">
               Capturas reales — no mockups.
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {shots.map((s) => (
-                <figure key={s.url} className="overflow-hidden rounded-lg border bg-card">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.url} alt={s.titulo} className="w-full" loading="lazy" />
-                  <figcaption className="border-t px-3 py-2 text-xs text-muted-foreground">
-                    {s.titulo}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+            <Galeria shots={shots} />
           </>
         ) : null}
 

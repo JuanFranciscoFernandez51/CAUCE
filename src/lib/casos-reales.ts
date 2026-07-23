@@ -20,7 +20,9 @@ export type CasoReal = {
   /** Tenant del que salen las capturas del sistema (settings.shots). */
   shotsSlug: string;
   /** Capturas de SU web real en producción (prioridad sobre las del tenant). */
-  shotsReales?: { titulo: string; url: string }[];
+  shotsReales?: { titulo: string; url: string; href?: string }[];
+  /** El proceso del negocio, paso a paso, tal como lo lleva el sistema. */
+  proceso?: string[];
 };
 
 export const CASOS_REALES: CasoReal[] = [
@@ -47,10 +49,17 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Post-venta automática", detalle: "Service a los 6 meses y encuesta de satisfacción a los 10 días." },
     ],
     shotsSlug: "bahiamotos",
+    proceso: [
+      "El cliente llega por la web: catálogo con financiación simulada, quiz de qué moto le conviene y consulta directa por WhatsApp — todo cae al CRM.",
+      "La venta se arma en el sistema: pagos combinados, permuta si trae usada, cuotas propias si financia, y el boleto sale en PDF listo para firmar.",
+      "Si financió, Tesorería sigue las cuotas: vencimientos, avisos automáticos y reclamo con copia al garante si se atrasa.",
+      "El taller trabaja con turnos online: orden de trabajo con estados, presupuesto aprobado por WhatsApp y aviso de 'lista para retirar'.",
+      "A los 6 meses el sistema le recuerda el service al cliente, solo — y el ciclo vuelve a empezar.",
+    ],
     shotsReales: [
-      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815882/cauce/sistema/casos/motos-fernandez/zltj0lvbycwgqmzjv9mg.png" },
-      { titulo: "Catálogo de motos online", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815889/cauce/sistema/casos/motos-fernandez/vv3b6z4vsidou8zb0c3z.png" },
-      { titulo: "Tienda de accesorios", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815896/cauce/sistema/casos/motos-fernandez/tz4c0yq6z8m1jgfgz2au.png" },
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816438/cauce/sistema/casos/motos-fernandez/yzjmjkqv59igf7eoyuks.png", href: "https://motosfernandez.com.ar" },
+      { titulo: "Catálogo de motos online", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816448/cauce/sistema/casos/motos-fernandez/yne4wxdiqp1nxsm5wkxu.png", href: "https://motosfernandez.com.ar/catalogo" },
+      { titulo: "Tienda de accesorios", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816457/cauce/sistema/casos/motos-fernandez/uv9wfdewlwgjpdmhrxda.png", href: "https://motosfernandez.com.ar/tienda" },
     ],
   },
   {
@@ -76,10 +85,17 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "CRM", detalle: "Leads de compra, turnos, test rides y campañas, todos en un lugar." },
     ],
     shotsSlug: "vespabahia",
+    proceso: [
+      "El catálogo público muestra modelos 0KM y usadas; cada unidad física vive en el sistema con su chasis único.",
+      "La venta genera la orden de compra: pagos combinados, permutas y financiación propia, con boleto numerado en PDF.",
+      "La tienda online vende cascos, ropa y repuestos con su stock; los pedidos entran al mismo panel.",
+      "El taller oficial atiende con turnos online: orden de trabajo → presupuesto → entrega, todo documentado.",
+      "Cada cliente queda en el CRM con su historial: compras, services y consultas en una sola ficha.",
+    ],
     shotsReales: [
-      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815909/cauce/sistema/casos/vespa-bahia/djuzc0pduawepbpavhwq.png" },
-      { titulo: "Catálogo de modelos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815969/cauce/sistema/casos/vespa-bahia/j3brf6w77klvcjmv1ly6.png" },
-      { titulo: "Tienda online oficial", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815926/cauce/sistema/casos/vespa-bahia/jlvngqoiojqg6k4kfokm.png" },
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816467/cauce/sistema/casos/vespa-bahia/njd1mvh6jme6u2mdijxv.png", href: "https://vespabahia.com.ar" },
+      { titulo: "Catálogo de modelos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816479/cauce/sistema/casos/vespa-bahia/kpcwuloet7dofde6nndw.png", href: "https://vespabahia.com.ar/modelos" },
+      { titulo: "Tienda online oficial", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816492/cauce/sistema/casos/vespa-bahia/h4q2xybhjmqf4s8cakdm.png", href: "https://vespabahia.com.ar/tienda" },
     ],
   },
   {
@@ -104,10 +120,17 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Analítica propia", detalle: "Visitas diarias y origen geográfico en el panel del club." },
     ],
     shotsSlug: "clubpiston",
+    proceso: [
+      "El piloto entra a la web, elige su número (el sistema le avisa cuáles están tomados) y completa sus datos.",
+      "Paga la inscripción con MercadoPago; el comprobante le llega al mail al instante, sin nadie en el medio.",
+      "El día de la carrera, el sensor en la pista marca partida y llegada: el tiempo se asocia solo al piloto en pista.",
+      "Penalizaciones y descalificaciones se cargan al momento, y el resultado se publica en vivo.",
+      "Entre eventos, el club publica sus salidas y noticias — con el asistente IA que las redacta.",
+    ],
     shotsReales: [
-      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815977/cauce/sistema/casos/vespa-club/lubeo0r4dfvaijamcc1n.png" },
-      { titulo: "Inscripción a la Gymkhana", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816068/cauce/sistema/casos/vespa-club/pcevemhneiaaoksffd3k.png" },
-      { titulo: "Noticias del club", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816013/cauce/sistema/casos/vespa-club/ek6xfz5nh4tpcnhkgngk.png" },
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815977/cauce/sistema/casos/vespa-club/lubeo0r4dfvaijamcc1n.png", href: "https://www.vespaclubbahiablanca.com.ar" },
+      { titulo: "Inscripción a la Gymkhana", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816068/cauce/sistema/casos/vespa-club/pcevemhneiaaoksffd3k.png", href: "https://www.vespaclubbahiablanca.com.ar/gymkhana" },
+      { titulo: "Noticias del club", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816013/cauce/sistema/casos/vespa-club/ek6xfz5nh4tpcnhkgngk.png", href: "https://www.vespaclubbahiablanca.com.ar/noticias" },
     ],
   },
   {
@@ -133,9 +156,16 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Analítica propia", detalle: "Visitas, clics a WhatsApp y conversiones medidas sin Google." },
     ],
     shotsSlug: "zatiori",
+    proceso: [
+      "El cliente diseña su espejo en la web: madera, pátina, tallado y medidas — el precio se calcula solo.",
+      "El pedido cae al panel con aviso por mail y sale el presupuesto en PDF numerado.",
+      "Con la seña, pasa a la cola de fábrica: prioridades, responsable y fotos de producción.",
+      "Terminado, se entrega y el saldo queda saldado en el sistema — o pasa directo al catálogo si es para stock.",
+      "Al cliente le llega un link único para dejar su reseña con fotos, que aparece en la web al aprobarse.",
+    ],
     shotsReales: [
-      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816025/cauce/sistema/casos/zatiori-espejos/hao3zylo2e3tzfq4u78g.png" },
-      { titulo: "Catálogo de espejos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816033/cauce/sistema/casos/zatiori-espejos/ndj7bmnp2z5rwcaejqcg.png" },
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816504/cauce/sistema/casos/zatiori-espejos/mlmisqslqzqwarwcijrf.png", href: "https://zatiori.vercel.app" },
+      { titulo: "Catálogo de espejos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816514/cauce/sistema/casos/zatiori-espejos/pncsrcqznpxpqdg85pyc.png", href: "https://zatiori.vercel.app/catalogo" },
     ],
   },
   {
@@ -161,6 +191,13 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Web con disponibilidad", detalle: "Su misma estética, pero conectada al sistema: muestra lugares libres reales." },
     ],
     shotsSlug: "avefenix",
+    proceso: [
+      "El anunciante consulta desde la web (que muestra la disponibilidad real de cada pantalla) o por WhatsApp.",
+      "Se le asigna su lugar: pantalla, cantidad de spots y abono mensual — la ocupación se actualiza sola.",
+      "Su spot rota en pantalla; el sistema sabe cuántos lugares quedan libres en cada punto del circuito.",
+      "Del 1 al 5 de cada mes, el aviso de cobro sale armado por WhatsApp con el total de cada cliente.",
+      "Cada pago entra a la caja diaria; el margen del negocio (contra proveedores y costos) se ve en el panel.",
+    ],
   },
 ];
 
