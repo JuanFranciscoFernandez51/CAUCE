@@ -28,28 +28,28 @@ export const PIEZA_BASE: Pieza = {
   label: "Base Cauce",
   queIncluye:
     "Tu página web completa (servicios, fotos, horarios, ubicación, contacto), tu sistema de gestión con CRM y tus procesos automáticos base, todo con tu marca. Hosting, mantenimiento y soporte directo.",
-  setupUsd: 500,
+  setupUsd: 300,
   monthlyUsd: 40,
 };
 
 export const PIEZAS: Pieza[] = [
   // ── Módulos grandes ────────────────────────────────────
-  { key: "taller", label: "Taller / órdenes de trabajo", queIncluye: "Ingreso → diagnóstico → lista → entregada, con fotos, items, saldo, OT imprimible y aviso automático al cliente.", setupUsd: 250, monthlyUsd: 15 },
-  { key: "ventas", label: "Ventas con señas y cuotas", queIncluye: "Señas, permutas, pagos, financiación propia, boleto imprimible y 'por cobrar' de un vistazo.", setupUsd: 250, monthlyUsd: 15 },
-  { key: "presupuestos", label: "Presupuestos que se convierten", queIncluye: "Cotizás, lo mandás por WhatsApp y al aceptar se convierte en orden de trabajo con un clic.", setupUsd: 100, monthlyUsd: 5 },
-  { key: "turnos", label: "Agenda y turnos online", queIncluye: "Calendario mensual y semanal, tus clientes se agendan solos desde la web, recordatorios y lista de espera.", setupUsd: 150, monthlyUsd: 10 },
-  { key: "catalogo", label: "Catálogo y stock", queIncluye: "Productos con fotos, precios, stock por talle y alerta de mínimos.", setupUsd: 150, monthlyUsd: 10 },
-  { key: "caja", label: "Finanzas y caja diaria", queIncluye: "Arqueo de caja con diferencia en verde/rojo, cuentas, costos fijos y punto de equilibrio del mes.", setupUsd: 150, monthlyUsd: 10 },
-  { key: "eventos", label: "Eventos con cronómetro", queIncluye: "Inscripción online, cronómetro con penalizaciones y ranking en vivo para proyectar en pantalla.", setupUsd: 250, monthlyUsd: 15 },
-  { key: "rrhh", label: "Equipo y fichaje", queIncluye: "Tu gente, sus horarios y sus fichadas, ordenados.", setupUsd: 100, monthlyUsd: 5 },
+  { key: "taller", label: "Taller / órdenes de trabajo", queIncluye: "Ingreso → diagnóstico → lista → entregada, con fotos, items, saldo, OT imprimible y aviso automático al cliente.", setupUsd: 40, monthlyUsd: 15 },
+  { key: "ventas", label: "Ventas con señas y cuotas", queIncluye: "Señas, permutas, pagos, financiación propia, boleto imprimible y 'por cobrar' de un vistazo.", setupUsd: 40, monthlyUsd: 15 },
+  { key: "presupuestos", label: "Presupuestos que se convierten", queIncluye: "Cotizás, lo mandás por WhatsApp y al aceptar se convierte en orden de trabajo con un clic.", setupUsd: 40, monthlyUsd: 5 },
+  { key: "turnos", label: "Agenda y turnos online", queIncluye: "Calendario mensual y semanal, tus clientes se agendan solos desde la web, recordatorios y lista de espera.", setupUsd: 40, monthlyUsd: 10 },
+  { key: "catalogo", label: "Catálogo y stock", queIncluye: "Productos con fotos, precios, stock por talle y alerta de mínimos.", setupUsd: 40, monthlyUsd: 10 },
+  { key: "caja", label: "Finanzas y caja diaria", queIncluye: "Arqueo de caja con diferencia en verde/rojo, cuentas, costos fijos y punto de equilibrio del mes.", setupUsd: 40, monthlyUsd: 10 },
+  { key: "eventos", label: "Eventos con cronómetro", queIncluye: "Inscripción online, cronómetro con penalizaciones y ranking en vivo para proyectar en pantalla.", setupUsd: 40, monthlyUsd: 15 },
+  { key: "rrhh", label: "Equipo y fichaje", queIncluye: "Tu gente, sus horarios y sus fichadas, ordenados.", setupUsd: 40, monthlyUsd: 5 },
 
   // ── Micro-piezas (ajuste fino, precios chicos) ─────────
-  { key: "pestana-extra", label: "Pestaña de admin extra", queIncluye: "Una sección más, a tu medida.", setupUsd: 30, monthlyUsd: 2, micro: true },
-  { key: "carrito", label: "Carrito de ventas en la web", queIncluye: "Tus clientes arman el pedido desde la web.", setupUsd: 30, monthlyUsd: 2, micro: true },
-  { key: "filtros", label: "Filtros y búsquedas avanzadas", queIncluye: "Encontrá cualquier cosa en dos letras.", setupUsd: 10, monthlyUsd: 1, micro: true },
-  { key: "imprimibles", label: "Documentos imprimibles con tu marca", queIncluye: "OTs, boletos y presupuestos en PDF, listos para firmar.", setupUsd: 20, monthlyUsd: 1, micro: true },
-  { key: "campos-propios", label: "Campos a medida", queIncluye: "Los datos que TU negocio necesita (patente, talle, obra social…).", setupUsd: 20, monthlyUsd: 1, micro: true },
-  { key: "galeria-fotos", label: "Galería de fotos en la web", queIncluye: "El local por dentro, en la página.", setupUsd: 10, monthlyUsd: 1, micro: true },
+  { key: "pestana-extra", label: "Pestaña de admin extra", queIncluye: "Una sección más, a tu medida.", setupUsd: 40, monthlyUsd: 2, micro: true },
+  { key: "carrito", label: "Carrito de ventas en la web", queIncluye: "Tus clientes arman el pedido desde la web.", setupUsd: 40, monthlyUsd: 2, micro: true },
+  { key: "filtros", label: "Filtros y búsquedas avanzadas", queIncluye: "Encontrá cualquier cosa en dos letras.", setupUsd: 40, monthlyUsd: 1, micro: true },
+  { key: "imprimibles", label: "Documentos imprimibles con tu marca", queIncluye: "OTs, boletos y presupuestos en PDF, listos para firmar.", setupUsd: 40, monthlyUsd: 1, micro: true },
+  { key: "campos-propios", label: "Campos a medida", queIncluye: "Los datos que TU negocio necesita (patente, talle, obra social…).", setupUsd: 40, monthlyUsd: 1, micro: true },
+  { key: "galeria-fotos", label: "Galería de fotos en la web", queIncluye: "El local por dentro, en la página.", setupUsd: 40, monthlyUsd: 1, micro: true },
 ];
 
 /** Casos espejo: la puerta de entrada del presupuesto ("querés algo como esto"). */
@@ -74,7 +74,7 @@ export const ESPEJOS: Espejo[] = [
     rubro: "Concesionaria y taller de motos · Bahía Blanca",
     historia: "Ventas con cuotas y permutas, taller completo y recordatorios de service que recuperan clientes solos. Su dueño hoy se dedica a vender.",
     shotsSlug: "bahiamotos",
-    setupUsd: 1500,
+    setupUsd: 999,
     monthlyUsd: 80,
     piezas: ["taller", "ventas", "presupuestos", "catalogo", "caja", "imprimibles", "campos-propios", "filtros"],
   },
@@ -84,7 +84,7 @@ export const ESPEJOS: Espejo[] = [
     rubro: "Clases, instructores y reservas · costa",
     historia: "Los alumnos se agendan solos desde la web, con recordatorios automáticos y lista de espera cuando el día se llena. Caja diaria con arqueo.",
     shotsSlug: "escuelaolas",
-    setupUsd: 900,
+    setupUsd: 999,
     monthlyUsd: 65,
     piezas: ["turnos", "caja", "galeria-fotos", "filtros"],
   },
@@ -94,7 +94,7 @@ export const ESPEJOS: Espejo[] = [
     rubro: "Club de motos y competencias",
     historia: "Inscripciones online que caen al CRM, cronómetro con penalizaciones y ranking en vivo proyectado en pantalla el día de la fecha.",
     shotsSlug: "clubpiston",
-    setupUsd: 950,
+    setupUsd: 999,
     monthlyUsd: 60,
     piezas: ["eventos", "caja", "galeria-fotos"],
   },

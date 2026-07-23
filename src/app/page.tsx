@@ -312,7 +312,7 @@ export default async function LandingPage() {
             Pagás una base y le sumás solo las piezas que tu negocio usa. Precios en USD + IVA{" "}
             {pricing.ivaPct}%.
           </p>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card className="flex flex-col p-6">
               <h3 className="font-bold">1 · La base (va siempre)</h3>
               <p className="mt-1.5 flex-1 text-sm text-muted-foreground">{PIEZA_BASE.queIncluye}</p>
@@ -334,8 +334,8 @@ export default async function LandingPage() {
               </p>
               <div className="mt-4">
                 <p className="text-2xl font-bold">
-                  desde {fmtUsd(100)}
-                  <span className="text-sm font-normal text-muted-foreground"> por pieza</span>
+                  {fmtUsd(40)}
+                  <span className="text-sm font-normal text-muted-foreground"> por componente</span>
                 </p>
                 <p className="text-sm text-muted-foreground">+ un mensual chico por mantenerla viva</p>
               </div>
@@ -347,10 +347,21 @@ export default async function LandingPage() {
               </p>
               <div className="mt-4">
                 <p className="text-2xl font-bold">
-                  {fmtUsd(ESPEJOS[0].setupUsd)}
+                  desde {fmtUsd(ESPEJOS[0].setupUsd)}
                   <span className="text-sm font-normal text-muted-foreground"> todo armado</span>
                 </p>
                 <p className="text-sm text-muted-foreground">+ {fmtUsd(ESPEJOS[0].monthlyUsd)}/mes con soporte directo</p>
+              </div>
+            </Card>
+            <Card className="flex flex-col p-6">
+              <h3 className="font-bold">4 · Escala</h3>
+              <p className="mt-1.5 flex-1 text-sm text-muted-foreground">
+                Para empresas grandes: desarrollos a medida, integraciones con tus sistemas,
+                infraestructura dedicada y equipo asignado. Lo armamos juntos.
+              </p>
+              <div className="mt-4">
+                <p className="text-2xl font-bold">A medida</p>
+                <p className="text-sm text-muted-foreground">valores según el proyecto</p>
               </div>
             </Card>
           </div>
