@@ -21,27 +21,27 @@ export const metadata: Metadata = {
 const PASOS = [
   {
     n: 1,
-    titulo: "Contanos tu proceso",
+    titulo: "Nos contás cómo trabajás",
     detalle:
-      "En 5 pasos guiados o en una videollamada gratis. Sin tecnicismos: nos contás qué te come el día.",
+      "Una charla por WhatsApp o un café, sin tecnicismos. Qué vendés, cómo cobrás, qué te tiene podrido de hacer a mano.",
   },
   {
     n: 2,
-    titulo: "Diagnóstico con IA",
+    titulo: "Te mostramos uno andando",
     detalle:
-      "Nuestra IA cruza tu caso contra los procesos que ya funcionan en negocios reales y arma tu plan a medida.",
+      "Antes de pagar nada, ves un sistema de un negocio como el tuyo funcionando de verdad: su página, sus turnos, su caja.",
   },
   {
     n: 3,
-    titulo: "Lo construimos y probamos",
+    titulo: "Te lo armamos a tu medida",
     detalle:
-      "Armamos el flujo, lo conectamos a tus apps y lo probamos con casos reales antes de que toque un cliente.",
+      "Tu página web, tu gestión y tu marca, adaptado a cómo laburás vos — no vos a un sistema. En días, no en meses.",
   },
   {
     n: 4,
-    titulo: "Corre solo y te reporta",
+    titulo: "Vos atendés, el resto se simplifica",
     detalle:
-      "El proceso se maneja solo, todos los días. Vos recibís reportes con resultados, no tareas nuevas.",
+      "Los turnos se agendan solos, los avisos de cobro salen listos para mandar y la caja cierra al día. Y si necesitás algo, nos escribís a nosotros, no a un 0800.",
   },
 ];
 
