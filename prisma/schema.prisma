@@ -105,6 +105,9 @@ model Client {
   actividad    Actividad[]
   presupuestosTaller PresupuestoTaller[]
   accounts     Account[]
+  categoriasFinancieras CategoriaFinanciera[]
+  cheques      Cheque[]
+  cuentasPorCobrar CuentaPorCobrar[]
   records      ContactRecord[]
   attachments  Attachment[]
   listings     Listing[]
@@ -522,21 +525,25 @@ model CashMovement {
   id        String   @id @default(cuid())
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  kind      String // venta | gasto | ajuste | transferencia
+  kind      String // venta (→INGRESO) | gasto (→GASTO) | ajuste | transferencia (→TRANSFERENCIA)
   concept   String
-  amountArs Float
+  amountArs Float // en transferencias nuevas (2 patas) va CON SIGNO: sale negativo, entra positivo
+  categoria String? // categoría financiera (string denormalizado; null = "Sin categoría")
+  moneda    String   @default("ARS") // ARS | USD (copia de la moneda de la cuenta)
   method    String? // efectivo | mp | transferencia
-  date      DateTime @default(now()) // fecha contable del movimiento
+  date      DateTime @default(now()) // fecha contable del movimiento (mediodía -03:00)
   accountId String? // cuenta afectada
   account   Account? @relation("AccountMovements", fields: [accountId], references: [id], onDelete: SetNull)
-  toAccountId String? // cuenta destino (solo transferencias)
+  toAccountId String? // cuenta destino (solo transferencias viejas de 1 fila)
   toAccount   Account? @relation("AccountTransfersIn", fields: [toAccountId], references: [id], onDelete: SetNull)
+  transferenciaId String? // une las 2 patas de una transferencia nueva
   attachmentUrl String? // comprobante (Cloudinary)
   createdAt DateTime @default(now())
 
   @@index([clientId])
   @@index([clientId, date])
   @@index([accountId])
+  @@index([transferenciaId])
 }
 
 // Taller — órdenes de trabajo (patrón MF/VB): ingreso → diagnóstico →
@@ -734,7 +741,10 @@ model CostoFijo {
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   concepto  String // "Alquiler", "Sueldos", "Luz y gas"...
+  categoria String   @default("Otros") // agrupador libre: "Local", "Personal", "Servicios"...
   montoArs  Float
+  notas     String?
+  activo    Boolean  @default(true) // inactivo = no suma al total (sin perder el dato)
   orden     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -832,7 +842,10 @@ model Account {
   name      String // "Efectivo", "Banco Galicia", "Mercado Pago", "Dólares"...
   kind      String   @default("efectivo") // efectivo | banco | mp | dolares | cheques | otro
   currency  String   @default("ARS") // ARS | USD
-  balance   Float    @default(0) // saldo actual
+  saldoInicial Float @default(0) // lo que había ANTES de empezar a cargar movimientos
+  balance   Float    @default(0) // cache: saldoInicial + Σ movimientos (la verdad se calcula)
+  excluirDeResultado Boolean @default(false) // no suma a ingresos/gastos (ej: cuenta de un tercero)
+  orden     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -841,6 +854,64 @@ model Account {
   transfersIn  CashMovement[] @relation("AccountTransfersIn")
 
   @@index([clientId])
+}
+
+// Categorías de ingresos/gastos de Finanzas — string denormalizado en el
+// movimiento (renombrar arrastra el historial con updateMany)
+model CategoriaFinanciera {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre    String
+  tipo      String // INGRESO | GASTO
+  orden     Int      @default(0)
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([clientId, nombre, tipo])
+  @@index([clientId, tipo, orden])
+}
+
+// Cheques en cartera (a cobrar) o emitidos (a pagar)
+model Cheque {
+  id               String    @id @default(cuid())
+  clientId         String
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tipo             String // A_COBRAR | A_PAGAR
+  beneficiario     String
+  monto            Float
+  moneda           String    @default("ARS") // ARS | USD
+  fechaVencimiento DateTime
+  fechaConcretado  DateTime?
+  formato          String    @default("E-Cheq") // E-Cheq | Físico | ...
+  estado           String    @default("PENDIENTE") // PENDIENTE | CONCRETADO | ANULADO
+  observaciones    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([clientId, estado])
+}
+
+// Cuentas a cobrar (créditos, saldos de clientes) y a pagar (deudas con proveedores).
+// Informativas: NO entran al resultado hasta que se concretan como movimiento.
+model CuentaPorCobrar {
+  id               String    @id @default(cuid())
+  clientId         String
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sentido          String // COBRAR | PAGAR
+  cliente          String // nombre de la persona/empresa
+  tipo             String // "Crédito", "Saldo", "Proveedor"...
+  descripcion      String?
+  monto            Float
+  moneda           String    @default("ARS") // ARS | USD
+  fechaVencimiento DateTime?
+  fechaCobro       DateTime?
+  estado           String    @default("PENDIENTE") // PENDIENTE | COBRADO
+  observaciones    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([clientId, estado])
 }
 
 // Ficha/historial del contacto: cada consulta, servicio o reparación suma una entrada

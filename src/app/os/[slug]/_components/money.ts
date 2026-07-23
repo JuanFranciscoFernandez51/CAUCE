@@ -17,3 +17,8 @@ export function fmtUsd(n: number): string {
     maximumFractionDigits: 2,
   });
 }
+
+/** Formatea según la moneda del dato ("ARS" | "USD"). */
+export function fmtMoneda(n: number, moneda: string): string {
+  return moneda === "USD" ? fmtUsd(n) : fmtArs(n);
+}

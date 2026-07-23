@@ -10,9 +10,10 @@ const CURRENCIES = ["ARS", "USD"] as const;
 
 const createSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio").max(80),
-  kind: z.enum(ACCOUNT_KINDS),
+  kind: z.enum(ACCOUNT_KINDS).default("otro"),
   currency: z.enum(CURRENCIES),
   initialBalance: z.number().finite("El saldo inicial es inválido").optional(),
+  excluirDeResultado: z.boolean().optional(),
 });
 
 /** Caja/Finanzas es SOLO del dueño: además del guard estándar, exige isOsOwner. */
@@ -61,13 +62,20 @@ export async function POST(
   const d = parsed.data;
   const initial = d.initialBalance ?? 0;
 
+  const max = await db.account.aggregate({
+    where: { clientId: guard.tenant.id },
+    _max: { orden: true },
+  });
   const account = await db.account.create({
     data: {
       clientId: guard.tenant.id,
       name: d.name,
       kind: d.kind,
       currency: d.currency,
-      balance: initial,
+      saldoInicial: initial,
+      balance: initial, // cache: sin movimientos todavía, saldo actual = saldo inicial
+      excluirDeResultado: d.excluirDeResultado ?? false,
+      orden: (max._max.orden ?? -1) + 1,
     },
   });
 

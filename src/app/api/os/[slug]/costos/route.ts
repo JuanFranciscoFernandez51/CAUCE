@@ -8,6 +8,8 @@ import { resolveOsRole, isOsOwner } from "@/app/os/[slug]/_components/os-role";
 const createSchema = z.object({
   concepto: z.string().trim().min(1).max(120),
   montoArs: z.number().min(0).max(1_000_000_000),
+  categoria: z.string().trim().min(1).max(60).default("Otros"),
+  notas: z.string().trim().max(300).optional(),
 });
 
 async function soloDueno(slug: string) {
@@ -39,6 +41,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
       clientId: g.tenant.id,
       concepto: parsed.data.concepto,
       montoArs: parsed.data.montoArs,
+      categoria: parsed.data.categoria,
+      notas: parsed.data.notas || null,
       orden: (max._max.orden ?? -1) + 1,
     },
   });
@@ -49,6 +53,9 @@ const patchSchema = z.object({
   id: z.string().min(1),
   concepto: z.string().trim().min(1).max(120).optional(),
   montoArs: z.number().min(0).max(1_000_000_000).optional(),
+  categoria: z.string().trim().min(1).max(60).optional(),
+  notas: z.string().trim().max(300).nullable().optional(),
+  activo: z.boolean().optional(),
 });
 
 /** Edición inline de un costo fijo. Solo el dueño. */

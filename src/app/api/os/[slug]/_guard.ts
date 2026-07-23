@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Client } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { assertTenantAccess, getTenantBySlug, hasModule, type OsModule } from "@/lib/tenant";
+import { isOsOwner, resolveOsRole } from "@/app/os/[slug]/_components/os-role";
 
 /**
  * Guard estándar de TODA API de Cauce OS:
@@ -38,6 +39,23 @@ export async function guardOsApi(
     };
   }
   return { tenant };
+}
+
+/**
+ * Guard de APIs SOLO-DUEÑO (ej: Finanzas): guard estándar + exige isOsOwner.
+ */
+export async function guardOsOwnerApi(
+  slug: string,
+  requiredModule?: OsModule
+): Promise<{ tenant: Client; error?: never } | { tenant?: never; error: NextResponse }> {
+  const guard = await guardOsApi(slug, requiredModule);
+  if (guard.error) return guard;
+  const session = await auth();
+  const osRole = session ? await resolveOsRole(session.user.id, guard.tenant.id) : null;
+  if (!isOsOwner(osRole)) {
+    return { error: NextResponse.json({ error: "Sin acceso a Finanzas" }, { status: 403 }) };
+  }
+  return guard;
 }
 
 /** Custom fields: objeto plano clave→string|number. */

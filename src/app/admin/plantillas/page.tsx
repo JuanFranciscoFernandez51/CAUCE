@@ -1,5 +1,10 @@
 import { Badge, Card } from "@/components/ui";
-import { CATEGORIA_LABELS, PLANTILLAS, type Plantilla } from "@/lib/plantillas";
+import {
+  CATEGORIA_LABELS,
+  PLANTILLAS,
+  SECCIONES_GUARDADAS,
+  type Plantilla,
+} from "@/lib/plantillas";
 
 export const metadata = { title: "Plantillas" };
 
@@ -56,6 +61,46 @@ export default function PlantillasPage() {
           </section>
         );
       })}
+
+      {/* Biblioteca visual: cada pantalla real, una por una */}
+      <section className="border-t pt-6">
+        <h2 className="text-xl font-bold tracking-tight">Secciones guardadas, una por una</h2>
+        <p className="mb-4 mt-1 text-sm text-muted-foreground">
+          {SECCIONES_GUARDADAS.length} pantallas reales capturadas de los sistemas en producción.
+          Cuando un cliente necesite algo parecido, esta es la referencia: se arma así de bien
+          hecho, de una.
+        </p>
+        {[...new Set(SECCIONES_GUARDADAS.map((s) => s.sistema))].map((sistema) => (
+          <div key={sistema} className="mb-8">
+            <h3 className="mb-3 font-semibold">{sistema}</h3>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {SECCIONES_GUARDADAS.filter((s) => s.sistema === sistema).map((s) => (
+                <Card key={s.url} className="flex flex-col overflow-hidden p-0">
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border-b bg-muted/30 transition-opacity hover:opacity-90"
+                    title="Ver captura completa"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.url}
+                      alt={`${sistema} — ${s.titulo}`}
+                      loading="lazy"
+                      className="aspect-video w-full object-cover object-top"
+                    />
+                  </a>
+                  <div className="flex flex-1 flex-col p-3">
+                    <h4 className="text-sm font-semibold">{s.titulo}</h4>
+                    <p className="mt-1 flex-1 text-xs text-muted-foreground">{s.queEs}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

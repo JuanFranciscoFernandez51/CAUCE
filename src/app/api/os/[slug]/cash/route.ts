@@ -4,41 +4,30 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { guardOsApi } from "../_guard";
 import { isOsOwner, resolveOsRole } from "@/app/os/[slug]/_components/os-role";
+import { noonArg } from "@/app/os/[slug]/_lib/finanzas";
+import { movView, recalcularBalances } from "@/app/os/[slug]/_lib/finanzas-data";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH_RE = /^\d{4}-\d{2}$/;
+const YEAR_RE = /^\d{4}$/;
 
-const createSchema = z
-  .object({
-    kind: z.enum(["venta", "gasto", "ajuste", "transferencia"]),
-    concept: z.string().trim().min(1, "El concepto es obligatorio").max(200),
-    amountArs: z.number().finite("El monto es inválido"),
-    method: z.enum(["efectivo", "mp", "transferencia"]).optional(),
-    accountId: z.string().trim().min(1).optional(),
-    toAccountId: z.string().trim().min(1).optional(),
-    date: z.string().regex(DATE_RE).optional(),
-    attachmentUrl: z.string().trim().url().max(500).optional(),
-  })
-  .refine((d) => (d.kind === "ajuste" ? d.amountArs !== 0 : d.amountArs > 0), {
-    message: "El monto debe ser mayor a 0",
-    path: ["amountArs"],
-  })
-  .refine((d) => (d.kind === "transferencia" ? !!d.accountId && !!d.toAccountId : true), {
-    message: "La transferencia necesita cuenta de origen y destino",
-    path: ["toAccountId"],
-  })
-  .refine((d) => (d.kind === "transferencia" ? d.accountId !== d.toAccountId : true), {
-    message: "Origen y destino deben ser cuentas distintas",
-    path: ["toAccountId"],
-  });
+const createSchema = z.object({
+  kind: z.enum(["venta", "gasto"]),
+  concept: z.string().trim().max(200).default(""),
+  categoria: z.string().trim().min(1).max(80).optional(),
+  amountArs: z.number().finite().positive("El monto debe ser mayor a 0"),
+  accountId: z.string().trim().min(1, "Elegí una cuenta"),
+  method: z.enum(["efectivo", "mp", "transferencia"]).optional(),
+  date: z.string().regex(DATE_RE).optional(),
+  attachmentUrl: z.string().trim().url().max(500).optional(),
+});
 
-/** "YYYY-MM-DD" → instante al mediodía ART (fecha contable estable). */
-function dateToInstant(dateStr: string): Date {
-  return new Date(`${dateStr}T12:00:00-03:00`);
-}
-
-/** Rango [inicio, fin) de un día o mes calendario argentino (UTC-3). */
-function rangeFor(date: string | null, month: string | null): { gte: Date; lt: Date } | null {
+/** Rango [inicio, fin) de un día, mes o año calendario argentino (UTC-3). */
+function rangeFor(
+  date: string | null,
+  month: string | null,
+  year: string | null
+): { gte: Date; lt: Date } | null {
   if (date && DATE_RE.test(date)) {
     const start = new Date(`${date}T00:00:00-03:00`);
     return { gte: start, lt: new Date(start.getTime() + 86_400_000) };
@@ -51,9 +40,16 @@ function rangeFor(date: string | null, month: string | null): { gte: Date; lt: D
       lt: new Date(`${next}-01T00:00:00-03:00`),
     };
   }
+  if (year && YEAR_RE.test(year)) {
+    return {
+      gte: new Date(`${year}-01-01T00:00:00-03:00`),
+      lt: new Date(`${Number(year) + 1}-01-01T00:00:00-03:00`),
+    };
+  }
   return null;
 }
 
+/** Caja/Finanzas es SOLO del dueño: además del guard estándar, exige isOsOwner. */
 async function guardOwner(slug: string) {
   const guard = await guardOsApi(slug, "caja");
   if (guard.error) return guard;
@@ -74,7 +70,7 @@ export async function GET(
   if (guard.error) return guard.error;
 
   const sp = new URL(req.url).searchParams;
-  const range = rangeFor(sp.get("date"), sp.get("month"));
+  const range = rangeFor(sp.get("date"), sp.get("month"), sp.get("year"));
   const accountId = sp.get("accountId");
 
   const movements = await db.cashMovement.findMany({
@@ -83,23 +79,12 @@ export async function GET(
       ...(range ? { date: range } : {}),
       ...(accountId ? { OR: [{ accountId }, { toAccountId: accountId }] } : {}),
     },
-    orderBy: { date: "desc" },
-    select: {
-      id: true,
-      kind: true,
-      concept: true,
-      amountArs: true,
-      method: true,
-      date: true,
-      accountId: true,
-      toAccountId: true,
-      attachmentUrl: true,
-      createdAt: true,
-    },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
   });
-  return NextResponse.json({ movements });
+  return NextResponse.json({ movements: movements.map(movView) });
 }
 
+/** Alta de un movimiento INGRESO (venta) o GASTO. Las transferencias van por /caja/transferencias. */
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
@@ -118,18 +103,13 @@ export async function POST(
     );
   }
   const d = parsed.data;
-  const when = d.date ? dateToInstant(d.date) : new Date();
 
-  // Validar que las cuentas (si vienen) sean de este tenant.
-  const accountIds = [d.accountId, d.toAccountId].filter(Boolean) as string[];
-  if (accountIds.length > 0) {
-    const owned = await db.account.count({
-      where: { id: { in: accountIds }, clientId },
-    });
-    if (owned !== new Set(accountIds).size) {
-      return NextResponse.json({ error: "Cuenta inválida" }, { status: 400 });
-    }
+  const account = await db.account.findFirst({ where: { id: d.accountId, clientId } });
+  if (!account) {
+    return NextResponse.json({ error: "Cuenta inválida" }, { status: 400 });
   }
+
+  const when = d.date ? noonArg(d.date) : new Date();
 
   try {
     const movement = await db.$transaction(async (tx) => {
@@ -137,41 +117,21 @@ export async function POST(
         data: {
           clientId,
           kind: d.kind,
-          concept: d.concept,
+          concept: d.concept || d.categoria || (d.kind === "venta" ? "Ingreso" : "Gasto"),
+          categoria: d.categoria ?? null,
           amountArs: d.amountArs,
+          moneda: account.currency,
           method: d.method ?? null,
-          accountId: d.accountId ?? null,
-          toAccountId: d.kind === "transferencia" ? d.toAccountId ?? null : null,
+          accountId: account.id,
           attachmentUrl: d.attachmentUrl ?? null,
           date: when,
-          createdAt: when,
         },
       });
-
-      // Ajuste de saldos: venta/ingreso suma, gasto resta, ajuste va con su signo,
-      // transferencia resta de origen y suma a destino.
-      if (d.kind === "transferencia") {
-        await tx.account.update({
-          where: { id: d.accountId! },
-          data: { balance: { decrement: d.amountArs } },
-        });
-        await tx.account.update({
-          where: { id: d.toAccountId! },
-          data: { balance: { increment: d.amountArs } },
-        });
-      } else if (d.accountId) {
-        const delta =
-          d.kind === "venta" ? d.amountArs : d.kind === "gasto" ? -d.amountArs : d.amountArs;
-        await tx.account.update({
-          where: { id: d.accountId },
-          data: { balance: { increment: delta } },
-        });
-      }
-
+      await recalcularBalances(tx, clientId, [account.id]);
       return mov;
     });
 
-    return NextResponse.json({ ok: true, movement }, { status: 201 });
+    return NextResponse.json({ ok: true, movement: movView(movement) }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "No se pudo guardar el movimiento" }, { status: 500 });
   }

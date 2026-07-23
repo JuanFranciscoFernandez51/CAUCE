@@ -1,339 +1,287 @@
-import { notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
+import Link from "next/link";
 import { db } from "@/lib/db";
-import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
-import { isOsOwner, resolveOsRole } from "../_components/os-role";
-import { Stat } from "@/components/ui";
-import { ModuleDisabled } from "../_components/module-disabled";
-import { argMonthStr } from "../_lib/dates";
-import { storageAvailable } from "@/lib/storage";
-import { AccountsSection } from "../_components/finanzas/accounts-section";
-import { MonthSection } from "../_components/finanzas/month-section";
-import { YearSection } from "../_components/finanzas/year-section";
-import { ArqueoSection, type ArqueoHistItem } from "../_components/finanzas/arqueo-section";
-import { CostosSection } from "../_components/finanzas/costos-section";
-import { FinanzasTabs } from "../_components/finanzas/tabs";
-import { argDateStr, dayRange } from "../_lib/dates";
-import { fmtArs } from "../_components/money";
+import { Card, Stat } from "@/components/ui";
+import { accesoCaja } from "./_acceso";
+import { FinanzasHeader } from "../_components/finanzas/header";
+import { fmtMoneda } from "../_components/money";
+import { fmtDateShort } from "../_lib/dates";
+import { calcularSaldos } from "../_lib/finanzas";
+import { cuentaView } from "../_lib/finanzas-data";
 
-const MONTH_RE = /^\d{4}-\d{2}$/;
-const YEAR_RE = /^\d{4}$/;
+/** Dorado "por cobrar" (patrón Vespa). */
+const DORADO = "#CE9F33";
 
-type Mov = {
-  id: string;
-  kind: string;
-  concept: string;
-  amountArs: number;
-  method: string | null;
-  date: Date;
-  accountId: string | null;
-  toAccountId: string | null;
-  attachmentUrl: string | null;
-};
-
-/** Ingresos/egresos/balance para reportes. Transferencia es neutra. Ajuste va con su signo. */
-function totals(movs: Pick<Mov, "kind" | "amountArs">[]) {
-  let ingresos = 0;
-  let egresos = 0;
-  for (const m of movs) {
-    if (m.kind === "venta") ingresos += m.amountArs;
-    if (m.kind === "gasto") egresos += m.amountArs;
-    if (m.kind === "ajuste") {
-      if (m.amountArs >= 0) ingresos += m.amountArs;
-      else egresos += -m.amountArs;
-    }
-  }
-  return { ingresos, egresos, balance: ingresos - egresos };
-}
-
-function monthRange(month: string) {
-  const [y, m] = month.split("-").map(Number);
-  const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
-  return {
-    gte: new Date(`${month}-01T00:00:00-03:00`),
-    lt: new Date(`${next}-01T00:00:00-03:00`),
-  };
-}
-
-function yearRange(year: string) {
-  return {
-    gte: new Date(`${year}-01-01T00:00:00-03:00`),
-    lt: new Date(`${Number(year) + 1}-01-01T00:00:00-03:00`),
-  };
-}
-
-const METHOD_LABELS: Record<string, string> = {
-  efectivo: "Efectivo",
-  mp: "Mercado Pago",
-  transferencia: "Transferencia",
-};
-
-export default async function CajaPage({
+export default async function ResumenGeneralPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ tab?: string; month?: string; year?: string; account?: string }>;
 }) {
   const { slug } = await params;
-  const sp = await searchParams;
-  const tenant = await getTenantBySlug(slug);
-  if (!tenant) notFound();
-  if (!hasModule(tenant, "caja")) {
-    return <ModuleDisabled moduleLabel={MODULE_LABELS.caja} />;
-  }
+  const acceso = await accesoCaja(slug);
+  if (!acceso.ok) return acceso.denied;
+  const tenant = acceso.tenant;
 
-  // Finanzas es solo del dueño: el equipo no la ve.
-  const session = await auth();
-  const osRole = session ? await resolveOsRole(session.user.id, tenant.id) : null;
-  if (!isOsOwner(osRole)) {
-    return (
-      <ModuleDisabled
-        moduleLabel={MODULE_LABELS.caja}
-        title="No tenés acceso a Caja & Reportes"
-        detail="Pedile acceso al dueño de la cuenta."
-      />
-    );
-  }
-
-  const tab =
-    sp.tab === "mes" || sp.tab === "ano" || sp.tab === "saldos" || sp.tab === "costos"
-      ? sp.tab
-      : "dia";
-  const month = sp.month && MONTH_RE.test(sp.month) ? sp.month : argMonthStr();
-  const year = sp.year && YEAR_RE.test(sp.year) ? sp.year : argMonthStr().slice(0, 4);
-  const accountFilter = sp.account || "";
-
-  const accounts = await db.account.findMany({
-    where: { clientId: tenant.id },
-    orderBy: [{ active: "desc" }, { createdAt: "asc" }],
-  });
-
-  // ── Total consolidado en ARS (las USD aparte, no se suman) ──
-  const arsTotal = accounts
-    .filter((a) => a.active && a.currency === "ARS")
-    .reduce((s, a) => s + a.balance, 0);
-  const usdTotal = accounts
-    .filter((a) => a.active && a.currency === "USD")
-    .reduce((s, a) => s + a.balance, 0);
-  const hasUsd = accounts.some((a) => a.currency === "USD");
-
-  // ── Arqueo del día (tab Caja del día) ──
-  const hoyStr = argDateStr();
-  const hoyRange = dayRange(hoyStr);
-  const [arqueoHoy, arqueoHist, efectivoMovs] = await Promise.all([
-    db.cajaDia.findUnique({
-      where: { clientId_fecha: { clientId: tenant.id, fecha: hoyStr } },
-      include: { saldos: true },
-    }),
-    db.cajaDia.findMany({
-      where: { clientId: tenant.id, cerradaEl: { not: null }, fecha: { not: hoyStr } },
-      include: { saldos: true },
-      orderBy: { fecha: "desc" },
-      take: 7,
+  const [cuentas, movimientos, cartera, cheques] = await Promise.all([
+    db.account.findMany({
+      where: { clientId: tenant.id },
+      orderBy: [{ orden: "asc" }, { createdAt: "asc" }],
     }),
     db.cashMovement.findMany({
-      where: { clientId: tenant.id, method: "efectivo", date: { gte: hoyRange.start, lt: hoyRange.end } },
-      select: { kind: true, amountArs: true },
+      where: { clientId: tenant.id },
+      select: { kind: true, amountArs: true, accountId: true, toAccountId: true },
     }),
+    db.cuentaPorCobrar.findMany({ where: { clientId: tenant.id, estado: "PENDIENTE" } }),
+    db.cheque.findMany({ where: { clientId: tenant.id, estado: "PENDIENTE" } }),
   ]);
-  const efectivoHoy = totals(efectivoMovs);
-  const tieneUsd = accounts.some((a) => a.active && a.currency === "USD");
-  const costosFijos = await db.costoFijo.findMany({
-    where: { clientId: tenant.id },
-    orderBy: [{ orden: "asc" }, { createdAt: "asc" }],
-  });
-  const historial: ArqueoHistItem[] = arqueoHist.map((h) => ({
-    fecha: h.fecha,
-    usuario: h.usuario,
-    saldos: h.saldos.map((s) => ({
-      moneda: s.moneda,
-      saldoInicial: s.saldoInicial,
-      ingresos: s.ingresos,
-      egresos: s.egresos,
-      contado: s.contado,
-      diferencia: s.diferencia,
+
+  const views = cuentas.map(cuentaView);
+  const saldos = calcularSaldos(views, movimientos).filter((s) => s.cuenta.active);
+  const saldosARS = saldos.filter((s) => s.cuenta.currency === "ARS" && !s.cuenta.excluirDeResultado);
+  const saldosUSD = saldos.filter((s) => s.cuenta.currency === "USD" && !s.cuenta.excluirDeResultado);
+  const excluidas = saldos.filter((s) => s.cuenta.excluirDeResultado);
+
+  const totalARS = saldosARS.reduce((a, s) => a + s.saldoActual, 0);
+  const totalUSD = saldosUSD.reduce((a, s) => a + s.saldoActual, 0);
+
+  // Cartera (solo ARS pendiente): cuentas por cobrar/pagar + cheques.
+  const sumARS = (arr: { monto: number; moneda: string }[]) =>
+    arr.filter((x) => x.moneda === "ARS").reduce((a, x) => a + x.monto, 0);
+  const aCobrar =
+    sumARS(cartera.filter((c) => c.sentido === "COBRAR")) +
+    sumARS(cheques.filter((c) => c.tipo === "A_COBRAR"));
+  const aPagar =
+    sumARS(cartera.filter((c) => c.sentido === "PAGAR")) +
+    sumARS(cheques.filter((c) => c.tipo === "A_PAGAR"));
+  const neta = aCobrar - aPagar;
+
+  const ahora = new Date();
+  const items = [
+    ...cartera.map((c) => ({
+      dir: c.sentido === "COBRAR" ? ("cobrar" as const) : ("pagar" as const),
+      label: c.cliente,
+      sub: c.tipo,
+      monto: c.monto,
+      moneda: c.moneda,
+      venc: c.fechaVencimiento,
     })),
-  }));
+    ...cheques.map((c) => ({
+      dir: c.tipo === "A_COBRAR" ? ("cobrar" as const) : ("pagar" as const),
+      label: c.beneficiario,
+      sub: "Cheque",
+      monto: c.monto,
+      moneda: c.moneda,
+      venc: c.fechaVencimiento as Date | null,
+    })),
+  ]
+    .map((i) => ({ ...i, vencido: !!i.venc && i.venc < ahora }))
+    .sort((a, b) => (a.venc?.getTime() ?? Infinity) - (b.venc?.getTime() ?? Infinity));
 
-  // ── Movimientos del mes (para tab Mes) ──
-  const mRange = monthRange(month);
-  const monthMovs: Mov[] = await db.cashMovement.findMany({
-    where: {
-      clientId: tenant.id,
-      date: mRange,
-      ...(accountFilter
-        ? { OR: [{ accountId: accountFilter }, { toAccountId: accountFilter }] }
-        : {}),
-    },
-    orderBy: { date: "desc" },
-    select: {
-      id: true,
-      kind: true,
-      concept: true,
-      amountArs: true,
-      method: true,
-      date: true,
-      accountId: true,
-      toAccountId: true,
-      attachmentUrl: true,
-    },
-  });
-  const monthTotals = totals(monthMovs);
+  const vencidoCobrar = items
+    .filter((i) => i.dir === "cobrar" && i.vencido && i.moneda === "ARS")
+    .reduce((a, i) => a + i.monto, 0);
 
-  // ── Movimientos del año (para dashboard anual) ──
-  const yRange = yearRange(year);
-  const yearMovs = await db.cashMovement.findMany({
-    where: { clientId: tenant.id, date: yRange },
-    orderBy: { date: "asc" },
-    select: { kind: true, amountArs: true, method: true, date: true },
-  });
-
-  // Agregar por mes (1..12) en calendario argentino.
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const mm = String(i + 1).padStart(2, "0");
-    return { month: i + 1, key: `${year}-${mm}`, ingresos: 0, egresos: 0, balance: 0 };
-  });
-  for (const m of yearMovs) {
-    const mk = m.date.toLocaleDateString("en-CA", {
-      timeZone: "America/Argentina/Buenos_Aires",
-    }); // YYYY-MM-DD
-    const idx = Number(mk.slice(5, 7)) - 1;
-    if (idx < 0 || idx > 11) continue;
-    const row = months[idx];
-    if (m.kind === "venta") row.ingresos += m.amountArs;
-    else if (m.kind === "gasto") row.egresos += m.amountArs;
-    else if (m.kind === "ajuste") {
-      if (m.amountArs >= 0) row.ingresos += m.amountArs;
-      else row.egresos += -m.amountArs;
-    }
-  }
-  for (const row of months) row.balance = row.ingresos - row.egresos;
-
-  const yearTotals = months.reduce(
-    (acc, m) => ({
-      ingresos: acc.ingresos + m.ingresos,
-      egresos: acc.egresos + m.egresos,
-      balance: acc.balance + m.balance,
-    }),
-    { ingresos: 0, egresos: 0, balance: 0 }
-  );
-
-  // Desglose por medio del año.
-  const methodKeys = ["efectivo", "mp", "transferencia", null] as const;
-  const byMethod = methodKeys
-    .map((key) => {
-      const movs = yearMovs.filter((mv) => (mv.method ?? null) === key);
-      return {
-        key: key ?? "none",
-        label: key ? METHOD_LABELS[key] : "Sin medio",
-        ...totals(movs),
-        count: movs.length,
-      };
-    })
-    .filter((r) => r.count > 0);
-
-  const accountsLite = accounts.map((a) => ({
-    id: a.id,
-    name: a.name,
-    kind: a.kind,
-    currency: a.currency,
-    balance: a.balance,
-    active: a.active,
-  }));
+  const posicionTotal = totalARS + neta;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Finanzas</h1>
-          <p className="text-sm text-muted-foreground">
-            Cuentas, movimientos y reportes de tu negocio.
-          </p>
-        </div>
-        <a
-          href={`/os/${tenant.slug}/caja/proveedores`}
-          className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
-        >
-          🏭 Proveedores
-        </a>
-      </div>
+      <FinanzasHeader
+        slug={tenant.slug}
+        subtitle="Cuentas, resultados y posición del negocio — en vivo."
+      />
 
-      {/* Total consolidado arriba */}
+      {/* KPIs */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Stat
-          label="Total en pesos"
-          value={fmtArs(arsTotal)}
-          tone={arsTotal >= 0 ? "default" : "destructive"}
-          hint="Suma de cuentas activas en ARS"
+          label="Posición total"
+          value={fmtMoneda(posicionTotal, "ARS")}
+          tone={posicionTotal >= 0 ? "default" : "destructive"}
+          hint="Plata en cuentas + cartera neta (ARS)"
         />
-        {hasUsd ? (
-          <Stat
-            label="Total en dólares"
-            value={usdTotal.toLocaleString("es-AR", {
-              style: "currency",
-              currency: "USD",
-              maximumFractionDigits: 2,
-            })}
-            hint="Cuentas en USD (no se suman a pesos)"
-          />
-        ) : null}
-        <Stat label="Balance del mes" value={fmtArs(monthTotals.balance)} tone={monthTotals.balance >= 0 ? "success" : "destructive"} hint="Mes seleccionado" />
+        <Stat
+          label="En cuentas (ARS)"
+          value={fmtMoneda(totalARS, "ARS")}
+          tone={totalARS >= 0 ? "default" : "destructive"}
+          hint="Disponible hoy en cuentas activas"
+        />
+        <Stat
+          label="Por cobrar"
+          value={<span style={{ color: DORADO }}>{fmtMoneda(aCobrar, "ARS")}</span>}
+          hint={`${items.filter((i) => i.dir === "cobrar").length} pendientes (cuentas + cheques)`}
+        />
       </div>
 
-      <FinanzasTabs slug={tenant.slug} active={tab} month={month} year={year}>
-        {tab === "dia" ? (
-          <ArqueoSection
-            slug={tenant.slug}
-            hoy={
-              arqueoHoy
-                ? {
-                    fecha: arqueoHoy.fecha,
-                    abierta: true,
-                    cerrada: Boolean(arqueoHoy.cerradaEl),
-                    usuario: arqueoHoy.usuario,
-                    saldos: arqueoHoy.saldos.map((s) => ({
-                      moneda: s.moneda,
-                      saldoInicial: s.saldoInicial,
-                      ingresos: s.ingresos,
-                      egresos: s.egresos,
-                      contado: s.contado,
-                      diferencia: s.diferencia,
-                    })),
-                  }
-                : null
-            }
-            efectivoHoy={{ ingresos: efectivoHoy.ingresos, egresos: efectivoHoy.egresos }}
-            tieneUsd={tieneUsd}
-            historial={historial}
-          />
-        ) : null}
-        {tab === "saldos" ? (
-          <AccountsSection slug={tenant.slug} accounts={accountsLite} arsTotal={arsTotal} />
-        ) : null}
-        {tab === "mes" ? (
-          <MonthSection
-            slug={tenant.slug}
-            month={month}
-            accounts={accountsLite.filter((a) => a.active)}
-            accountFilter={accountFilter}
-            movements={monthMovs.map((m) => ({ ...m, date: m.date.toISOString() }))}
-            totals={monthTotals}
-            storageReady={storageAvailable()}
-          />
-        ) : null}
-        {tab === "ano" ? (
-          <YearSection slug={tenant.slug} year={year} months={months} totals={yearTotals} byMethod={byMethod} />
-        ) : null}
-        {tab === "costos" ? (
-          <CostosSection
-            slug={tenant.slug}
-            costos={costosFijos.map((c) => ({ id: c.id, concepto: c.concepto, montoArs: c.montoArs }))}
-            ingresosMes={monthTotals.ingresos}
-            mesLabel={month}
-          />
-        ) : null}
-      </FinanzasTabs>
+      {vencidoCobrar > 0 ? (
+        <div className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          ⚠ Tenés <strong>{fmtMoneda(vencidoCobrar, "ARS")}</strong> vencido por cobrar. Pasá por{" "}
+          <Link href={`/os/${tenant.slug}/caja/cartera`} className="underline">
+            Cartera
+          </Link>{" "}
+          para reclamarlo.
+        </div>
+      ) : null}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Saldos ARS */}
+        <Card className="p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold">Saldos por cuenta (ARS)</h2>
+            <Link
+              href={`/os/${tenant.slug}/caja/cuentas`}
+              className="text-xs text-primary hover:underline"
+            >
+              Editar →
+            </Link>
+          </div>
+          <div className="space-y-1">
+            {saldosARS.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Todavía no hay cuentas en pesos. Crealas desde la pestaña Cuentas.
+              </p>
+            ) : null}
+            {saldosARS.map((s) => (
+              <div
+                key={s.cuenta.id}
+                className="flex items-center justify-between border-b py-1.5 text-sm last:border-0"
+              >
+                <span>{s.cuenta.name}</span>
+                <span
+                  className={`font-medium tabular-nums ${s.saldoActual < 0 ? "text-destructive" : ""}`}
+                >
+                  {fmtMoneda(s.saldoActual, "ARS")}
+                </span>
+              </div>
+            ))}
+            {saldosARS.length > 0 ? (
+              <div className="flex items-center justify-between pt-2 font-bold">
+                <span>Total en cuentas</span>
+                <span className="tabular-nums text-primary">{fmtMoneda(totalARS, "ARS")}</span>
+              </div>
+            ) : null}
+          </div>
+        </Card>
+
+        <div className="space-y-6">
+          {/* USD */}
+          {saldosUSD.length > 0 ? (
+            <Card className="p-5">
+              <h2 className="mb-3 text-base font-semibold">💵 Saldos en USD</h2>
+              <div className="space-y-1">
+                {saldosUSD.map((s) => (
+                  <div
+                    key={s.cuenta.id}
+                    className="flex items-center justify-between border-b py-1.5 text-sm last:border-0"
+                  >
+                    <span>{s.cuenta.name}</span>
+                    <span className="font-medium tabular-nums">
+                      {fmtMoneda(s.saldoActual, "USD")}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between pt-2 font-bold">
+                  <span>Total USD</span>
+                  <span className="tabular-nums text-success">{fmtMoneda(totalUSD, "USD")}</span>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Los dólares no se suman a los pesos: se muestran aparte.
+              </p>
+            </Card>
+          ) : null}
+
+          {/* Cuentas excluidas */}
+          {excluidas.length > 0 ? (
+            <Card className="p-5">
+              <h2 className="mb-3 text-base font-semibold">Cuentas excluidas de resultados</h2>
+              <div className="space-y-1">
+                {excluidas.map((s) => (
+                  <div
+                    key={s.cuenta.id}
+                    className="flex items-center justify-between py-1.5 text-sm"
+                  >
+                    <span>
+                      {s.cuenta.name}{" "}
+                      <span className="text-[11px] text-muted-foreground">(excluida)</span>
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {fmtMoneda(s.saldoActual, s.cuenta.currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Plata que se administra pero no es del negocio: no entra en ingresos/gastos.
+              </p>
+            </Card>
+          ) : null}
+
+          {/* Cartera */}
+          <Card className="p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-semibold">Cartera (cuentas y cheques)</h2>
+              <Link
+                href={`/os/${tenant.slug}/caja/cartera`}
+                className="text-xs text-primary hover:underline"
+              >
+                Ver todo →
+              </Link>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex items-center justify-between border-b py-1.5">
+                <span>A cobrar</span>
+                <span className="font-medium tabular-nums" style={{ color: DORADO }}>
+                  {fmtMoneda(aCobrar, "ARS")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-b py-1.5">
+                <span>A pagar</span>
+                <span className="font-medium tabular-nums text-destructive">
+                  {fmtMoneda(aPagar, "ARS")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2 font-bold">
+                <span>Posición neta</span>
+                <span
+                  className={`tabular-nums ${neta >= 0 ? "text-success" : "text-destructive"}`}
+                >
+                  {fmtMoneda(neta, "ARS")}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {neta >= 0 ? "Te queda a favor" : "Te queda en contra"} (cuentas + cheques, ARS).
+              </p>
+              {items.length > 0 ? (
+                <div className="mt-1 space-y-1.5 border-t pt-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Próximos vencimientos
+                  </p>
+                  {items.slice(0, 5).map((i, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <span className="max-w-[58%] truncate">
+                        <span style={{ color: i.dir === "cobrar" ? DORADO : "var(--destructive)" }}>
+                          {i.dir === "cobrar" ? "▲" : "▼"}
+                        </span>{" "}
+                        {i.label} <span className="text-muted-foreground">· {i.sub}</span>
+                        {i.vencido ? <span className="text-destructive"> · vencido</span> : null}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {i.venc ? fmtDateShort(i.venc) : "—"} ·{" "}
+                        <span className="font-medium tabular-nums text-foreground">
+                          {fmtMoneda(i.monto, i.moneda)}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Los saldos se calculan siempre en vivo: saldo inicial + movimientos. La cartera es
+        informativa — entra al resultado recién cuando la cobrás o pagás de verdad.
+      </p>
     </div>
   );
 }

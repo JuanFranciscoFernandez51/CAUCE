@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { guardOsApi } from "../../_guard";
 import { isOsOwner, resolveOsRole } from "@/app/os/[slug]/_components/os-role";
+import { recalcularBalances } from "@/app/os/[slug]/_lib/finanzas-data";
 
 const ACCOUNT_KINDS = ["efectivo", "banco", "mp", "dolares", "cheques", "otro"] as const;
 
@@ -12,6 +13,9 @@ const patchSchema = z
     name: z.string().trim().min(1).max(80).optional(),
     kind: z.enum(ACCOUNT_KINDS).optional(),
     active: z.boolean().optional(),
+    saldoInicial: z.number().finite().optional(),
+    excluirDeResultado: z.boolean().optional(),
+    orden: z.number().int().optional(),
   })
   .refine((d) => Object.keys(d).length > 0, { message: "Nada para actualizar" });
 
@@ -43,13 +47,16 @@ export async function PATCH(
     );
   }
 
-  // No tocamos balance ni currency desde acá: el saldo lo manejan los movimientos.
+  // currency no se toca desde acá; balance solo se recalcula (saldoInicial + movimientos).
   const result = await db.account.updateMany({
     where: { id, clientId: guard.tenant.id },
     data: parsed.data,
   });
   if (result.count === 0) {
     return NextResponse.json({ error: "Cuenta no encontrada" }, { status: 404 });
+  }
+  if (parsed.data.saldoInicial !== undefined) {
+    await recalcularBalances(db, guard.tenant.id, [id]);
   }
   const account = await db.account.findFirst({ where: { id, clientId: guard.tenant.id } });
   return NextResponse.json({ ok: true, account });
