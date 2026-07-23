@@ -360,7 +360,7 @@ function NuevaCampana({ onClose, onSaved }: { onClose: () => void; onSaved: () =
   const [videoUrl, setVideoUrl] = useState("");
   const [caption, setCaption] = useState("");
   const [cta, setCta] = useState("LEARN_MORE");
-  const [destino, setDestino] = useState("https://cauce-arg.vercel.app");
+  const [destino, setDestino] = useState("https://www.cauceapp.com.ar");
   const [busy, setBusy] = useState(false);
   const [sugiriendo, setSugiriendo] = useState(false);
   const [subiendo, setSubiendo] = useState(false);

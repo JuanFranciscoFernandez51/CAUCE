@@ -16,6 +16,7 @@ const NAV = [
   { href: "/admin/pricing", label: "Presupuestos", icon: "💵" },
   { href: "/admin/propuestas", label: "Propuestas", icon: "📨" },
   { href: "/admin/marketing", label: "Marketing", icon: "📣" },
+  { href: "/admin/plantillas", label: "Plantillas", icon: "🧩" },
   { href: "/admin/estilos", label: "Estilos", icon: "🎨" },
 ] as const;
 

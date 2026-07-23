@@ -23,6 +23,8 @@ export type CasoReal = {
   shotsReales?: { titulo: string; url: string; href?: string }[];
   /** El proceso del negocio, paso a paso, tal como lo lleva el sistema. */
   proceso?: string[];
+  /** Capturas del ADMIN real (con datos difuminados por privacidad). */
+  shotsAdmin?: { titulo: string; url: string }[];
 };
 
 export const CASOS_REALES: CasoReal[] = [
@@ -49,6 +51,12 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Post-venta automática", detalle: "Service a los 6 meses y encuesta de satisfacción a los 10 días." },
     ],
     shotsSlug: "bahiamotos",
+    shotsAdmin: [
+      { titulo: "Panel de control", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829407/cauce/sistema/casos/motos-fernandez/admin/e6qj4skomk1ygleejblh.png" },
+      { titulo: "CRM de clientes", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829414/cauce/sistema/casos/motos-fernandez/admin/anhtfyfftahs54bi9nkb.png" },
+      { titulo: "Publicación en Instagram desde el panel", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829421/cauce/sistema/casos/motos-fernandez/admin/lpekicszjiaujo7ctuig.png" },
+      { titulo: "Campañas de Meta Ads", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829427/cauce/sistema/casos/motos-fernandez/admin/yvr8xmvhqdi8me124wes.png" },
+    ],
     proceso: [
       "El cliente llega por la web: catálogo con financiación simulada, quiz de qué moto le conviene y consulta directa por WhatsApp — todo cae al CRM.",
       "La venta se arma en el sistema: pagos combinados, permuta si trae usada, cuotas propias si financia, y el boleto sale en PDF listo para firmar.",
@@ -85,6 +93,12 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "CRM", detalle: "Leads de compra, turnos, test rides y campañas, todos en un lugar." },
     ],
     shotsSlug: "vespabahia",
+    shotsAdmin: [
+      { titulo: "Panel de control", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829441/cauce/sistema/casos/vespa-bahia/admin/yizpiappubu9slslpt1z.png" },
+      { titulo: "Finanzas — la carpeta completa", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829448/cauce/sistema/casos/vespa-bahia/admin/oeno5bxmxmp3dnx4njxk.png" },
+      { titulo: "Tesorería y financiaciones", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829452/cauce/sistema/casos/vespa-bahia/admin/z3d9jcnslkg8xb2gamum.png" },
+      { titulo: "Catálogo y unidades", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829459/cauce/sistema/casos/vespa-bahia/admin/vqgouxlfcshj45fk6p1o.png" },
+    ],
     proceso: [
       "El catálogo público muestra modelos 0KM y usadas; cada unidad física vive en el sistema con su chasis único.",
       "La venta genera la orden de compra: pagos combinados, permutas y financiación propia, con boleto numerado en PDF.",
@@ -156,6 +170,12 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Analítica propia", detalle: "Visitas, clics a WhatsApp y conversiones medidas sin Google." },
     ],
     shotsSlug: "zatiori",
+    shotsAdmin: [
+      { titulo: "Panel de gestión", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829578/cauce/sistema/casos/zatiori-espejos/admin/bgnbyaechnsmpu8hxhad.png" },
+      { titulo: "Pedidos y presupuestos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829585/cauce/sistema/casos/zatiori-espejos/admin/vs3dizsrfitltsvofsij.png" },
+      { titulo: "Cola de fábrica", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829592/cauce/sistema/casos/zatiori-espejos/admin/vx3cz2tzvzt0sll0psy6.png" },
+      { titulo: "CRM de clientes", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829598/cauce/sistema/casos/zatiori-espejos/admin/lzefe3tct2u5rnr8tkhl.png" },
+    ],
     proceso: [
       "El cliente diseña su espejo en la web: madera, pátina, tallado y medidas — el precio se calcula solo.",
       "El pedido cae al panel con aviso por mail y sale el presupuesto en PDF numerado.",
@@ -166,6 +186,48 @@ export const CASOS_REALES: CasoReal[] = [
     shotsReales: [
       { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816504/cauce/sistema/casos/zatiori-espejos/mlmisqslqzqwarwcijrf.png", href: "https://zatiori.vercel.app" },
       { titulo: "Catálogo de espejos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816514/cauce/sistema/casos/zatiori-espejos/pncsrcqznpxpqdg85pyc.png", href: "https://zatiori.vercel.app/catalogo" },
+    ],
+  },
+  {
+    slug: "la-base",
+    nombre: "La Base — Escuela de Ski & Snowboard",
+    rubro: "Escuela de ski y snowboard · Cerro Catedral, Bariloche",
+    logo: null,
+    webUrl: "https://la-base-vespa-bahia.vercel.app/es",
+    resumen:
+      "Una escuela de montaña con más de 40 instructores, funcionando en 3 idiomas y 4 monedas: las reservas entran solas desde la web con disponibilidad real de instructores, y si no se pagan a tiempo, el cupo se libera automático.",
+    resultados: [
+      "Las reservas entran solas en 3 idiomas (español, inglés y portugués): el cliente elige clase, fecha e instructor libre, y si no paga a tiempo el cupo se libera automático.",
+      "La caja cierra todos los días en 4 monedas (pesos, dólares, reales y euros) con cotizaciones historizadas, y el contador se baja todo en un CSV con un clic.",
+      "Cada instructor entra con su usuario, ve su agenda y bloquea sus días; la escuela liquida las horas trabajadas sin planillas.",
+      "El check-in es con QR: el cliente muestra el código, recepción ve al toque si debe plata y lo marca presente.",
+    ],
+    modulos: [
+      { nombre: "Reservas online", detalle: "Wizard de 3 pasos con disponibilidad real de instructores y precio automático del tarifario." },
+      { nombre: "Caja multimoneda", detalle: "Apertura y cierre diario en ARS/USD/BRL/EUR con cotizaciones historizadas." },
+      { nombre: "Instructores", detalle: "Perfiles públicos, agenda propia, bolsa de postulantes y liquidaciones por horas." },
+      { nombre: "CRM y lista de espera", detalle: "Toda consulta, reserva y postulación cae al CRM; espera por día cuando no hay cupo." },
+      { nombre: "Parte de nieve en vivo", detalle: "El estado del cerro desde la fuente oficial del Catedral, con respaldo manual." },
+    ],
+    shotsSlug: "escuelaolas",
+    shotsAdmin: [
+      { titulo: "Panel de control", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829616/cauce/sistema/casos/la-base/admin/f5nmx21pboph7hs3nd69.png" },
+      { titulo: "Reservas", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829627/cauce/sistema/casos/la-base/admin/qruw8dc4dwsrge6zc7y0.png" },
+      { titulo: "Caja multimoneda", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829635/cauce/sistema/casos/la-base/admin/exmh0xecvva3eovzs5wa.png" },
+      { titulo: "Check-in con QR", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829641/cauce/sistema/casos/la-base/admin/n6killsno1x93zj3xhh4.png" },
+    ],
+    shotsReales: [
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829436/cauce/sistema/casos/la-base/fjzkktlzeavbx3hddfh1.png", href: "https://la-base-vespa-bahia.vercel.app/es" },
+      { titulo: "Reservas online en 3 pasos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829441/cauce/sistema/casos/la-base/coivsepyrcm7rt5klihe.png", href: "https://la-base-vespa-bahia.vercel.app/es/reservas" },
+      { titulo: "Tarifas de la temporada", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829447/cauce/sistema/casos/la-base/avc5nizvgcwpy6t27xil.png", href: "https://la-base-vespa-bahia.vercel.app/es/tarifas" },
+      { titulo: "Parte de nieve en vivo", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784829453/cauce/sistema/casos/la-base/zajni0djpn7knam8psbi.png", href: "https://la-base-vespa-bahia.vercel.app/es/parte-de-nieve" },
+    ],
+    proceso: [
+      "El cliente llega a la web en su idioma (se detecta solo) y ve las tarifas y el parte de nieve en vivo del cerro.",
+      "Reserva en 3 pasos: clase, fecha y horario — el sistema le muestra solo los instructores realmente libres.",
+      "La reserva queda pendiente de pago con su código; si no se paga a tiempo, el cupo se libera solo y avisa al de la lista de espera.",
+      "El día de la clase, check-in con QR en recepción: saldo a la vista y presente marcado.",
+      "Después de esquiar deja su reseña verificada con el código de la clase, que alimenta el perfil del instructor.",
     ],
   },
   {

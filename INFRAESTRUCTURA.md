@@ -19,6 +19,14 @@ Con 50 clientes a USD 40/mes (USD 2.000/mes de ingreso), la infra total ronda
 USD 60-150/mes. **No** se crean cuentas por cliente: 50 Vercels serían 50 lugares
 donde algo se rompe y 50 facturas.
 
+## Dominio propio de Cauce: cauceapp.com.ar (comprado jul 2026)
+
+1. Vercel → proyecto CAUCE → Settings → Domains → Add: `cauceapp.com.ar` y `www.cauceapp.com.ar`.
+2. En nic.ar (delegación DNS): registro A de la raíz a la IP que indica Vercel y CNAME `www` → `cname.vercel-dns.com`.
+3. Cuando esté activo: agregar `https://www.cauceapp.com.ar/api/admin/marketing/meta/callback` a los
+   URI válidos de OAuth en la app de Meta y actualizar `META_REDIRECT_BASE` en Vercel.
+   (Hasta entonces, la conexión de Meta sigue usando cauce-arg.vercel.app y funciona igual.)
+
 ## Paso a paso: dominio propio para un cliente
 
 El sistema ya resuelve el tenant según el dominio (proxy → tenant-by-host).

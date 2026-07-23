@@ -23,7 +23,7 @@ de empleados, importar la agenda de contactos en 2 minutos.
 
 Tono: argentino, directo, de dueño de negocio a dueño de negocio. Sin humo técnico:
 hablar de tiempo ahorrado, plata y orden — no de "software" ni "digitalización".
-Contacto: cauce-arg.vercel.app · Bahía Blanca.
+Contacto: cauceapp.com.ar · Bahía Blanca.
 `.trim();
 
 export type PublicacionGenerada = {

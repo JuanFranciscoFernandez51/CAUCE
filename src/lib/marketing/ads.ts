@@ -176,7 +176,7 @@ async function crearCreativeItem(
   item: AdItem,
   ctx: { token: string; adAccountId: string; pageId: string; igUserId: string | null }
 ): Promise<string> {
-  const link = c.destinationUrl || "https://cauce-arg.vercel.app";
+  const link = c.destinationUrl || "https://www.cauceapp.com.ar";
   let objectStorySpec: Record<string, unknown>;
 
   if (item.videoUrl) {
@@ -235,7 +235,7 @@ async function crearCreative(
   c: MktCampaign,
   ctx: { token: string; adAccountId: string; pageId: string; igUserId: string | null }
 ): Promise<string> {
-  const link = c.destinationUrl || "https://cauce-arg.vercel.app";
+  const link = c.destinationUrl || "https://www.cauceapp.com.ar";
   let objectStorySpec: Record<string, unknown>;
 
   if (c.creativeMediaType === "VIDEO" || c.creativeMediaType === "REEL") {

@@ -141,6 +141,17 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
           </>
         ) : null}
 
+        {/* Su sistema por dentro (admin real, datos protegidos) */}
+        {caso.shotsAdmin?.length ? (
+          <>
+            <h2 className="mt-10 text-xl font-bold">Su sistema por dentro</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              El panel de administración real — con los datos difuminados por privacidad.
+            </p>
+            <Galeria shots={caso.shotsAdmin} />
+          </>
+        ) : null}
+
         {/* CTA */}
         <div className="no-print mt-12 rounded-lg border bg-muted/40 p-6 text-center">
           <Badge variant="primary">¿Tu negocio se parece?</Badge>
