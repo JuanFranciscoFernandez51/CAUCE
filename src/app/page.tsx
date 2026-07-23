@@ -108,7 +108,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <h2 className="text-center text-3xl font-bold">Cómo funciona</h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-muted-foreground">
-            De &quot;esto me come el día&quot; a &quot;esto corre solo&quot;, en cuatro pasos.
+            De tenerlo todo en la cabeza a tenerlo todo resuelto, en cuatro pasos.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {PASOS.map((p) => (
