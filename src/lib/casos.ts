@@ -43,7 +43,7 @@ export const CASOS: Caso[] = [
     descripcion:
       "Sabés que hay que estar en redes, pero entre atender y producir no te queda tiempo. Publicás cuando podés, sin constancia, y el alcance se desploma.",
     solucion:
-      "La IA genera el contenido con tu tono y tus productos, te lo deja listo para aprobar y lo publica en horario. Vos revisás cinco minutos por semana; las redes corren solas.",
+      "Dejamos las publicaciones armadas con tu tono y tus productos: vos las aprobás y salen solas en horario. Y tus anuncios llevan al cliente directo a tu WhatsApp.",
     area: "MARKETING",
     icon: "📣",
   },

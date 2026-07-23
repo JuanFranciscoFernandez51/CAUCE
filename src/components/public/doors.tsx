@@ -13,8 +13,8 @@ export function Doors({ compact = false }: { compact?: boolean }) {
         </p>
         <h3 className="mt-1 text-xl font-bold">Sé lo que necesito</h3>
         <p className="mt-2 flex-1 text-sm text-muted-foreground">
-          Contanos tu proceso en 5 pasos y la IA arma tu plan de automatización.
-          En menos de 24 horas lo tenés por WhatsApp.
+          Contanos tu negocio en 5 pasos y en menos de 24 horas te mandamos por WhatsApp
+          una propuesta con precio y una demo de tu rubro para que la toques.
         </p>
         <ButtonLink href="/intake" variant="primary" className="mt-4 w-full sm:w-auto">
           Empezar mi diagnóstico
@@ -24,10 +24,10 @@ export function Doors({ compact = false }: { compact?: boolean }) {
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Puerta 2
         </p>
-        <h3 className="mt-1 text-xl font-bold">No sé qué automatizar</h3>
+        <h3 className="mt-1 text-xl font-bold">No sé por dónde empezar</h3>
         <p className="mt-2 flex-1 text-sm text-muted-foreground">
-          Videollamada gratis de 30-45 minutos. Te llevás un roadmap de
-          automatización de tu negocio, por fases y con precios.
+          Charla gratis de 30 minutos: nos contás cómo trabajás y te llevás un plan
+          concreto de qué armar primero, por etapas y con precios.
         </p>
         <ButtonLink href="/consultoria" variant="accent" className="mt-4 w-full sm:w-auto">
           Agendar consultoría gratis
