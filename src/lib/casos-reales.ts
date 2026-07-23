@@ -27,7 +27,7 @@ export const CASOS_REALES: CasoReal[] = [
     nombre: "Motos Fernández",
     rubro: "Concesionaria multimarca y taller · Bahía Blanca · desde 1985",
     logo: "/casos/motos-fernandez-logo.png",
-    webUrl: "https://www.motosfernandez.com.ar",
+    webUrl: "https://motosfernandez.com.ar",
     resumen:
       "No es un catálogo lindo: es la concesionaria entera adentro de un sistema. Vender, cobrar cuotas, gestionar el taller, publicar en redes y hacer post-venta — todo desde un panel.",
     resultados: [
@@ -51,7 +51,7 @@ export const CASOS_REALES: CasoReal[] = [
     nombre: "Vespa Bahía",
     rubro: "Concesionario oficial Vespa · Piaggio · Aprilia · Bahía Blanca",
     logo: null,
-    webUrl: "https://www.vespabahia.com",
+    webUrl: "https://vespabahia.com.ar",
     resumen:
       "El concesionario oficial digitalizado de punta a punta: cada moto física es una unidad con su chasis en el sistema, cada venta un boleto con sus pagos, y la tienda online vende sola.",
     resultados: [
@@ -75,6 +75,7 @@ export const CASOS_REALES: CasoReal[] = [
     nombre: "Vespa Club Bahía Blanca",
     rubro: "Club de marca · comunidad, eventos y encuentros",
     logo: null,
+    webUrl: "https://vespaclubbahiablanca.com.ar",
     resumen:
       "La comunidad Vespa de Bahía con su casa digital: los socios se anotan solos a cada encuentro, las inscripciones caen al sistema y el día del evento todo está organizado de antemano.",
     resultados: [

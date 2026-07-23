@@ -86,6 +86,9 @@ const OPS_NAV: Partial<Record<OsModule, { path: string; label: string; icon: str
 /** Orden de los módulos operativos dentro del grupo. */
 const OPS_ORDER: OsModule[] = ["pantallas", "ventas", "turnos", "catalogo", "taller", "eventos", "sitio", "proyectos", "rrhh", "caja"];
 
+/** "Propiedades" (gestión de listings) solo tiene sentido para inmobiliarias. */
+const esInmobiliaria = (rubro: string | null) => (rubro ?? "").toLowerCase().includes("inmobil");
+
 export default async function OsLayout({
   children,
   params,
@@ -98,6 +101,7 @@ export default async function OsLayout({
   if (!tenant) notFound();
 
   const branding = tenantBranding(tenant);
+  const opsOrder = OPS_ORDER.filter((m) => m !== "sitio" || esInmobiliaria(tenant.rubro));
   const themeVars = {
     "--primary": branding.primary,
     "--primary-foreground": "#ffffff",
@@ -145,7 +149,7 @@ export default async function OsLayout({
   const crm = modules.includes("crm");
 
   // Grupo Operaciones: módulos operativos activos (Caja solo para el dueño) + Procesos.
-  const opsItems = OPS_ORDER.filter((m) => modules.includes(m) && (m !== "caja" || owner)).map((m) => ({
+  const opsItems = opsOrder.filter((m) => modules.includes(m) && (m !== "caja" || owner)).map((m) => ({
     label: OPS_NAV[m]!.label,
     href: `${base}/${OPS_NAV[m]!.path}`,
     icon: OPS_NAV[m]!.icon,

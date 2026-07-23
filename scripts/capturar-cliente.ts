@@ -12,6 +12,8 @@ import { uploadToTenant } from "../src/lib/storage";
 
 const db = new PrismaClient();
 const BASE = process.env.BASE ?? "http://localhost:3000";
+/** Tenants con DATOS REALES: difuminar nombres y montos en las capturas del sistema. */
+const PRIVADOS = new Set((process.env.PRIVADOS ?? "avefenix").split(","));
 const DEFAULT = ["vespabahia", "bahiamotos", "escuelaolas", "clubpiston"];
 
 type Shot = { titulo: string; grupo: "web" | "sistema"; url: string };
@@ -33,6 +35,19 @@ async function shot(ctx: BrowserContext, slug: string, path: string, titulo: str
     const res = await p.goto(`${BASE}${path}`, { waitUntil: "networkidle", timeout: 25000 });
     if (!res || res.status() >= 400) { await p.close(); return null; }
     await p.waitForTimeout(900);
+    // Modo privacidad: se ve el diseño, no los datos (nombres, montos, teléfonos).
+    if (grupo === "sistema" && PRIVADOS.has(slug)) {
+      await p.addStyleTag({
+        content: `
+          main li, main td, main tbody, main [class*="tabular"],
+          main p.font-medium, main p.font-semibold, main .text-2xl, main .text-xl,
+          main a[href^="https://wa.me"], main figcaption
+          { filter: blur(5px) !important; }
+          main h1, main h2, main h3 { filter: none !important; }
+        `,
+      });
+      await p.waitForTimeout(300);
+    }
     const buffer = await p.screenshot(); // viewport (parece pantalla real)
     await p.close();
     const up = await uploadToTenant({ slug, scope: ["presentacion"], buffer, originalName: `${titulo}.png` });
@@ -61,6 +76,7 @@ async function capturarTenant(ctx: BrowserContext, slug: string) {
   if (mods.includes("proyectos")) shots.push(await shot(ctx, slug, `/os/${slug}/proyectos`, "Tus proyectos", "sistema"));
   else if (mods.includes("turnos")) shots.push(await shot(ctx, slug, `/os/${slug}/turnos`, "Tu agenda", "sistema"));
   else if (mods.includes("caja")) shots.push(await shot(ctx, slug, `/os/${slug}/caja`, "Tus finanzas", "sistema"));
+  if (mods.includes("pantallas")) shots.push(await shot(ctx, slug, `/os/${slug}/pantallas`, "Tus pantallas y su disponibilidad", "sistema"));
   if (mods.includes("ventas")) shots.push(await shot(ctx, slug, `/os/${slug}/ventas`, "Tus ventas y saldos", "sistema"));
   if (mods.includes("taller")) shots.push(await shot(ctx, slug, `/os/${slug}/taller`, "Tu taller", "sistema"));
   shots.push(await shot(ctx, slug, `/os/${slug}/hoy`, "Tu día armado", "sistema"));
