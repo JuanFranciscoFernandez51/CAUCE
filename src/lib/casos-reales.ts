@@ -17,8 +17,10 @@ export type CasoReal = {
   resultados: string[];
   /** Qué tiene su sistema adentro. */
   modulos: { nombre: string; detalle: string }[];
-  /** Tenant del que salen las capturas reales (settings.shots). */
+  /** Tenant del que salen las capturas del sistema (settings.shots). */
   shotsSlug: string;
+  /** Capturas de SU web real en producción (prioridad sobre las del tenant). */
+  shotsReales?: { titulo: string; url: string }[];
 };
 
 export const CASOS_REALES: CasoReal[] = [
@@ -45,6 +47,11 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Post-venta automática", detalle: "Service a los 6 meses y encuesta de satisfacción a los 10 días." },
     ],
     shotsSlug: "bahiamotos",
+    shotsReales: [
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815882/cauce/sistema/casos/motos-fernandez/zltj0lvbycwgqmzjv9mg.png" },
+      { titulo: "Catálogo de motos online", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815889/cauce/sistema/casos/motos-fernandez/vv3b6z4vsidou8zb0c3z.png" },
+      { titulo: "Tienda de accesorios", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815896/cauce/sistema/casos/motos-fernandez/tz4c0yq6z8m1jgfgz2au.png" },
+    ],
   },
   {
     slug: "vespa-bahia",
@@ -69,6 +76,11 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "CRM", detalle: "Leads de compra, turnos, test rides y campañas, todos en un lugar." },
     ],
     shotsSlug: "vespabahia",
+    shotsReales: [
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815909/cauce/sistema/casos/vespa-bahia/djuzc0pduawepbpavhwq.png" },
+      { titulo: "Catálogo de modelos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815969/cauce/sistema/casos/vespa-bahia/j3brf6w77klvcjmv1ly6.png" },
+      { titulo: "Tienda online oficial", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815926/cauce/sistema/casos/vespa-bahia/jlvngqoiojqg6k4kfokm.png" },
+    ],
   },
   {
     slug: "vespa-club",
@@ -92,6 +104,11 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Analítica propia", detalle: "Visitas diarias y origen geográfico en el panel del club." },
     ],
     shotsSlug: "clubpiston",
+    shotsReales: [
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784815977/cauce/sistema/casos/vespa-club/lubeo0r4dfvaijamcc1n.png" },
+      { titulo: "Inscripción a la Gymkhana", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816068/cauce/sistema/casos/vespa-club/pcevemhneiaaoksffd3k.png" },
+      { titulo: "Noticias del club", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816013/cauce/sistema/casos/vespa-club/ek6xfz5nh4tpcnhkgngk.png" },
+    ],
   },
   {
     slug: "zatiori-espejos",
@@ -116,6 +133,10 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "Analítica propia", detalle: "Visitas, clics a WhatsApp y conversiones medidas sin Google." },
     ],
     shotsSlug: "zatiori",
+    shotsReales: [
+      { titulo: "Su web viva — home", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816025/cauce/sistema/casos/zatiori-espejos/hao3zylo2e3tzfq4u78g.png" },
+      { titulo: "Catálogo de espejos", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1784816033/cauce/sistema/casos/zatiori-espejos/ndj7bmnp2z5rwcaejqcg.png" },
+    ],
   },
   {
     slug: "ave-fenix",

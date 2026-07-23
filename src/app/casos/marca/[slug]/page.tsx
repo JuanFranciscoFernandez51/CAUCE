@@ -32,8 +32,12 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
   const caso = getCasoReal(slug);
   if (!caso) notFound();
 
-  const tenant = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
-  const shots = shotsDeSettings(tenant?.settings).slice(0, 6);
+  // Prioridad: capturas de SU web real; si no hay, las del tenant en Cauce.
+  let shots: { titulo: string; url: string }[] = caso.shotsReales ?? [];
+  if (shots.length === 0) {
+    const tenant = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
+    shots = shotsDeSettings(tenant?.settings).slice(0, 6);
+  }
 
   return (
     <PublicShell>

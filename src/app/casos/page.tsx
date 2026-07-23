@@ -69,12 +69,14 @@ export default async function CasosPage() {
   // Marcas reales con ficha propia: shot principal desde su tenant.
   const marcas = await Promise.all(
     CASOS_REALES.map(async (caso) => {
-      let shotUrl: string | null = null;
-      try {
-        const t = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
-        shotUrl = shotPrincipal(shotsDeSettings(t?.settings))?.url ?? null;
-      } catch {
-        // sin captura no rompe
+      let shotUrl: string | null = caso.shotsReales?.[0]?.url ?? null;
+      if (!shotUrl) {
+        try {
+          const t = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
+          shotUrl = shotPrincipal(shotsDeSettings(t?.settings))?.url ?? null;
+        } catch {
+          // sin captura no rompe
+        }
       }
       return { caso, shotUrl };
     })
