@@ -75,7 +75,41 @@ export default async function LandingPage() {
   const pricing = await getPricing();
   const byArea = catalogoPorArea();
 
-  const packOrder: PackKey[] = ["starter", "pro", "scale", "custom"];
+  const areaCard = (area: BizArea) => {
+    const procesos = (byArea.get(area) ?? []).slice(0, 2);
+    const caso = CASOS.find((c) => c.area === area);
+    return (
+      <Card key={area} className="flex flex-col p-5">
+        <div className="flex items-center gap-2">
+          <span aria-hidden className="text-xl">{AREA_ICONS[area]}</span>
+          <h3 className="font-semibold">{AREA_LABELS[area]}</h3>
+        </div>
+        <ul className="mt-3 flex-1 space-y-2 text-sm text-muted-foreground">
+          {procesos.length > 0 ? (
+            procesos.map((p) => (
+              <li key={p.key} className="flex gap-2">
+                <span aria-hidden className="text-primary">✓</span>
+                <span>{p.queHace}</span>
+              </li>
+            ))
+          ) : (
+            <li className="flex gap-2">
+              <span aria-hidden className="text-primary">✓</span>
+              <span>{caso?.solucion ?? "Automatizaciones a medida para esta área."}</span>
+            </li>
+          )}
+        </ul>
+        {caso ? (
+          <Link
+            href={`/casos/${caso.slug}`}
+            className="mt-3 text-sm font-medium text-primary hover:underline"
+          >
+            Ver el caso completo →
+          </Link>
+        ) : null}
+      </Card>
+    );
+  };
 
   return (
     <PublicShell>
@@ -88,7 +122,7 @@ export default async function LandingPage() {
               <Badge variant="primary">Web + sistema de gestión a medida — Bahía Blanca, Argentina</Badge>
               <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
                 Tu negocio entero, en un sistema{" "}
-                <span className="text-primary">hecho a tu medida</span>
+                <span className="text-primary">hecho 100% a tu medida</span>
               </h1>
               <p className="mt-4 text-lg text-muted-foreground">
                 Tu página web, tu gestión y tus avisos automáticos, armados como trabajás vos.
@@ -204,6 +238,37 @@ export default async function LandingPage() {
           . Todo lo de abajo funciona hoy en negocios reales.
         </p>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {areaCard("FINANZAS")}
+          {areaCard("OPERACIONES")}
+          <Card className="flex flex-col p-5">
+            <div className="flex items-center gap-2">
+              <span aria-hidden className="text-xl">🧾</span>
+              <h3 className="font-semibold">Papelería & Documentos</h3>
+            </div>
+            <ul className="mt-3 flex-1 space-y-2 text-sm text-muted-foreground">
+              <li className="flex gap-2">
+                <span aria-hidden className="text-primary">✓</span>
+                <span>
+                  Boletos de compra-venta, presupuestos y órdenes de trabajo en PDF con tu marca,
+                  listos para firmar o mandar por WhatsApp.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span aria-hidden className="text-primary">✓</span>
+                <span>
+                  Facturación oficial integrada: la factura sale del mismo sistema donde cargaste la
+                  venta, sin tipear dos veces.
+                </span>
+              </li>
+            </ul>
+            <Link href="/casos" className="mt-3 text-sm font-medium text-primary hover:underline">
+              Ver el caso completo →
+            </Link>
+          </Card>
+          {areaCard("ATENCION")}
+          {areaCard("TURNOS")}
+          {areaCard("VENTAS_CRM")}
+          {areaCard("RRHH")}
           <Card className="flex flex-col p-5">
             <div className="flex items-center gap-2">
               <span aria-hidden className="text-xl">🔧</span>
@@ -214,7 +279,7 @@ export default async function LandingPage() {
                 <span aria-hidden className="text-primary">✓</span>
                 <span>
                   Cada trabajo entra con fotos y diagnóstico, avanza por estados y se entrega con su
-                  orden imprimible con tu marca y el saldo claro.
+                  orden imprimible y el saldo claro.
                 </span>
               </li>
               <li className="flex gap-2">
@@ -229,41 +294,7 @@ export default async function LandingPage() {
               Ver el caso completo →
             </Link>
           </Card>
-          {AREA_ORDER.map((area) => {
-            const procesos = (byArea.get(area) ?? []).slice(0, 2);
-            const caso = CASOS.find((c) => c.area === area);
-            return (
-              <Card key={area} className="flex flex-col p-5">
-                <div className="flex items-center gap-2">
-                  <span aria-hidden className="text-xl">{AREA_ICONS[area]}</span>
-                  <h3 className="font-semibold">{AREA_LABELS[area]}</h3>
-                </div>
-                <ul className="mt-3 flex-1 space-y-2 text-sm text-muted-foreground">
-                  {procesos.length > 0 ? (
-                    procesos.map((p) => (
-                      <li key={p.key} className="flex gap-2">
-                        <span aria-hidden className="text-primary">✓</span>
-                        <span>{p.queHace}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="flex gap-2">
-                      <span aria-hidden className="text-primary">✓</span>
-                      <span>{caso?.solucion ?? "Automatizaciones a medida para esta área."}</span>
-                    </li>
-                  )}
-                </ul>
-                {caso ? (
-                  <Link
-                    href={`/casos/${caso.slug}`}
-                    className="mt-3 text-sm font-medium text-primary hover:underline"
-                  >
-                    Ver el caso completo →
-                  </Link>
-                ) : null}
-              </Card>
-            );
-          })}
+          {areaCard("MARKETING")}
         </div>
         <div className="mt-10 text-center">
           <ButtonLink href="/casos" variant="ghost">

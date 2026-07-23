@@ -11,6 +11,7 @@ import {
   shotPrincipal,
 } from "@/lib/casos";
 import { PublicShell } from "@/components/public/shell";
+import { CASOS_REALES } from "@/lib/casos-reales";
 import { Card, Badge } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -65,54 +66,88 @@ async function getNegociosReales(): Promise<NegocioReal[]> {
 export default async function CasosPage() {
   const negocios = await getNegociosReales();
 
+  // Marcas reales con ficha propia: shot principal desde su tenant.
+  const marcas = await Promise.all(
+    CASOS_REALES.map(async (caso) => {
+      let shotUrl: string | null = null;
+      try {
+        const t = await db.client.findUnique({ where: { slug: caso.shotsSlug } });
+        shotUrl = shotPrincipal(shotsDeSettings(t?.settings))?.url ?? null;
+      } catch {
+        // sin captura no rompe
+      }
+      return { caso, shotUrl };
+    })
+  );
+
   return (
     <PublicShell>
-      {/* ── Negocios reales (capturas) ── */}
-      {negocios.length > 0 ? (
-        <section className="border-b bg-muted/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
-              <Badge variant="primary">Negocios reales</Badge>
-              <h1 className="mt-4 text-4xl font-bold tracking-tight">
-                Ya funcionan con Cauce
-              </h1>
-              <p className="mt-3 text-muted-foreground">
-                No son maquetas: son negocios argentinos con su web, su sistema y
-                sus automatizaciones andando. Estas son capturas reales.
-              </p>
-            </div>
+      {/* ── Marcas reales con ficha completa ── */}
+      <section className="border-b bg-muted/40">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <Badge variant="primary">Casos reales</Badge>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight">
+              Las marcas que ya trabajan con Cauce
+            </h1>
+            <p className="mt-3 text-muted-foreground">
+              Negocios argentinos de verdad, con su web y su sistema andando todos los días.
+              Entrá a cada uno y mirá qué tiene su sistema adentro — capturas reales incluidas.
+            </p>
+          </div>
 
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {negocios.map((n) => (
-                <Card key={n.slug} className="flex flex-col overflow-hidden">
-                  <div className="relative aspect-[16/10] w-full border-b bg-muted">
-                    <Image
-                      src={n.shotUrl}
-                      alt={`${n.shotTitulo} — ${n.name}`}
-                      fill
-                      sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover object-top"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h2 className="text-lg font-bold leading-snug">{n.name}</h2>
-                      {n.rubro ? (
-                        <Badge variant="outline" className="shrink-0 capitalize">
-                          {n.rubro}
-                        </Badge>
-                      ) : null}
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {marcas.map(({ caso, shotUrl }) => (
+              <Link key={caso.slug} href={`/casos/marca/${caso.slug}`} className="group">
+                <Card className="flex h-full flex-col overflow-hidden transition-shadow group-hover:shadow-md">
+                  {shotUrl ? (
+                    <div className="relative aspect-[16/10] w-full border-b bg-muted">
+                      <Image
+                        src={shotUrl}
+                        alt={`Sistema de ${caso.nombre}`}
+                        fill
+                        sizes="(min-width: 768px) 360px, 100vw"
+                        className="object-cover object-top"
+                      />
                     </div>
-                    <p className="mt-2 flex-1 text-sm text-muted-foreground">
-                      {n.logro}
+                  ) : null}
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex items-center gap-3">
+                      {caso.logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={caso.logo}
+                          alt=""
+                          className={`h-9 w-auto rounded object-contain ${caso.logoOscuro ? "bg-slate-900 p-1" : ""}`}
+                        />
+                      ) : (
+                        <span className="flex h-9 w-9 items-center justify-center rounded bg-primary text-lg font-bold text-primary-foreground">
+                          {caso.nombre[0]}
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <h2 className="font-bold leading-snug">{caso.nombre}</h2>
+                        <p className="truncate text-xs text-muted-foreground">{caso.rubro}</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 flex-1 text-sm text-muted-foreground">{caso.resumen}</p>
+                    <p className="mt-3 text-sm font-medium text-primary">
+                      Ver su sistema por dentro →
                     </p>
                   </div>
                 </Card>
-              ))}
-            </div>
+              </Link>
+            ))}
           </div>
-        </section>
-      ) : null}
+
+          {negocios.length > 0 ? (
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              Y además: {negocios.map((n) => n.name).join(" · ")} — demos vivas por rubro para
+              que toques antes de decidir.
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       {/* ── Dolores (recetario) ── */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
