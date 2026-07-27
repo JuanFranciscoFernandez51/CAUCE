@@ -154,6 +154,16 @@ export default async function OsLayout({
     href: `${base}/${OPS_NAV[m]!.path}`,
     icon: OPS_NAV[m]!.icon,
   }));
+  // Template bazar (tienda online): sus módulos propios van primero en Operaciones.
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "bazar") {
+    opsItems.unshift(
+      { label: "Catálogo", href: `${base}/productos`, icon: "🛍️" },
+      { label: "Despacho", href: `${base}/despacho`, icon: "📦" },
+      { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
+      { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
+    );
+  }
   opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.

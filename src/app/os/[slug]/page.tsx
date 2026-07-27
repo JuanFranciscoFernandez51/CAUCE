@@ -12,6 +12,7 @@ import {
 } from "@/lib/playbooks";
 import { fmtTime } from "./_lib/dates";
 import { APPT_STATUS } from "./_lib/labels";
+import { BazarDashboard } from "./_components/bazar/dashboard";
 
 export default async function OsHomePage({
   params,
@@ -21,6 +22,11 @@ export default async function OsHomePage({
   const { slug } = await params;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
+
+  // Template bazar (tienda online): dashboard propio con ventas y tops.
+  if ((tenant.settings as { template?: string } | null)?.template === "bazar") {
+    return <BazarDashboard tenant={tenant} />;
+  }
 
   const branding = tenantBranding(tenant);
   const modules = tenantModules(tenant);

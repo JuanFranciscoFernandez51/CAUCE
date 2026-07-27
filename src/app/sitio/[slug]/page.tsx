@@ -10,6 +10,8 @@ import { ProductCard, type PublicProduct } from "./_components/product-card";
 import { ConsultaForm } from "./_components/consulta-form";
 import { siteContent } from "./_lib/site-content";
 import { DoohSite } from "./_components/dooh-site";
+import { getBazarSite } from "./_lib/bazar-site";
+import { BazarHome } from "./_components/bazar/bazar-home";
 
 export const revalidate = 300; // ISR: cachea 5 min (gru1 + esto = páginas casi instantáneas)
 
@@ -57,6 +59,14 @@ export default async function SitioHome({
 
   // Template DOOH (pantallas LED): página propia, dark, con disponibilidad en vivo.
   const tpl = (tenant.settings as { template?: string } | null)?.template;
+
+  // Template BAZAR (tienda deco & home): home propia con tienda completa.
+  if (tpl === "bazar") {
+    const site = await getBazarSite(slug);
+    if (!site) notFound();
+    return <BazarHome tenant={site.tenant} info={site.info} />;
+  }
+
   if (tpl === "dooh") {
     const pantallasDb = await db.pantalla.findMany({
       where: { clientId: tenant.id, activa: true },

@@ -113,6 +113,11 @@ model Client {
   listings     Listing[]
   proyectos    Proyecto[]
   proyectoTareas ProyectoTarea[]
+  bazarProductos     BazarProducto[]
+  bazarPedidos       BazarPedido[]
+  bazarCuentas       BazarCuenta[]
+  bazarConsultas     BazarConsulta[]
+  bazarPublicaciones BazarPublicacion[]
 }
 
 // Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
@@ -1149,6 +1154,127 @@ model PantallaContrato {
   @@index([clientId])
   @@index([pantallaId])
   @@index([contactId])
+}
+
+// ── Bazar online (template "bazar" — La Estación Deco & Home) ────────────
+// Tienda web completa: catálogo grande (6k+), pedidos con MercadoPago,
+// cuentas de comprador, consultas y publicaciones de Instagram programadas.
+
+/// Producto del bazar. Pensado para 6.000+ filas: TODO listado va paginado
+/// server-side y la búsqueda es contains sobre nombre+sku.
+model BazarProducto {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre       String
+  slug         String // único por tenant → URL /sitio/<tenant>/producto/<slug>
+  categoria    String
+  precio       Int // ARS enteros
+  precioOferta Int? // si está, es el precio vigente (el otro va tachado)
+  stock        Int      @default(0)
+  fotos        Json     @default("[]") // array de URLs Cloudinary; el orden ES el carrusel
+  descripcion  String?  @db.Text
+  destacado    Boolean  @default(false)
+  activo       Boolean  @default(true)
+  visitas      Int      @default(0)
+  vendidos     Int      @default(0)
+  sku          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  publicaciones BazarPublicacion[]
+
+  @@unique([clientId, slug])
+  @@index([clientId, categoria])
+  @@index([clientId, activo])
+  @@index([clientId, vendidos])
+  @@index([clientId, visitas])
+}
+
+/// Pedido de la tienda. numero secuencial por tenant (#1, #2, ...).
+model BazarPedido {
+  id             String       @id @default(cuid())
+  clientId       String
+  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero         Int
+  items          Json // [{productoId, nombre, precio, cant, foto}]
+  subtotal       Int
+  descuentoTipo  String? // "CUENTA10" | "POPUP5" | null — NO acumulables, aplica el mayor
+  descuentoMonto Int          @default(0)
+  envio          Int          @default(0) // costo de envío; 0 = retiro en el local
+  total          Int
+  estado         String       @default("NUEVO") // NUEVO|PAGADO|PREPARANDO|DESPACHADO|ENTREGADO|CANCELADO
+  nombre         String
+  telefono       String
+  email          String?
+  direccion      String?
+  ciudad         String?
+  cp             String?
+  notas          String?
+  retiroEnLocal  Boolean      @default(false)
+  seguimiento    String? // nro de seguimiento del correo
+  mpPreferenceId String?
+  mpPaymentId    String?
+  cuentaId       String?
+  cuenta         BazarCuenta? @relation(fields: [cuentaId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
+  @@index([clientId, createdAt])
+}
+
+/// Cuenta de cliente comprador del sitio (JWT propio, NADA que ver con NextAuth).
+model BazarCuenta {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  email        String
+  hash         String // bcrypt
+  nombre       String
+  telefono     String?
+  usoDescuento Boolean  @default(false) // ya usó el 10% de primera compra
+  createdAt    DateTime @default(now())
+
+  pedidos BazarPedido[]
+
+  @@unique([clientId, email])
+}
+
+/// Consulta del sitio (general o por producto). También cae al CRM como Contact.
+model BazarConsulta {
+  id         String   @id @default(cuid())
+  clientId   String
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre     String
+  contacto   String // teléfono o email, lo que haya dejado
+  mensaje    String   @db.Text
+  productoId String?
+  estado     String   @default("NUEVA") // NUEVA | RESPONDIDA
+  createdAt  DateTime @default(now())
+
+  @@index([clientId, estado])
+}
+
+/// Publicación de Instagram de un producto (ahora o programada; cron la publica).
+model BazarPublicacion {
+  id             String        @id @default(cuid())
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  productoId     String
+  producto       BazarProducto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  caption        String        @db.Text
+  fotos          Json          @default("[]")
+  programadaPara DateTime?
+  estado         String        @default("BORRADOR") // BORRADOR|PROGRAMADA|PUBLICADA|ERROR
+  publicadaEn    DateTime?
+  error          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([clientId, estado])
+  @@index([estado, programadaPara])
 }
 
 /// Proveedor del negocio: a quién se le paga, cuánto por mes y cuándo.
