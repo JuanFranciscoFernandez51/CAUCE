@@ -130,6 +130,34 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
           </>
         ) : null}
 
+        {/* Automatizaciones: lo que pasa solo */}
+        {caso.automatizaciones?.length ? (
+          <>
+            <h2 className="mt-10 text-xl font-bold">Lo que pasa solo</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Las automatizaciones del sistema: cada cosa dispara la siguiente, sin que nadie tenga
+              que acordarse.
+            </p>
+            <div className="mt-4 space-y-4">
+              {caso.automatizaciones.map((a) => (
+                <Card key={a.titulo} className="p-4">
+                  <p className="font-semibold">⚡ {a.titulo}</p>
+                  <ol className="mt-2 space-y-1.5">
+                    {a.flujo.map((paso, i) => (
+                      <li key={paso} className="flex gap-2 text-sm text-muted-foreground">
+                        <span aria-hidden className="shrink-0 text-primary">
+                          {i === 0 ? "▸" : "→"}
+                        </span>
+                        {paso}
+                      </li>
+                    ))}
+                  </ol>
+                </Card>
+              ))}
+            </div>
+          </>
+        ) : null}
+
         {/* Capturas reales */}
         {shots.length > 0 ? (
           <>
