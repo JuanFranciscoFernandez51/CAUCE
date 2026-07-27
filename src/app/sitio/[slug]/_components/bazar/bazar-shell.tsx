@@ -15,13 +15,8 @@ import { CarritoProvider, useCarrito } from "./carrito-store";
  */
 
 // Paleta del template (de la conchilla del logo — nada oscuro).
-export const BZ = {
-  aqua: "#3FA9A5",
-  aquaClaro: "#A8DAD6",
-  azul: "#2C6E8A",
-  arena: "#F6F1E8",
-  texto: "#2A3238",
-};
+import { BZ } from "../../_lib/bazar-paleta";
+export { BZ };
 
 export function BazarShell({ info, children }: { info: BazarShellInfo; children: ReactNode }) {
   return (
