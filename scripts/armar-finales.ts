@@ -21,6 +21,8 @@ const INTRO = path.join(OUT, "intro.mp4"); // 3.5 s
 const OUTRO_SRC = "/Users/juanfri/Desktop/anuncios-cauce/Cauce - Outro.mp4"; // 9.0 s
 const VOZ_FRAN =
   "/Users/juanfri/Desktop/anuncios-cauce/ElevenLabs_2026-07-27T15_31_34_Agustín - Relaxed, Warm and Approachable_pvc_sp87_s50_sb75_se0_b_m2.mp3";
+const VOZ_FRAN_LB =
+  "/Users/juanfri/Desktop/anuncios-cauce/ElevenLabs_2026-07-27T16_35_40_Agustín - Relaxed, Warm and Approachable_pvc_sp90_s38_sb75_se30_b_m2.mp3";
 mkdirSync(CLIPS, { recursive: true });
 
 const BASE_CSS = `::-webkit-scrollbar { display: none !important; }
@@ -85,23 +87,23 @@ const OUTRO_A = 9.55; // 65.65 - 56.10: la frase final suena sobre la outro
 // LB: voz temporal c1..c16 (se regraba con la voz de Fran cuando esté)
 const LB = "https://la-base-vespa-bahia.vercel.app";
 const ESCENAS_LB: Escena[] = [
-  { url: `${LB}/es`, dur: 10.42, caption: "La Base · Cerro Catedral — su web real" },
-  { url: `${LB}/es/reservas`, dur: 7.82, caption: "Reservas online, 24 hs" },
-  { url: `${LB}/es/instructores`, dur: 4.66, caption: "Perfil de cada instructor" },
-  { url: `${LB}/admin`, dur: 9.6, sitio: "labase", caption: "El negocio en números" },
-  { url: `${LB}/admin/hoy`, dur: 7.13, sitio: "labase", caption: "El parte del día, solo" },
-  { url: `${LB}/admin/calendario`, dur: 3.91, sitio: "labase", caption: "Ocupación del mes" },
-  { url: `${LB}/admin/reservas`, dur: 8.42, sitio: "labase", caption: "Señas y vencimientos automáticos" },
-  { url: `${LB}/admin/checkin`, dur: 7.39, sitio: "labase", caption: "Check-in con QR" },
-  { url: `${LB}/admin/caja`, dur: 7.99, sitio: "labase", caption: "Caja en 4 monedas" },
-  { url: `${LB}/admin/espera`, dur: 8.21, sitio: "labase", caption: "La demanda no se pierde" },
-  { url: `${LB}/admin/rental`, dur: 5.23, sitio: "labase", caption: "Rental asociado a la reserva" },
-  { url: `${LB}/admin/instructores`, dur: 7.08, sitio: "labase", caption: "Cada instructor, su agenda" },
-  { url: `${LB}/admin/liquidaciones`, dur: 4.7, sitio: "labase", caption: "Liquidaciones automáticas" },
-  { url: `${LB}/admin/bolsa`, dur: 6.58, sitio: "labase", caption: "Bolsa de trabajo → instructor en 1 clic" },
-  { url: `${LB}/admin/tarifas`, dur: 5.09, sitio: "labase", caption: "Tarifas en vivo" },
+  { url: `${LB}/es`, dur: 11.4, caption: "La Base · Cerro Catedral — su web real" },
+  { url: `${LB}/es/reservas`, dur: 8.28, caption: "Reservas online, 24 hs" },
+  { url: `${LB}/es/instructores`, dur: 4.88, caption: "Perfil de cada instructor" },
+  { url: `${LB}/admin`, dur: 9.92, sitio: "labase", caption: "El negocio en números" },
+  { url: `${LB}/admin/hoy`, dur: 6.48, sitio: "labase", caption: "El parte del día, solo" },
+  { url: `${LB}/admin/calendario`, dur: 3.6, sitio: "labase", caption: "Ocupación del mes" },
+  { url: `${LB}/admin/reservas`, dur: 7.96, sitio: "labase", caption: "Señas y vencimientos automáticos" },
+  { url: `${LB}/admin/checkin`, dur: 7.12, sitio: "labase", caption: "Check-in con QR" },
+  { url: `${LB}/admin/caja`, dur: 7.08, sitio: "labase", caption: "Caja en 4 monedas" },
+  { url: `${LB}/admin/espera`, dur: 7.56, sitio: "labase", caption: "La demanda no se pierde" },
+  { url: `${LB}/admin/rental`, dur: 6.0, sitio: "labase", caption: "Rental asociado a la reserva" },
+  { url: `${LB}/admin/instructores`, dur: 6.56, sitio: "labase", caption: "Cada instructor, su agenda" },
+  { url: `${LB}/admin/liquidaciones`, dur: 4.84, sitio: "labase", caption: "Liquidaciones automáticas" },
+  { url: `${LB}/admin/bolsa`, dur: 6.92, sitio: "labase", caption: "Bolsa de trabajo → instructor en 1 clic" },
+  { url: `${LB}/admin/tarifas`, dur: 6.16, sitio: "labase", caption: "Tarifas en vivo" },
 ];
-const OUTRO_LB = 10.3; // c16 suena sobre la outro
+const OUTRO_LB = 10.78; // c16 suena sobre la outro
 
 async function login(sitio: keyof typeof LOGINS, browser: import("playwright").Browser): Promise<string> {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
@@ -158,19 +160,19 @@ async function grabarEscena(
       .catch(() => {});
   }
   await p.waitForTimeout(300);
-  const FPS = 8;
+  const FPS = 30;
   const frames = Math.max(2, Math.round(esc.dur * FPS));
   const dir = path.join(CLIPS, `${pref}-${idx}-frames`);
   mkdirSync(dir, { recursive: true });
   const scrollTotal = await p
     .evaluate(() => Math.min(Math.max(document.body.scrollHeight - window.innerHeight, 0), 900))
     .catch(() => 0);
-  const framesScroll = Math.round(frames * 0.8);
+  const framesScroll = Math.round(frames * 0.85);
+  const easeIO = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   for (let f = 0; f < frames; f++) {
     if (scrollTotal > 0) {
-      const avance = Math.min(f / framesScroll, 1);
+      const avance = easeIO(Math.min(f / framesScroll, 1));
       await p.evaluate((y) => window.scrollTo(0, y), Math.round(scrollTotal * avance)).catch(() => {});
-      await p.waitForTimeout(30);
     }
     await p.screenshot({ path: path.join(dir, `f${String(f).padStart(4, "0")}.jpeg`), quality: 85, type: "jpeg" });
   }
@@ -236,15 +238,7 @@ async function main() {
     console.log("  🎬 LB", i + 1, "/", ESCENAS_LB.length);
   }
   clipsLB.push(outroClip(OUTRO_LB, "outro-LB.mp4"));
-  // concat de la voz temporal c1..c16
-  const listaVo = path.join(CLIPS, "LB-vo.txt");
-  writeFileSync(
-    listaVo,
-    Array.from({ length: 16 }, (_, i) => `file '${path.join(VO, `c${i + 1}.mp3`)}'`).join("\n")
-  );
-  const voLB = path.join(CLIPS, "LB-vo.mp3");
-  execFileSync(FFMPEG, ["-y", "-f", "concat", "-safe", "0", "-i", listaVo, "-c:a", "libmp3lame", "-q:a", "3", voLB]);
-  armar("LB", clipsLB, ["-i", voLB], path.join(OUT, "cauce-video-la-base.mp4"));
+  armar("LB", clipsLB, ["-i", VOZ_FRAN_LB], path.join(OUT, "cauce-video-la-base.mp4"));
 
   await browser.close();
 }
