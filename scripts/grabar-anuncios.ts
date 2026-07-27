@@ -29,14 +29,25 @@ const BLUR_JS = `
 (() => {
   const money = /\\$\\s?[\\d.,]{2,}|[\\d.]{4,}\\s?(ARS|USD|us\\$|u\\$s)/i;
   const contacto = /\\b\\d{2,4}[\\s-]?\\d{6,8}\\b|@[a-z0-9.-]+\\.[a-z]{2,}|wa\\.me/i;
-  const walker = document.createTreeWalker(document.querySelector('main') || document.body, NodeFilter.SHOW_TEXT);
+  const nombre = /^[A-Z\\u00c1\\u00c9\\u00cd\\u00d3\\u00da\\u00d1][a-z\\u00e1\\u00e9\\u00ed\\u00f3\\u00fa\\u00f1]+( [A-Z\\u00c1\\u00c9\\u00cd\\u00d3\\u00da\\u00d1][a-z\\u00e1\\u00e9\\u00ed\\u00f3\\u00fa\\u00f1]+){1,3}$/;
+  const raiz = document.querySelector('main') || document.body;
+  const walker = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
   const objetivos = new Set();
+  const prohibidos = ['H1','H2','H3','H4','TH','NAV','BUTTON','LABEL'];
   while (walker.nextNode()) {
-    const t = walker.currentNode.textContent || '';
+    const t = (walker.currentNode.textContent || '').trim();
+    const el = walker.currentNode.parentElement;
+    if (!el || prohibidos.includes(el.tagName) || el.closest('nav,aside,button,th')) continue;
     if (money.test(t) || contacto.test(t)) {
-      const el = walker.currentNode.parentElement;
-      if (el && !['H1','H2','H3','H4','TH','NAV','BUTTON','LABEL'].includes(el.tagName)) objetivos.add(el);
+      objetivos.add(el);
+      // el dato suele venir con el nombre arriba: tapa tambien al hermano anterior corto
+      const prev = el.previousElementSibling;
+      if (prev && (prev.textContent || '').trim().length < 45) objetivos.add(prev);
+      const prevPadre = el.parentElement && el.parentElement.previousElementSibling;
+      if (prevPadre && (prevPadre.textContent || '').trim().length < 45) objetivos.add(prevPadre);
     }
+    // nombre propio suelto (2-4 palabras capitalizadas)
+    if (t.length < 40 && nombre.test(t)) objetivos.add(el);
   }
   for (const el of objetivos) el.style.setProperty('filter', 'blur(6px)', 'important');
 })()
@@ -129,10 +140,10 @@ async function grabarEscena(
 ): Promise<string> {
   const ctx: BrowserContext = await browser.newContext({
     viewport: { width: 1280, height: 720 },
-    recordVideo: { dir: CLIPS, size: { width: 1280, height: 720 } },
+    deviceScaleFactor: 1,
     ...(esc.sitio ? { storageState: states[esc.sitio] } : {}),
   });
-  // blur presente DESDE el primer paint: el estilo se inyecta apenas existe <head>
+  // blur presente DESDE el primer paint
   if (esc.url !== "endcard") {
     await ctx.addInitScript(
       `new MutationObserver((_, obs) => {
@@ -149,7 +160,7 @@ async function grabarEscena(
   const p = await ctx.newPage();
   const url = esc.url === "endcard" ? ENDCARD : esc.url;
   await p.goto(url, { waitUntil: esc.url === "endcard" ? "load" : "networkidle", timeout: 40000 }).catch(() => {});
-  await p.waitForTimeout(1200);
+  await p.waitForTimeout(1500);
   if (esc.url !== "endcard") {
     await p.addStyleTag({ content: BLUR_CSS }).catch(() => {});
     await p.evaluate(BLUR_JS).catch(() => {});
@@ -164,54 +175,34 @@ async function grabarEscena(
         }, esc.caption)
         .catch(() => {});
     }
+    await p.waitForTimeout(300);
   }
-  // colchón post-blur: garantiza que la ventana recortada arranque con blur aplicado
-  if (esc.url !== "endcard") await p.waitForTimeout(1500);
-  // scroll suave durante la escena (deja 1s quieto al final)
-  const scrollMs = Math.max(0, (esc.dur - 1) * 1000);
-  if (esc.url !== "endcard" && scrollMs > 800) {
-    await p
-      .evaluate((ms) => {
-        const total = Math.min(
-          Math.max(document.body.scrollHeight - window.innerHeight, 0),
-          600
-        );
-        const t0 = performance.now();
-        return new Promise<void>((fin) => {
-          function paso(t: number) {
-            const f = Math.min((t - t0) / ms, 1);
-            window.scrollTo(0, total * f);
-            if (f < 1) requestAnimationFrame(paso);
-            else fin();
-          }
-          requestAnimationFrame(paso);
-        });
-      }, scrollMs)
-      .catch(() => {});
-    await p.waitForTimeout(1000);
-  } else {
-    await p.waitForTimeout(esc.dur * 1000);
+  // captura frame a frame: scroll progresivo, duración EXACTA garantizada
+  const FPS = 8;
+  const frames = Math.max(2, Math.round(esc.dur * FPS));
+  const dir = path.join(CLIPS, `${pref}-${idx}-frames`);
+  mkdirSync(dir, { recursive: true });
+  const scrollTotal =
+    esc.url === "endcard"
+      ? 0
+      : await p.evaluate(() =>
+          Math.min(Math.max(document.body.scrollHeight - window.innerHeight, 0), 600)
+        ).catch(() => 0);
+  // el último 20% de frames queda quieto al final del scroll
+  const framesScroll = Math.round(frames * 0.8);
+  for (let f = 0; f < frames; f++) {
+    if (scrollTotal > 0) {
+      const avance = Math.min(f / framesScroll, 1);
+      await p.evaluate((y) => window.scrollTo(0, y), Math.round(scrollTotal * avance)).catch(() => {});
+      await p.waitForTimeout(30);
+    }
+    await p.screenshot({ path: path.join(dir, `f${String(f).padStart(4, "0")}.jpeg`), quality: 85, type: "jpeg" });
   }
-  const video = p.video();
   await ctx.close();
-  const raw = await video!.path();
-  // remux para tener duración confiable (el webm de Playwright viene sin metadata)
-  const tmp = path.join(CLIPS, `${pref}-${idx}.mkv`);
-  execFileSync(FFMPEG, ["-y", "-i", raw, "-c", "copy", tmp]);
-  let rawDur = 0;
-  try {
-    execFileSync(FFMPEG, ["-i", tmp], { stdio: ["ignore", "pipe", "pipe"] });
-  } catch (e) {
-    const m = /Duration: (\d+):(\d+):([\d.]+)/.exec(String((e as { stderr?: unknown }).stderr));
-    if (m) rawDur = Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
-  }
-  // recorte exacto: los últimos dur segundos, con búsqueda de salida (frame-accurate);
-  // si el clip quedó corto, congela el último frame hasta completar
-  const start = Math.max(0, rawDur - esc.dur - 0.1);
   const clip = path.join(CLIPS, `${pref}-${idx}.mp4`);
   execFileSync(FFMPEG, [
-    "-y", "-i", tmp, "-ss", `${start}`,
-    "-vf", `scale=1280:720,fps=30,tpad=stop_mode=clone:stop_duration=5`,
+    "-y", "-framerate", `${FPS}`, "-i", path.join(dir, "f%04d.jpeg"),
+    "-vf", "scale=1280:720,fps=30",
     "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
     "-t", `${esc.dur}`, "-an", clip,
   ]);

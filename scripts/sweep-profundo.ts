@@ -15,16 +15,27 @@ const BLUR_JS = `
 (() => {
   const money = /\\$\\s?[\\d.,]{2,}|[\\d.]{4,}\\s?(ARS|USD|us\\$|u\\$s)/i;
   const contacto = /\\b\\d{2,4}[\\s-]?\\d{6,8}\\b|@[a-z0-9.-]+\\.[a-z]{2,}|wa\\.me/i;
-  const walker = document.createTreeWalker(document.querySelector('main') || document.body, NodeFilter.SHOW_TEXT);
+  const nombre = /^[A-Z\\u00c1\\u00c9\\u00cd\\u00d3\\u00da\\u00d1][a-z\\u00e1\\u00e9\\u00ed\\u00f3\\u00fa\\u00f1]+( [A-Z\\u00c1\\u00c9\\u00cd\\u00d3\\u00da\\u00d1][a-z\\u00e1\\u00e9\\u00ed\\u00f3\\u00fa\\u00f1]+){1,3}$/;
+  const raiz = document.querySelector('main') || document.body;
+  const walker = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
   const objetivos = new Set();
+  const prohibidos = ['H1','H2','H3','H4','TH','NAV','BUTTON','LABEL'];
   while (walker.nextNode()) {
-    const t = walker.currentNode.textContent || '';
+    const t = (walker.currentNode.textContent || '').trim();
+    const el = walker.currentNode.parentElement;
+    if (!el || prohibidos.includes(el.tagName) || el.closest('nav,aside,button,th')) continue;
     if (money.test(t) || contacto.test(t)) {
-      const el = walker.currentNode.parentElement;
-      if (el && !['H1','H2','H3','H4','TH','NAV','BUTTON','LABEL'].includes(el.tagName)) objetivos.add(el);
+      objetivos.add(el);
+      // el dato suele venir con el nombre arriba: tapa tambien al hermano anterior corto
+      const prev = el.previousElementSibling;
+      if (prev && (prev.textContent || '').trim().length < 45) objetivos.add(prev);
+      const prevPadre = el.parentElement && el.parentElement.previousElementSibling;
+      if (prevPadre && (prevPadre.textContent || '').trim().length < 45) objetivos.add(prevPadre);
     }
+    // nombre propio suelto (2-4 palabras capitalizadas)
+    if (t.length < 40 && nombre.test(t)) objetivos.add(el);
   }
-  for (const el of objetivos) el.style.setProperty('filter', 'blur(5px)', 'important');
+  for (const el of objetivos) el.style.setProperty('filter', 'blur(6px)', 'important');
 })()
 `;
 
