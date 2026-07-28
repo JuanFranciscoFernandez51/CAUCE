@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { LeadsList, type LeadView } from "./leads-list";
+import { AgenteSwitch } from "./agente-switch";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +25,14 @@ export default async function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
-        <p className="text-sm text-muted-foreground">
-          Todos los interesados, con su estado, temperatura y de dónde vinieron.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
+          <p className="text-sm text-muted-foreground">
+            Todos los interesados, con su estado, temperatura y de dónde vinieron.
+          </p>
+        </div>
+        <AgenteSwitch />
       </div>
       <LeadsList leads={views} />
     </div>

@@ -1297,3 +1297,10 @@ model Proveedor {
 
   @@index([clientId])
 }
+
+/// Banderas simples del sistema (ej: pausar el agente nocturno de leads desde el admin).
+model Bandera {
+  clave     String   @id
+  activa    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
