@@ -10,7 +10,8 @@ import {
   tipoLabel,
 } from "@/lib/conce";
 import { aCardVehiculo, CONCE_CARD_SELECT, getConceSite } from "../../_lib/conce-site";
-import { ConceShell, RC } from "../../_components/conce/conce-shell";
+import { ConceShell } from "../../_components/conce/conce-shell";
+import { RC } from "@/lib/conce";
 import { CarruselVehiculo } from "../../_components/conce/carrusel-vehiculo";
 import { VehiculoCard } from "../../_components/conce/vehiculo-card";
 import {

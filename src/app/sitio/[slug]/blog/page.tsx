@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BLOG_CATEGORIAS } from "@/lib/conce";
 import { getConceSite } from "../_lib/conce-site";
-import { ConceShell, RC } from "../_components/conce/conce-shell";
+import { ConceShell } from "../_components/conce/conce-shell";
+import { RC } from "@/lib/conce";
 
 export const revalidate = 300;
 

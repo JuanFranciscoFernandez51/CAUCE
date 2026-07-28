@@ -9,7 +9,8 @@ import {
   conceMarcas,
   type ConceShellInfo,
 } from "../../_lib/conce-site";
-import { ConceShell, RC } from "./conce-shell";
+import { ConceShell } from "./conce-shell";
+import { RC } from "@/lib/conce";
 import { VehiculoCard } from "./vehiculo-card";
 import { Reveal } from "./reveal";
 

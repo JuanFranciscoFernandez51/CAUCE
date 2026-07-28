@@ -15,18 +15,12 @@ import { Chatbot } from "./chatbot";
  * vos?" flotante (der).
  */
 
-// Paleta del template (relevada de su web actual).
-export const RC = {
-  negro: "#0A0A0A",
-  dorado: "#D18E00",
-  doradoTexto: "#B7891B",
-  doradoSuave: "#F7EBD4",
-  fondo: "#FAFAFA",
-  card: "#FFFFFF",
-  borde: "#E8E4DB",
-  gris: "#4B5563",
-  grisSuave: "#6B7280",
-} as const;
+// Paleta del template: vive en lib/conce (módulo compartido) para que también
+// los server components reciban los valores reales — los SERVER components
+// deben importarla de "@/lib/conce" (importar desde este módulo client les
+// daría una client reference y los estilos inline se pierden en silencio).
+import { RC } from "@/lib/conce";
+export { RC };
 
 export function ConceShell({ info, children }: { info: ConceShellInfo; children: ReactNode }) {
   const wa = info.whatsapp ? `https://wa.me/${info.whatsapp}` : null;

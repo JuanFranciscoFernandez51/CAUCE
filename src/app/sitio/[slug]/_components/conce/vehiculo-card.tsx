@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fmtKm, fmtPrecioVehiculo, nombreVehiculo } from "@/lib/conce";
 import type { ConceCardData } from "../../_lib/conce-site";
-import { RC } from "./conce-shell";
+import { RC } from "@/lib/conce";
 
 /**
  * Card de vehículo del sitio: foto grande, badges diferenciados 0KM/Usado

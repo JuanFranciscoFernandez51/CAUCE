@@ -10,7 +10,8 @@ import {
   conceMarcas,
   getConceSite,
 } from "../_lib/conce-site";
-import { ConceShell, RC } from "../_components/conce/conce-shell";
+import { ConceShell } from "../_components/conce/conce-shell";
+import { RC } from "@/lib/conce";
 import { VehiculoCard } from "../_components/conce/vehiculo-card";
 
 export const dynamic = "force-dynamic";

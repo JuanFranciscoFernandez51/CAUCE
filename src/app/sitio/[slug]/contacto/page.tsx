@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getConceSite } from "../_lib/conce-site";
-import { ConceShell, RC } from "../_components/conce/conce-shell";
+import { ConceShell } from "../_components/conce/conce-shell";
+import { RC } from "@/lib/conce";
 import { ConsultaConceForm } from "../_components/conce/consulta-conce-form";
 
 export const revalidate = 300;

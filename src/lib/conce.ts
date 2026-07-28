@@ -3,6 +3,23 @@
  * Nada de Prisma ni server-only acá: esto lo importan client components.
  */
 
+// ── Paleta del template (relevada de la web actual de Ri Cars) ────────────
+// OJO: vive acá (módulo compartido, sin "use client") para que los SERVER
+// components reciban los valores reales — importarla desde un módulo client
+// les daría una client reference y los estilos inline se pierden en silencio.
+
+export const RC = {
+  negro: "#0A0A0A",
+  dorado: "#D18E00",
+  doradoTexto: "#B7891B",
+  doradoSuave: "#F7EBD4",
+  fondo: "#FAFAFA",
+  card: "#FFFFFF",
+  borde: "#E8E4DB",
+  gris: "#4B5563",
+  grisSuave: "#6B7280",
+} as const;
+
 // ── Tipos de vehículo (categorías) ────────────────────────────────────────
 
 export const CONCE_TIPOS: { valor: string; label: string; emoji: string }[] = [
