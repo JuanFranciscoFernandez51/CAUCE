@@ -27,11 +27,11 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Cauce — Automatización con IA para tu negocio",
+    default: "Cauce — Que tu negocio fluya",
     template: "%s · Cauce",
   },
   description:
-    "Cualquier empresa, cualquier proceso, resuelto con mínimos clicks. No vendemos horas: vendemos procesos que se manejan solos.",
+    "Software hecho 100% a la medida de tu negocio: tu web, tu gestión y tus avisos automáticos, con tu marca. Que tu negocio fluya.",
 };
 
 export default function RootLayout({

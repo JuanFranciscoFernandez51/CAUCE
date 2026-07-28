@@ -66,7 +66,8 @@ const CAUCE_SVG = `<svg viewBox="0 0 48 48" fill="none" width="120" height="120"
 const ENDCARD = `data:text/html;base64,${Buffer.from(
   `<!doctype html><html><body style="margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:radial-gradient(ellipse at 50% 30%, #182337 0%, #0B1220 70%);font-family:-apple-system,'Helvetica Neue',sans-serif">
   <div style="display:flex;align-items:center;gap:20px">${CAUCE_SVG}<span style="color:#F4F7FC;font-size:76px;font-weight:800;letter-spacing:-2px">Cauce</span></div>
-  <div style="color:#DDE7F5;font-size:30px;font-weight:600;margin-top:6px">Software hecho 100% a la medida de tu negocio</div>
+  <div style="color:#DDE7F5;font-size:30px;font-weight:600;margin-top:6px">Que tu negocio fluya</div>
+  <div style="color:#8FA3BC;font-size:20px;font-weight:500">Software hecho 100% a tu medida</div>
   <div style="color:#7FE8FF;font-size:26px;font-weight:700">cauceapp.com.ar</div>
   </body></html>`
 ).toString("base64")}`;

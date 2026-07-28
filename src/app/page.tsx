@@ -792,7 +792,7 @@ export default async function LandingPage() {
       <section className="mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-24">
         <Reveal>
           <h2 className="title-mega text-center text-4xl sm:text-5xl">
-            ¿Listo para sacarte trabajo de encima?
+            Que tu negocio <span className="text-primary">fluya</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-lg text-muted-foreground">
             Elegí tu puerta: las dos terminan con tu sistema andando y tu día más liviano.

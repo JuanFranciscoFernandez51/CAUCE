@@ -9,7 +9,10 @@ export function SiteFooter() {
           <div>
             <div className="flex items-center gap-2.5">
               <CauceMark className="h-9 w-9" />
-              <p className="font-display text-xl font-medium tracking-tight">Cauce</p>
+              <div>
+                <p className="font-display text-xl font-medium tracking-tight">Cauce</p>
+                <p className="text-xs font-medium text-accent">Que tu negocio fluya</p>
+              </div>
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               No vendemos horas. Vendemos procesos que se manejan solos.
