@@ -13,6 +13,7 @@ import { ConceShell } from "./conce-shell";
 import { RC } from "@/lib/conce";
 import { VehiculoCard } from "./vehiculo-card";
 import { Reveal } from "./reveal";
+import { IconAuto, IconLlave, IconBillete, IconDoc, IconMedalla, IconEstrella } from "./iconos";
 
 /**
  * Home del template CONCESIONARIA: hero negro con buscador, banda de
@@ -87,7 +88,8 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
               className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider"
               style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
             >
-              🚗 Multimarcas 0KM y Usados · Bahía Blanca
+              <IconAuto className="h-4 w-4" />
+              Multimarcas 0KM y Usados · Bahía Blanca
             </p>
             <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
               Encontrá tu <span style={{ color: RC.dorado }}>auto ideal</span>
@@ -163,10 +165,21 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
       {/* ── Banda de beneficios ── */}
       <section className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid grid-cols-2 gap-2 text-center text-[13px] font-semibold sm:grid-cols-4">
-          <p className="rounded-2xl bg-white px-3 py-3 shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>🔁 Tomamos tu usado</p>
-          <p className="rounded-2xl bg-white px-3 py-3 shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>💳 Financiación a tu medida</p>
-          <p className="rounded-2xl bg-white px-3 py-3 shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>📄 Gestoría incluida</p>
-          <p className="rounded-2xl bg-white px-3 py-3 shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>🛡️ +15 años de trayectoria</p>
+          {[
+            { Icono: IconLlave, texto: "Tomamos tu usado" },
+            { Icono: IconBillete, texto: "Financiación a tu medida" },
+            { Icono: IconDoc, texto: "Gestoría incluida" },
+            { Icono: IconMedalla, texto: "+15 años de trayectoria" },
+          ].map(({ Icono, texto }) => (
+            <div
+              key={texto}
+              className="flex items-center justify-center gap-2.5 rounded-2xl bg-white px-4 py-4 shadow-sm"
+              style={{ border: `1px solid ${RC.borde}` }}
+            >
+              <Icono className="h-5 w-5 shrink-0" style={{ color: RC.dorado }} />
+              <span>{texto}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -182,7 +195,7 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: RC.dorado }}>
                 Entrega inmediata
               </p>
-              <h2 className="mt-2 text-3xl font-extrabold text-white">Vehículos 0KM 🆕</h2>
+              <h2 className="mt-2 text-3xl font-extrabold text-white">Vehículos 0KM</h2>
               <p className="mt-2 text-sm text-gray-400">
                 {count0km} unidades nuevas de fábrica, con garantía oficial.
               </p>
@@ -263,8 +276,9 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
           <Reveal>
             <div className="mb-6 flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-                  ⭐ Vehículos destacados
+                <h2 className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                  <IconEstrella className="h-6 w-6" style={{ color: RC.dorado }} />
+                  Vehículos destacados
                 </h2>
                 <p className="text-sm text-gray-500">La selección de la casa</p>
               </div>
@@ -298,7 +312,7 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
               <div className="mb-6 flex items-end justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                    🔥 Ofertas especiales
+                    Ofertas especiales
                   </h2>
                   <p className="text-sm text-gray-400">Oportunidades por tiempo limitado</p>
                 </div>

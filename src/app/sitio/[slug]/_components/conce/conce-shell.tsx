@@ -5,6 +5,16 @@ import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { ConceShellInfo } from "../../_lib/conce-site";
 import { Chatbot } from "./chatbot";
+import {
+  IconWhatsapp,
+  IconInstagram,
+  IconFacebook,
+  IconPin,
+  IconReloj,
+  IconCheck,
+  IconMail,
+  IconAuto,
+} from "./iconos";
 
 /**
  * Shell del template CONCESIONARIA (Ri Cars Automotores): la marca del
@@ -44,10 +54,22 @@ export function ConceShell({ info, children }: { info: ConceShellInfo; children:
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Escribinos por WhatsApp"
-          className="fixed bottom-5 left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-2xl text-white shadow-lg transition-transform hover:scale-105"
+          className="fixed bottom-5 left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)] transition-transform hover:scale-105"
           style={{ backgroundColor: "#25D366" }}
         >
-          💬
+          <IconWhatsapp className="h-7 w-7" />
+        </a>
+      ) : null}
+      {info.instagram ? (
+        <a
+          href={info.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Seguinos en Instagram"
+          className="fixed bottom-[86px] left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(193,53,132,0.65)] transition-transform hover:scale-105"
+          style={{ background: "linear-gradient(45deg,#F58529,#DD2A7B,#8134AF)" }}
+        >
+          <IconInstagram className="h-6 w-6" />
         </a>
       ) : null}
       <Chatbot slug={info.slug} />
@@ -93,7 +115,7 @@ function Header({ info }: { info: ConceShellInfo }) {
               className="h-10 w-10 rounded-full bg-white object-contain"
             />
           ) : (
-            <span className="text-2xl">🚗</span>
+            <IconAuto className="h-8 w-8 text-white" />
           )}
           <span className="hidden flex-col leading-tight md:flex">
             <span className="text-sm font-bold tracking-wide text-white">{info.nombre}</span>
@@ -126,19 +148,33 @@ function Header({ info }: { info: ConceShellInfo }) {
           <Link
             href={`${base}/favoritos`}
             aria-label="Favoritos"
-            className="hidden rounded-full px-2 py-1.5 text-lg sm:block"
+            className="hidden rounded-full p-2 text-white/70 transition-colors hover:text-white sm:block"
           >
-            ❤️
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden>
+              <path d="M12 20s-7-4.6-7-9.3A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.7c0 4.7-7 9.3-7 9.3Z" strokeLinejoin="round" />
+            </svg>
           </Link>
+          {info.instagram ? (
+            <a
+              href={info.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="hidden rounded-full p-2 text-white/70 transition-colors hover:text-white sm:block"
+            >
+              <IconInstagram />
+            </a>
+          ) : null}
           {info.whatsapp ? (
             <a
               href={`https://wa.me/${info.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold transition-transform hover:scale-[1.03] sm:inline-flex"
+              className="hidden items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold transition-transform hover:scale-[1.03] sm:inline-flex"
               style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
             >
-              💬 291 503-8204
+              <IconWhatsapp className="h-4 w-4" />
+              Escribinos
             </a>
           ) : null}
           <button
@@ -175,10 +211,11 @@ function Header({ info }: { info: ConceShellInfo }) {
                 href={`https://wa.me/${info.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full px-4 py-2 text-sm font-bold"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
                 style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
               >
-                💬 WhatsApp
+                <IconWhatsapp className="h-4 w-4" />
+                WhatsApp
               </a>
             ) : null}
           </div>
@@ -205,7 +242,7 @@ function Footer({ info }: { info: ConceShellInfo }) {
                 className="h-12 w-12 rounded-full bg-white object-contain"
               />
             ) : (
-              <span className="text-3xl">🚗</span>
+              <IconAuto className="h-10 w-10 text-white" />
             )}
             <div>
               <p className="font-bold text-white">{info.nombre}</p>
@@ -271,7 +308,7 @@ function Footer({ info }: { info: ConceShellInfo }) {
           <ul className="mt-3 space-y-3 text-sm text-gray-400">
             {info.sucursales.map((s, i) => (
               <li key={i}>
-                <p className="text-gray-300">📍 {s.direccion}</p>
+                <p className="flex items-start gap-2 text-gray-300"><IconPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: RC.dorado }} />{s.direccion}</p>
                 <div className="mt-0.5 flex gap-3 text-xs">
                   {s.maps ? (
                     <a href={s.maps} target="_blank" rel="noopener noreferrer" className="hover:text-white" style={{ color: RC.doradoTexto }}>
@@ -286,14 +323,14 @@ function Footer({ info }: { info: ConceShellInfo }) {
                       className="hover:text-white"
                       style={{ color: RC.doradoTexto }}
                     >
-                      💬 WhatsApp
+                      WhatsApp →
                     </a>
                   ) : null}
                 </div>
               </li>
             ))}
             {info.horarios ? (
-              <li className="whitespace-pre-line text-gray-300">🕒 {info.horarios}</li>
+              <li className="flex items-start gap-2 whitespace-pre-line text-gray-300"><IconReloj className="mt-0.5 h-4 w-4 shrink-0" style={{ color: RC.dorado }} />{info.horarios}</li>
             ) : null}
           </ul>
         </div>
@@ -304,12 +341,13 @@ function Footer({ info }: { info: ConceShellInfo }) {
           </h3>
           <ul className="mt-3 space-y-2 text-sm text-gray-400">
             {info.serviciosFooter.map((s) => (
-              <li key={s}>✔ {s}</li>
+              <li key={s} className="flex items-center gap-2"><IconCheck className="h-3.5 w-3.5 shrink-0" style={{ color: RC.dorado }} />{s}</li>
             ))}
             {info.email ? (
               <li className="pt-2">
-                <a href={`mailto:${info.email}`} className="hover:text-white">
-                  ✉️ {info.email}
+                <a href={`mailto:${info.email}`} className="flex items-center gap-2 hover:text-white">
+                  <IconMail className="h-4 w-4 shrink-0" style={{ color: RC.dorado }} />
+                  {info.email}
                 </a>
               </li>
             ) : null}
@@ -318,7 +356,7 @@ function Footer({ info }: { info: ConceShellInfo }) {
       </div>
       <div className="border-t py-4" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
         <p className="text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} {info.nombre} · ⚡ Powered by{" "}
+          © {new Date().getFullYear()} {info.nombre} · Powered by{" "}
           <a href="https://cauce.app" className="font-medium hover:text-gray-300">
             Cauce
           </a>
