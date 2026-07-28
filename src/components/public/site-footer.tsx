@@ -1,51 +1,57 @@
 import Link from "next/link";
+import { CauceMark } from "@/components/public/cauce-mark";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t bg-card">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-3">
-        <div>
-          <p className="text-lg font-bold text-primary">Cauce</p>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-            No vendemos horas. Vendemos procesos que se manejan solos.
-          </p>
-        </div>
-        <nav aria-label="Pie de página">
-          <p className="text-sm font-semibold">Explorar</p>
-          <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
-            <li>
-              <Link href="/#como-funciona" className="hover:text-foreground">
-                Cómo funciona
-              </Link>
-            </li>
-            <li>
-              <Link href="/precios" className="hover:text-foreground">
-                Precios
-              </Link>
-            </li>
-            <li>
-              <Link href="/casos" className="hover:text-foreground">
-                Casos
-              </Link>
-            </li>
-            <li>
-              <Link href="/consultoria" className="hover:text-foreground">
-                Consultoría
-              </Link>
-            </li>
-            <li>
-              <Link href="/intake" className="hover:text-foreground">
-                Pedir diagnóstico
-              </Link>
-            </li>
-          </ul>
-        </nav>
-        <div className="text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Dónde estamos</p>
-          <p className="mt-2">
-            Bahía Blanca, Argentina — operamos remoto en todo el país.
-          </p>
-          <p className="mt-4">© {new Date().getFullYear()} Cauce</p>
+    <footer className="px-3 pb-4 pt-6 sm:px-4 sm:pb-6">
+      <div className="menta-dark mx-auto max-w-6xl rounded-[32px] px-6 py-12 sm:rounded-[40px] sm:px-12 sm:py-14">
+        <div className="grid gap-10 md:grid-cols-3">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <CauceMark className="h-9 w-9" />
+              <p className="font-display text-xl font-medium tracking-tight">Cauce</p>
+            </div>
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+              No vendemos horas. Vendemos procesos que se manejan solos.
+            </p>
+          </div>
+          <nav aria-label="Pie de página">
+            <p className="text-sm font-semibold">Explorar</p>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/#como-funciona" className="transition-colors hover:text-foreground">
+                  Cómo funciona
+                </Link>
+              </li>
+              <li>
+                <Link href="/precios" className="transition-colors hover:text-foreground">
+                  Precios
+                </Link>
+              </li>
+              <li>
+                <Link href="/casos" className="transition-colors hover:text-foreground">
+                  Casos
+                </Link>
+              </li>
+              <li>
+                <Link href="/consultoria" className="transition-colors hover:text-foreground">
+                  Consultoría
+                </Link>
+              </li>
+              <li>
+                <Link href="/intake" className="transition-colors hover:text-foreground">
+                  Pedir diagnóstico
+                </Link>
+              </li>
+            </ul>
+          </nav>
+          <div className="text-sm text-muted-foreground">
+            <p className="font-semibold text-foreground">Dónde estamos</p>
+            <p className="mt-3">
+              Bahía Blanca, Argentina — operamos remoto en todo el país.
+            </p>
+            <p className="mt-5">© {new Date().getFullYear()} Cauce</p>
+          </div>
         </div>
       </div>
     </footer>

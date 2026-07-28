@@ -5,7 +5,6 @@ import { db } from "@/lib/db";
 import { CASOS_REALES, getCasoReal } from "@/lib/casos-reales";
 import { shotsDeSettings } from "@/lib/casos";
 import { PublicShell } from "@/components/public/shell";
-import { Badge, Card } from "@/components/ui";
 import { PrintFicha } from "./print-ficha";
 import { Galeria } from "./galeria";
 
@@ -71,7 +70,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl font-bold">{caso.nombre}</h1>
+            <h1 className="title-mega text-3xl sm:text-4xl">{caso.nombre}</h1>
             <p className="text-sm text-muted-foreground">{caso.rubro}</p>
           </div>
           <div className="no-print flex gap-2">
@@ -80,7 +79,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
               href={caso.webUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
+              className="inline-flex h-10 items-center rounded-full bg-[#111111] px-5 text-sm font-medium text-white transition hover:bg-black"
             >
               Ver su web viva →
             </a>
@@ -92,7 +91,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         <p className="mt-6 text-lg text-muted-foreground">{caso.resumen}</p>
 
         {/* Resultados */}
-        <h2 className="mt-10 text-xl font-bold">Lo que el sistema les resolvió</h2>
+        <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Lo que el sistema les resolvió</h2>
         <ul className="mt-4 space-y-3">
           {caso.resultados.map((r) => (
             <li key={r} className="flex gap-3 text-sm">
@@ -103,20 +102,20 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         </ul>
 
         {/* Módulos */}
-        <h2 className="mt-10 text-xl font-bold">Qué tiene su sistema adentro</h2>
+        <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Qué tiene su sistema adentro</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {caso.modulos.map((m) => (
-            <Card key={m.nombre} className="p-4">
+            <div key={m.nombre} className="rounded-2xl border border-black/5 bg-card p-5">
               <p className="font-semibold">{m.nombre}</p>
               <p className="mt-1 text-sm text-muted-foreground">{m.detalle}</p>
-            </Card>
+            </div>
           ))}
         </div>
 
         {/* Proceso paso a paso */}
         {caso.proceso?.length ? (
           <>
-            <h2 className="mt-10 text-xl font-bold">Cómo trabaja, paso a paso</h2>
+            <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Cómo trabaja, paso a paso</h2>
             <ol className="mt-4 space-y-3">
               {caso.proceso.map((paso, i) => (
                 <li key={paso} className="flex gap-3 text-sm">
@@ -133,14 +132,14 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         {/* Automatizaciones: lo que pasa solo */}
         {caso.automatizaciones?.length ? (
           <>
-            <h2 className="mt-10 text-xl font-bold">Lo que pasa solo</h2>
+            <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Lo que pasa solo</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Las automatizaciones del sistema: cada cosa dispara la siguiente, sin que nadie tenga
               que acordarse.
             </p>
             <div className="mt-4 space-y-4">
               {caso.automatizaciones.map((a) => (
-                <Card key={a.titulo} className="p-4">
+                <div key={a.titulo} className="rounded-2xl border border-black/5 bg-card p-5">
                   <p className="font-semibold">⚡ {a.titulo}</p>
                   <ol className="mt-2 space-y-1.5">
                     {a.flujo.map((paso, i) => (
@@ -152,7 +151,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
                       </li>
                     ))}
                   </ol>
-                </Card>
+                </div>
               ))}
             </div>
           </>
@@ -161,7 +160,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         {/* Capturas reales */}
         {shots.length > 0 ? (
           <>
-            <h2 className="mt-10 text-xl font-bold">Su sistema, de verdad</h2>
+            <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Su sistema, de verdad</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Capturas reales — no mockups.
             </p>
@@ -172,7 +171,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         {/* Su sistema por dentro (admin real, datos protegidos) */}
         {caso.shotsAdmin?.length ? (
           <>
-            <h2 className="mt-10 text-xl font-bold">Su sistema por dentro</h2>
+            <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">Su sistema por dentro</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               El panel de administración real — con los datos difuminados por privacidad.
             </p>
@@ -181,10 +180,12 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
         ) : null}
 
         {/* CTA */}
-        <div className="no-print mt-12 rounded-lg border bg-muted/40 p-6 text-center">
-          <Badge variant="primary">¿Tu negocio se parece?</Badge>
-          <h2 className="mt-3 text-2xl font-bold">Armamos uno así, pero tuyo</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
+        <div className="menta-dark no-print mt-14 rounded-[32px] px-6 py-12 text-center sm:px-10">
+          <span className="inline-flex items-center rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-accent">
+            ¿Tu negocio se parece?
+          </span>
+          <h2 className="title-mega mt-4 text-3xl sm:text-4xl">Armamos uno así, pero tuyo</h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-muted-foreground">
             Nos sentamos con vos, entendemos cómo trabajás y el sistema se adapta a tu manera —
             con tu marca, tu rubro y tus precios.
           </p>
@@ -192,7 +193,7 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
             href={`https://wa.me/5492915757101?text=${encodeURIComponent(`Hola! Vi el caso de ${caso.nombre} y quiero algo así para mi negocio.`)}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 inline-flex h-11 items-center rounded-md bg-primary px-6 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            className="mt-6 inline-flex h-12 items-center rounded-full bg-white px-7 text-sm font-semibold text-[#111111] transition hover:bg-white/90"
           >
             Quiero el mío — hablemos por WhatsApp
           </a>

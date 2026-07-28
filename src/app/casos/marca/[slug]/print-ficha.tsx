@@ -6,7 +6,7 @@ export function PrintFicha() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="no-print inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"
+      className="no-print inline-flex h-10 items-center gap-2 rounded-full border border-black/10 bg-white px-5 text-sm font-medium transition hover:bg-black/5"
     >
       🖨️ Descargar ficha en PDF
     </button>

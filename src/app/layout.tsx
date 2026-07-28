@@ -10,7 +10,7 @@ import { PwaRegister } from "@/components/pwa-register";
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const plexSans = IBM_Plex_Sans({

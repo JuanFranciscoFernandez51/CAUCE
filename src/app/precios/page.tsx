@@ -8,8 +8,9 @@ import {
   type PackPricing,
   type PricingData,
 } from "@/lib/pricing";
+import Link from "next/link";
 import { PublicShell } from "@/components/public/shell";
-import { Card, Badge, ButtonLink } from "@/components/ui";
+import { Reveal } from "@/components/public/menta";
 
 export const dynamic = "force-dynamic";
 
@@ -94,9 +95,11 @@ function MonthlyBlock({ p, dolar }: { p: PackPricing; dolar: number }) {
 function CauceOsBlock({ pricing }: { pricing: PricingData }) {
   const modules = Object.entries(pricing.modulePricing);
   return (
-    <Card className="mt-12 p-6 sm:p-8">
-      <Badge variant="primary">Incluido en Scale y Custom</Badge>
-      <h2 className="mt-3 text-2xl font-bold">Cauce OS — tu software propio</h2>
+    <div className="menta-dark mt-14 rounded-[32px] p-7 sm:rounded-[40px] sm:p-12">
+      <span className="inline-flex items-center rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-accent">
+        Incluido en Scale y Custom
+      </span>
+      <h2 className="title-mega mt-4 text-3xl sm:text-4xl">Cauce OS — tu software propio</h2>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Scale no es &quot;más bot&quot;: es tu sistema, con tu marca y tu dominio. Elegís
         los módulos que tu negocio necesita y todo queda conectado a tus
@@ -105,7 +108,7 @@ function CauceOsBlock({ pricing }: { pricing: PricingData }) {
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {modules.map(([key, m]) => (
-          <div key={key} className="rounded-md border bg-muted/40 p-4">
+          <div key={key} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
             <p className="font-semibold">{m.label}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {fmtUsd(m.monthlyUsd)}/mes + IVA
@@ -116,10 +119,10 @@ function CauceOsBlock({ pricing }: { pricing: PricingData }) {
           </div>
         ))}
       </div>
-      <p className="mt-4 text-sm text-muted-foreground">
+      <p className="mt-5 text-sm text-muted-foreground">
         Sumás módulos a medida que crecés. Sin migraciones, sin volver a empezar.
       </p>
-    </Card>
+    </div>
   );
 }
 
@@ -129,28 +132,34 @@ export default async function PreciosPage() {
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl font-bold">Precios</h1>
-          <p className="mt-3 text-muted-foreground">
-            Setup por única vez + mensual, siempre separados. Lo que ves es lo
-            que pagás.
-          </p>
+          <Reveal>
+            <h1 className="title-mega text-[44px] sm:text-6xl lg:text-[72px]">Precios</h1>
+            <p className="mt-5 text-lg text-muted-foreground">
+              Setup por única vez + mensual, siempre separados. Lo que ves es lo
+              que pagás.
+            </p>
+          </Reveal>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {packOrder.map((key) => {
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {packOrder.map((key, i) => {
             const p = pricing.packs[key];
             const cta = PACK_CTAS[key];
             const highlighted = key === "pro";
             return (
-              <Card
-                key={key}
-                className={`flex flex-col p-6 ${highlighted ? "border-2 border-primary" : ""}`}
+              <Reveal key={key} delay={i * 90} className="h-full">
+              <div
+                className={`flex h-full flex-col rounded-[28px] border bg-card p-6 shadow-[0_2px_24px_-10px_rgba(17,17,17,0.1)] ${highlighted ? "border-primary ring-1 ring-primary" : "border-black/5"}`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-lg font-bold">{p.label}</h2>
-                  {highlighted ? <Badge variant="primary">Más elegido</Badge> : null}
+                  <h2 className="font-display text-lg font-medium tracking-tight">{p.label}</h2>
+                  {highlighted ? (
+                    <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                      Más elegido
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{p.tagline}</p>
 
@@ -173,14 +182,18 @@ export default async function PreciosPage() {
                   ))}
                 </ul>
 
-                <ButtonLink
+                <Link
                   href={cta.href}
-                  variant={highlighted ? "primary" : "secondary"}
-                  className="mt-6 w-full"
+                  className={`mt-6 inline-flex h-11 w-full items-center justify-center rounded-full text-sm font-medium transition ${
+                    highlighted
+                      ? "bg-[#111111] text-white hover:bg-black"
+                      : "border border-black/10 bg-white hover:bg-black/5"
+                  }`}
                 >
                   {cta.label}
-                </ButtonLink>
-              </Card>
+                </Link>
+              </div>
+              </Reveal>
             );
           })}
         </div>
