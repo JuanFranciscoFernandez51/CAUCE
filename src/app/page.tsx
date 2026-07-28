@@ -74,21 +74,21 @@ const AREA_CHIPS = [
 /** Capturas REALES del producto (Cloudinary, ver casos-reales.ts). */
 const SHOTS = {
   mfDashboard:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785161802/cauce/sistema/casos/motos-fernandez/admin-full/ixvlghlwc8igfh3mcxub.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262068/cauce/sistema/hero/yxkwcepjsbi89ow0yd0l.png",
   mfInstagram:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785161916/cauce/sistema/casos/motos-fernandez/admin-full/spv4yuasztpnih7rbo80.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262073/cauce/sistema/hero/busrdpddobawzs9vvofi.png",
   mfOutreach:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785161911/cauce/sistema/casos/motos-fernandez/admin-full/mhnag8gqjfcqrawazmv6.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262078/cauce/sistema/hero/l6g7ukrtktfxakiudnze.png",
   mfTaller:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785161854/cauce/sistema/casos/motos-fernandez/admin-full/npfaq7hjnywtucys5x04.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262083/cauce/sistema/hero/lmurwve5wpp40tyksszy.png",
   vbStock:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785162028/cauce/sistema/casos/vespa-bahia/admin-full/lzoyvxllf7qleofywcpk.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262089/cauce/sistema/hero/exppo79knigxlmmv4dfh.png",
   vbArca:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785162158/cauce/sistema/casos/vespa-bahia/admin-full/wsgn9ito9uxchh43wa3t.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262094/cauce/sistema/hero/kbpruvdb425tez1a1mhi.png",
   lbCaja:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785162312/cauce/sistema/casos/la-base/admin-full/arpjgot7xmvrqhfazqos.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262104/cauce/sistema/hero/kzrho8qgih7qsk2ywedn.png",
   lbCalendario:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785162281/cauce/sistema/casos/la-base/admin-full/vfsjkm62i3rbiq7f0ro3.png",
+    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262114/cauce/sistema/hero/yjgjy29urlaxv33t4kti.png",
 };
 
 const DIA_CAUCE: [string, string, string][] = [
@@ -103,11 +103,14 @@ const DIA_CAUCE: [string, string, string][] = [
 function Shot({
   src,
   alt,
+  label,
   className = "",
   priority = false,
 }: {
   src: string;
   alt: string;
+  /** Punto de ataque en 4 palabras. */
+  label?: string;
   className?: string;
   priority?: boolean;
 }) {
@@ -123,6 +126,11 @@ function Shot({
         sizes="(min-width: 1024px) 400px, 90vw"
         className="object-cover object-left-top"
       />
+      {label ? (
+        <span className="absolute bottom-2 left-2 z-10 rounded-full bg-[#0B1220]/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
+          {label}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -259,6 +267,7 @@ export default async function LandingPage() {
                   <div className="rotate-[2deg]">
                     <Shot
                       src={SHOTS.mfDashboard}
+                  label="📊 Tu negocio en números, en vivo"
                       alt="Dashboard real de Motos Fernández en Cauce"
                       className="aspect-[16/10]"
                       priority
@@ -274,6 +283,7 @@ export default async function LandingPage() {
                   <div className="rotate-[-2deg]">
                     <Shot
                       src={SHOTS.lbCaja}
+                  label="💵 La caja cierra sola"
                       alt="Caja en 4 monedas de La Base en Cauce"
                       className="aspect-[16/10]"
                     />
@@ -302,6 +312,7 @@ export default async function LandingPage() {
               <div className="relative rotate-[1deg]">
                 <Shot
                   src={SHOTS.mfDashboard}
+                  label="📊 Tu negocio en números, en vivo"
                   alt="Dashboard real de Motos Fernández en Cauce"
                   className="aspect-[16/10]"
                   priority
@@ -463,6 +474,7 @@ export default async function LandingPage() {
               <Reveal>
                 <Shot
                   src={SHOTS.mfInstagram}
+                  label="📷 Instagram publica solo"
                   alt="Publicar en Instagram con un botón — Motos Fernández"
                   className="aspect-[4/3] rotate-[-1.5deg]"
                 />
@@ -473,6 +485,7 @@ export default async function LandingPage() {
                 <div className="relative rotate-[1.5deg]">
                   <Shot
                     src={SHOTS.vbArca}
+                  label="🧾 Factura ARCA en 1 clic"
                     alt="Facturación ARCA — Vespa Bahía"
                     className="aspect-[4/3]"
                   />
@@ -487,6 +500,7 @@ export default async function LandingPage() {
                 <div className="relative rotate-[1deg]">
                   <Shot
                     src={SHOTS.mfOutreach}
+                  label="💬 Avisos por WhatsApp, solos"
                     alt="Avisos por WhatsApp — Motos Fernández"
                     className="aspect-[4/3]"
                   />
@@ -501,6 +515,7 @@ export default async function LandingPage() {
                 <div className="relative rotate-[-1deg]">
                   <Shot
                     src={SHOTS.lbCalendario}
+                  label="📅 Turnos que entran de la web"
                     alt="Calendario del mes — La Base"
                     className="aspect-[4/3]"
                   />
