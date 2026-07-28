@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge, Card, EmptyState, ErrorState, Input, Select, Spinner } from "@/components/ui";
+import { CeldaEditable } from "../_components/celda-editable";
 
 export type LeadView = {
   id: string;
@@ -202,11 +203,17 @@ export function LeadsList({ leads }: { leads: LeadView[] }) {
                 <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      <CeldaEditable
+                        valor={l.name}
+                        onGuardar={(v) => patch(l.id, { name: v || l.name })}
+                        className="font-semibold"
+                      />
                       <Link
                         href={`/admin/leads/${l.id}`}
-                        className="font-semibold hover:text-primary hover:underline"
+                        className="text-xs text-muted-foreground hover:text-primary"
+                        title="Abrir ficha"
                       >
-                        {l.name}
+                        ↗
                       </Link>
                       <Badge variant={f.variant}>{f.label}</Badge>
                       {l.status === "CONVERTED" || l.esCliente ? (
@@ -222,10 +229,40 @@ export function LeadsList({ leads }: { leads: LeadView[] }) {
                       )}
                       <span className="text-xs text-muted-foreground">{fmtFecha(l.createdAt)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {[l.business, l.rubro].filter(Boolean).join(" · ") || "Sin datos del negocio"}
-                      {l.score > 0 ? ` · score ${l.score}` : ""}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
+                      <CeldaEditable
+                        valor={l.business}
+                        placeholder="negocio…"
+                        onGuardar={(v) => patch(l.id, { business: v || null })}
+                      />
+                      <span>·</span>
+                      <CeldaEditable
+                        valor={l.rubro}
+                        placeholder="rubro…"
+                        onGuardar={(v) => patch(l.id, { rubro: v || null })}
+                      />
+                      {l.score > 0 ? <span>· score {l.score}</span> : null}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        💬
+                        <CeldaEditable
+                          valor={l.whatsapp ?? l.phone}
+                          tipo="tel"
+                          placeholder="whatsapp…"
+                          onGuardar={(v) => patch(l.id, { whatsapp: v || null })}
+                        />
+                      </span>
+                      <span className="flex items-center gap-1">
+                        ✉️
+                        <CeldaEditable
+                          valor={l.email}
+                          tipo="email"
+                          placeholder="email…"
+                          onGuardar={(v) => patch(l.id, { email: v || null })}
+                        />
+                      </span>
+                    </div>
                     {/* Temperatura: 1 clic marca / re-clic saca */}
                     <div className="flex gap-1 pt-0.5">
                       {TEMPS.map((t) => (

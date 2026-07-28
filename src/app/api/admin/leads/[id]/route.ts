@@ -8,6 +8,12 @@ const patchSchema = z.object({
   temperatura: z.enum(["frio", "tibio", "caliente"]).nullable().optional(),
   score: z.number().int().min(0).max(100).optional(),
   notes: z.string().max(5000).optional(),
+  name: z.string().trim().min(1).max(200).optional(),
+  business: z.string().max(200).nullable().optional(),
+  rubro: z.string().max(200).nullable().optional(),
+  phone: z.string().max(50).nullable().optional(),
+  whatsapp: z.string().max(50).nullable().optional(),
+  email: z.string().max(200).nullable().optional(),
 });
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -17,10 +23,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const { data, error } = await parseBody(req, patchSchema);
   if (error) return error;
   try {
-    const lead = await db.lead.update({
-      where: { id },
-      data: { status: data.status, score: data.score, temperatura: data.temperatura },
-    });
+    const lead = await db.lead.update({ where: { id }, data });
     return NextResponse.json({ lead });
   } catch (e) {
     return serverError(e);
