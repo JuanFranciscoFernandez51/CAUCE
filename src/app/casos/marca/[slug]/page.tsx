@@ -157,6 +157,34 @@ export default async function CasoRealPage({ params }: { params: Promise<{ slug:
           </>
         ) : null}
 
+        {/* Documentos reales descargables */}
+        {caso.documentos?.length ? (
+          <>
+            <h2 className="mt-12 font-display text-2xl font-medium tracking-tight">
+              Los documentos que salen solos
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              PDFs reales generados por el sistema, con su marca — datos difuminados por privacidad.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {caso.documentos.map((d) => (
+                <a
+                  key={d.url}
+                  href={d.url.replace("/upload/", "/upload/fl_attachment/")}
+                  className="group overflow-hidden rounded-2xl border border-black/5 bg-card shadow-[0_2px_24px_-10px_rgba(17,17,17,0.1)] transition hover:-translate-y-0.5"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={d.url} alt={d.titulo} className="aspect-[3/4] w-full object-cover object-top" />
+                  <div className="flex items-center justify-between gap-2 p-3">
+                    <p className="text-sm font-medium">{d.titulo}</p>
+                    <span className="text-primary transition group-hover:translate-y-0.5">⬇</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </>
+        ) : null}
+
         {/* Capturas reales */}
         {shots.length > 0 ? (
           <>

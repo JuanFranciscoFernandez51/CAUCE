@@ -23,6 +23,8 @@ export type CasoReal = {
   shotsReales?: { titulo: string; url: string; href?: string }[];
   /** El proceso del negocio, paso a paso, tal como lo lleva el sistema. */
   proceso?: string[];
+  /** Documentos reales del sistema, descargables (con datos difuminados). */
+  documentos?: { titulo: string; url: string }[];
   /** Automatizaciones: lo que pasa solo, como flujo encadenado. */
   automatizaciones?: { titulo: string; flujo: string[] }[];
   /** Capturas del ADMIN real (con datos difuminados por privacidad). */
@@ -51,6 +53,11 @@ export const CASOS_REALES: CasoReal[] = [
       { nombre: "CRM y leads", detalle: "Toda consulta de todos los canales cae al sistema con su seguimiento." },
       { nombre: "Marketing", detalle: "Instagram programado, Meta Ads y Mercado Libre desde el panel." },
       { nombre: "Post-venta automática", detalle: "Service a los 6 meses y encuesta de satisfacción a los 10 días." },
+    ],
+    documentos: [
+      { titulo: "Mandato de venta (PDF real)", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785261796/cauce/sistema/casos/motos-fernandez/documentos/vozn33wfccqjjjywotco.png" },
+      { titulo: "Boleto / orden de compra", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785261797/cauce/sistema/casos/motos-fernandez/documentos/q6vsizlwla8evnvcj1ff.png" },
+      { titulo: "Orden de trabajo del taller", url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785261798/cauce/sistema/casos/motos-fernandez/documentos/ipzvwzo4ho5emgtijd9f.png" },
     ],
     automatizaciones: [
       {
