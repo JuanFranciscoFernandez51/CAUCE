@@ -234,3 +234,25 @@ h3 {
 .os-densidad-compacta :is(.p-6) { padding: 1rem; }
 .os-densidad-compacta :is(.py-2\.5) { padding-top: 0.4rem; padding-bottom: 0.4rem; }
 .os-densidad-compacta :is(.py-3) { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+/* ── Template CONCESIONARIA (Ri Cars): reveals suaves estilo Menta ── */
+.conce-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.conce-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .conce-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

@@ -118,6 +118,10 @@ model Client {
   bazarCuentas       BazarCuenta[]
   bazarConsultas     BazarConsulta[]
   bazarPublicaciones BazarPublicacion[]
+  conceVehiculos     ConceVehiculo[]
+  conceConsultas     ConceConsulta[]
+  conceOperaciones   ConceOperacion[]
+  concePublicaciones ConcePublicacion[]
 }
 
 // Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
@@ -1303,4 +1307,127 @@ model Bandera {
   clave     String   @id
   activa    Boolean  @default(true)
   updatedAt DateTime @updatedAt
+}
+
+// ── Template CONCESIONARIA (Ri Cars Automotores) ──────────────────────────
+
+/// Vehículo del stock de la concesionaria. precio null = "Consultar precio".
+model ConceVehiculo {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  slug        String // URL /sitio/<tenant>/vehiculo/<slug>
+  marca       String
+  modelo      String
+  version     String?
+  anio        Int
+  km          Int      @default(0)
+  precio      Float? // null = "Consultar precio"
+  moneda      String   @default("ARS") // ARS | USD
+  condicion   String   @default("usado") // 0km | usado
+  tipo        String   @default("sedan") // sedan | suv | pickup | hatchback | ...
+  transmision String? // Manual | Automática
+  combustible String? // Nafta | Diésel | GNC | Híbrido
+  color       String?
+  motor       String?
+  puertas     Int?
+  dominio     String? // patente (interno, NO se muestra en la web)
+  descripcion String?  @db.Text
+  fotos       Json     @default("[]") // URLs Cloudinary; el orden ES el carrusel
+  destacado   Boolean  @default(false)
+  oferta      Boolean  @default(false)
+  estado      String   @default("disponible") // disponible | reservado | vendido
+  visitas     Int      @default(0)
+  ingresadoEl DateTime @default(now()) // para "stock viejo" (+90 días)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  consultas     ConceConsulta[]
+  publicaciones ConcePublicacion[]
+  operaciones   ConceOperacion[]
+
+  @@unique([clientId, slug])
+  @@index([clientId, estado])
+  @@index([clientId, condicion])
+  @@index([clientId, tipo])
+  @@index([clientId, marca])
+  @@index([clientId, visitas])
+}
+
+/// Consulta del sitio (general, por vehículo o del chatbot). También cae al CRM como Contact.
+model ConceConsulta {
+  id         String         @id @default(cuid())
+  clientId   String
+  client     Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre     String
+  contacto   String // teléfono o email
+  mensaje    String         @db.Text
+  vehiculoId String?
+  vehiculo   ConceVehiculo? @relation(fields: [vehiculoId], references: [id], onDelete: SetNull)
+  origen     String         @default("web") // web | chatbot
+  estado     String         @default("NUEVA") // NUEVA | RESPONDIDA
+  createdAt  DateTime       @default(now())
+
+  @@index([clientId, estado])
+}
+
+/// Mandato de venta (consignación) u orden de compra / boleto (patrón MF adaptado a autos).
+model ConceOperacion {
+  id            String         @id @default(cuid())
+  clientId      String
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tipo          String // MANDATO (consignación del dueño) | BOLETO (orden de compra del comprador)
+  numero        Int
+  fecha         DateTime       @default(now())
+  // Persona: titular que consigna (mandato) o comprador (boleto)
+  nombre        String
+  dni           String?
+  domicilio     String?
+  telefono      String?
+  email         String?
+  // Vehículo: del stock o texto libre
+  vehiculoId    String?
+  vehiculo      ConceVehiculo? @relation(fields: [vehiculoId], references: [id], onDelete: SetNull)
+  vehiculoTexto String? // descripción libre si no está en el stock
+  dominio       String?
+  chasis        String?
+  motorNro      String?
+  // Documentación (checklist [{item, ok}])
+  documentacion Json           @default("[]")
+  // Condiciones económicas
+  precio        Float?
+  moneda        String         @default("ARS") // ARS | USD
+  comisionPct   Float? // % de comisión (mandato)
+  sena          Float          @default(0) // seña / anticipo (boleto)
+  formaPago     String? // contado | transferencia | financiado | permuta + efectivo
+  condiciones   String?        @db.Text
+  estado        String         @default("VIGENTE") // VIGENTE | CONCRETADA | CANCELADA
+  observaciones String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([clientId, tipo, numero])
+  @@index([clientId, estado])
+  @@index([clientId, tipo])
+}
+
+/// Publicación de un vehículo en Instagram o Mercado Libre (borrador/programada/publicada).
+model ConcePublicacion {
+  id             String        @id @default(cuid())
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  vehiculoId     String
+  vehiculo       ConceVehiculo @relation(fields: [vehiculoId], references: [id], onDelete: Cascade)
+  canal          String        @default("instagram") // instagram | mercadolibre
+  caption        String        @db.Text
+  fotos          Json          @default("[]")
+  programadaPara DateTime?
+  estado         String        @default("BORRADOR") // BORRADOR | PROGRAMADA | PUBLICADA | ERROR
+  publicadaEn    DateTime?
+  error          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([clientId, estado])
+  @@index([clientId, canal])
 }

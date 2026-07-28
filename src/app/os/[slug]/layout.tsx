@@ -164,6 +164,15 @@ export default async function OsLayout({
       { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
     );
   }
+  // Template concesionaria (Ri Cars): sus módulos propios primero en Operaciones.
+  if (tpl === "concesionaria") {
+    opsItems.unshift(
+      { label: "Stock", href: `${base}/stock`, icon: "🚗" },
+      { label: "Mandatos & Boletos", href: `${base}/mandatos`, icon: "📋" },
+      { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
+      { label: "Publicar", href: `${base}/publicar`, icon: "📣" }
+    );
+  }
   opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.

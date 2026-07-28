@@ -12,6 +12,8 @@ import { siteContent } from "./_lib/site-content";
 import { DoohSite } from "./_components/dooh-site";
 import { getBazarSite } from "./_lib/bazar-site";
 import { BazarHome } from "./_components/bazar/bazar-home";
+import { getConceSite } from "./_lib/conce-site";
+import { ConceHome } from "./_components/conce/conce-home";
 
 export const revalidate = 300; // ISR: cachea 5 min (gru1 + esto = páginas casi instantáneas)
 
@@ -65,6 +67,13 @@ export default async function SitioHome({
     const site = await getBazarSite(slug);
     if (!site) notFound();
     return <BazarHome tenant={site.tenant} info={site.info} />;
+  }
+
+  // Template CONCESIONARIA (Ri Cars): home propia con buscador y stock real.
+  if (tpl === "concesionaria") {
+    const site = await getConceSite(slug);
+    if (!site) notFound();
+    return <ConceHome tenant={site.tenant} info={site.info} />;
   }
 
   if (tpl === "dooh") {

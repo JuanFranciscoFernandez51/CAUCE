@@ -13,6 +13,7 @@ import {
 import { fmtTime } from "./_lib/dates";
 import { APPT_STATUS } from "./_lib/labels";
 import { BazarDashboard } from "./_components/bazar/dashboard";
+import { ConceDashboard } from "./_components/conce/dashboard";
 
 export default async function OsHomePage({
   params,
@@ -26,6 +27,11 @@ export default async function OsHomePage({
   // Template bazar (tienda online): dashboard propio con ventas y tops.
   if ((tenant.settings as { template?: string } | null)?.template === "bazar") {
     return <BazarDashboard tenant={tenant} />;
+  }
+
+  // Template concesionaria: dashboard propio con ventas, stock y consultas.
+  if ((tenant.settings as { template?: string } | null)?.template === "concesionaria") {
+    return <ConceDashboard tenant={tenant} />;
   }
 
   const branding = tenantBranding(tenant);
