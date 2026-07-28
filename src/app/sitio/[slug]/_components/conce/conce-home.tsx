@@ -255,13 +255,13 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
                       className="h-full w-full object-cover opacity-80 transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl opacity-60">
-                      {t.emoji}
+                    <div className="flex h-full w-full items-center justify-center opacity-40">
+                      <IconAuto className="h-10 w-10 text-white" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <p className="absolute bottom-2 left-3 right-2 text-[13px] font-bold text-white drop-shadow">
-                    {t.emoji} {t.label}
+                  <p className="absolute bottom-2.5 left-3.5 right-2 text-[13px] font-semibold tracking-wide text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
+                    {t.label}
                   </p>
                 </Link>
               </Reveal>
