@@ -88,13 +88,18 @@ export default async function NosotrosPage({
       {s.nosotros?.valores?.length ? (
         <section className="mx-auto max-w-6xl px-4 py-8">
           <div className="grid gap-3 sm:grid-cols-3">
-            {s.nosotros.valores.map((v, i) => (
-              <Reveal key={v} delay={i * 80}>
-                <div className="rounded-3xl p-6" style={{ backgroundColor: RC.doradoSuave }}>
-                  <p className="font-bold">{v}</p>
-                </div>
-              </Reveal>
-            ))}
+            {s.nosotros.valores.map((v, i) => {
+              const nombre = typeof v === "string" ? v : v.nombre;
+              const texto = typeof v === "string" ? null : v.texto;
+              return (
+                <Reveal key={nombre} delay={i * 80}>
+                  <div className="rounded-3xl p-6" style={{ backgroundColor: RC.doradoSuave }}>
+                    <p className="font-bold">{nombre}</p>
+                    {texto ? <p className="mt-1 text-sm text-gray-600">{texto}</p> : null}
+                  </div>
+                </Reveal>
+              );
+            })}
           </div>
         </section>
       ) : null}
@@ -105,7 +110,7 @@ export default async function NosotrosPage({
           <div className="rounded-[2.5rem] px-6 py-12 text-center" style={{ backgroundColor: RC.negro }}>
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">Vení a conocernos</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-gray-400">
-              {info.sucursales.map((su) => su.direccion).join(" · ")}
+              {(info.sucursales ?? []).map((su) => su.direccion).join(" · ")}
               {info.horarios ? ` — ${info.horarios}` : ""}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">

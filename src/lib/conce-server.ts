@@ -29,7 +29,7 @@ export type ConceSettings = {
   nosotros?: {
     historia?: string;
     numeros?: { valor: string; label: string }[];
-    valores?: string[];
+    valores?: (string | { nombre: string; texto?: string })[];
   };
   serviciosFooter?: string[];
   logoOscuro?: string; // logo para fondo negro (header/footer)
