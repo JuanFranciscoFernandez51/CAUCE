@@ -94,7 +94,7 @@ export function Chatbot({ slug }: { slug: string }) {
           className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full py-3 pl-4 pr-5 text-sm font-bold shadow-xl transition-transform hover:scale-105"
           style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
         >
-          <span className="text-lg">🤖</span> ¿Qué auto es para vos?
+          <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden><path d="M12 2.5 13.6 8 19 9.6 13.6 11.2 12 16.6 10.4 11.2 5 9.6 10.4 8 12 2.5ZM18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></svg> ¿Qué auto es para vos?
         </button>
       ) : null}
 
@@ -110,7 +110,7 @@ export function Chatbot({ slug }: { slug: string }) {
           >
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-full text-lg" style={{ backgroundColor: RC.dorado }}>
-                🤖
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden><path d="M12 2.5 13.6 8 19 9.6 13.6 11.2 12 16.6 10.4 11.2 5 9.6 10.4 8 12 2.5ZM18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></svg>
               </span>
               <div className="leading-tight">
                 <p className="text-sm font-bold text-white">Asesor Ri Cars</p>

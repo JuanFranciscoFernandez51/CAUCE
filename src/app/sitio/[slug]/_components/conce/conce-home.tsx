@@ -152,10 +152,14 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
               </select>
               <button
                 type="submit"
-                className="h-11 rounded-xl text-sm font-bold transition-opacity hover:opacity-90"
+                className="flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
               >
-                🔍 Buscar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-4 w-4" aria-hidden>
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+                </svg>
+                Buscar
               </button>
             </form>
           </div>
