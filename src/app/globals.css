@@ -138,6 +138,32 @@ h3 {
   color: var(--foreground);
 }
 
+/* Modo oscuro de la web pública: .menta define sus propios tokens, así que
+   necesita su contraparte oscura o el toggle no tendría efecto acá. */
+.dark .menta {
+  --background: #0b1220;
+  --foreground: #ffffff;
+  --card: #111a2e;
+  --card-foreground: #ffffff;
+  --muted: #17233c;
+  --muted-foreground: #9aa8c7;
+  --border: #223154;
+  --input: #2c3a55;
+  --primary: #5e8cff;
+  --primary-foreground: #0b1220;
+  --primary-soft: #16264a;
+  --accent: #7fe8ff;
+  --accent-foreground: #0b1220;
+  --ring: #5e8cff;
+}
+
+/* En oscuro, la mega-tarjeta se aclara un paso para seguir despegándose del fondo. */
+.dark .menta .menta-dark {
+  --background: #151f38;
+  --card: #1b2745;
+  --border: #2b3a60;
+}
+
 /* Mega-tarjeta oscura dentro de la pública (azul Cauce, no negro puro). */
 .menta .menta-dark {
   --background: #0b1220;

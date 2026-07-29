@@ -8,7 +8,7 @@ export function Doors({ compact = false }: { compact?: boolean }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div
-        className={`flex flex-col rounded-3xl border border-black/5 bg-card shadow-[0_2px_24px_-8px_rgba(17,17,17,0.08)] ${compact ? "p-6" : "p-7"}`}
+        className={`flex flex-col rounded-3xl border border-border bg-card shadow-[0_2px_24px_-8px_rgba(17,17,17,0.08)] ${compact ? "p-6" : "p-7"}`}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Puerta 1
@@ -22,13 +22,13 @@ export function Doors({ compact = false }: { compact?: boolean }) {
         </p>
         <Link
           href="/intake"
-          className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#111111] px-6 text-sm font-medium text-white transition hover:bg-black sm:self-start"
+          className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition hover:opacity-90 sm:self-start"
         >
           Empezar mi diagnóstico
         </Link>
       </div>
       <div
-        className={`flex flex-col rounded-3xl border border-black/5 bg-card shadow-[0_2px_24px_-8px_rgba(17,17,17,0.08)] ${compact ? "p-6" : "p-7"}`}
+        className={`flex flex-col rounded-3xl border border-border bg-card shadow-[0_2px_24px_-8px_rgba(17,17,17,0.08)] ${compact ? "p-6" : "p-7"}`}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Puerta 2
@@ -42,7 +42,7 @@ export function Doors({ compact = false }: { compact?: boolean }) {
         </p>
         <Link
           href="/consultoria"
-          className="mt-5 inline-flex h-11 items-center justify-center rounded-full border border-black/10 bg-white px-6 text-sm font-medium text-foreground transition hover:bg-black/5 sm:self-start"
+          className="mt-5 inline-flex h-11 items-center justify-center rounded-full border border-border bg-card px-6 text-sm font-medium text-foreground transition hover:bg-muted sm:self-start"
         >
           Agendar consultoría gratis
         </Link>

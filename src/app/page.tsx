@@ -116,7 +116,7 @@ function Shot({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-black/10 bg-white dark:bg-[#141821] shadow-[0_24px_70px_-24px_rgba(11,15,22,0.45)] ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_70px_-24px_rgba(11,15,22,0.45)] ${className}`}
     >
       <Image
         src={src}
@@ -127,7 +127,7 @@ function Shot({
         className="object-cover object-left-top"
       />
       {label ? (
-        <span className="absolute bottom-2 left-2 z-10 rounded-full bg-[#0B1220]/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
+        <span className="absolute bottom-2 left-2 z-10 rounded-full bg-[#0B1220] dark:bg-[#1b2745]/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
           {label}
         </span>
       ) : null}
@@ -173,7 +173,7 @@ export default async function LandingPage() {
     const caso = CASOS.find((c) => c.area === area);
     return (
       <Reveal key={area} delay={delay} className="h-full">
-        <div className="flex h-full flex-col rounded-3xl border border-black/5 bg-background p-6">
+        <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
           <div className="flex items-center gap-3">
             <span
               aria-hidden
@@ -221,7 +221,7 @@ export default async function LandingPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1fr]">
             <div>
               <Reveal>
-                <span className="inline-flex items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-4 py-1.5 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
                   Web + sistema de gestión a medida — Bahía Blanca, Argentina
                 </span>
               </Reveal>
@@ -246,13 +246,13 @@ export default async function LandingPage() {
                     href={WA_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-12 items-center rounded-full bg-[#111111] dark:bg-white dark:text-[#111111] px-7 text-sm font-medium text-white transition hover:bg-black"
+                    className="inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background transition hover:opacity-90"
                   >
                     Armemos el tuyo por WhatsApp
                   </a>
                   <Link
                     href="/casos"
-                    className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-7 text-sm font-medium transition hover:bg-black/5"
+                    className="inline-flex h-12 items-center rounded-full border border-border bg-card px-7 text-sm font-medium transition hover:bg-muted"
                   >
                     Ver casos reales →
                   </Link>
@@ -272,7 +272,7 @@ export default async function LandingPage() {
                       className="aspect-[16/10]"
                       priority
                     />
-                    <span className="ui-chip absolute -bottom-4 right-8 bg-white dark:bg-[#141821] text-foreground">
+                    <span className="ui-chip absolute -bottom-4 right-8 bg-card text-foreground">
                       ✓ Factura ARCA emitida
                     </span>
                   </div>
@@ -297,7 +297,7 @@ export default async function LandingPage() {
                 <Reveal delay={240}>
                   <div className="rotate-[-1.5deg]">
                     <DiaCard />
-                    <span className="ui-chip absolute -bottom-4 left-8 bg-[#0B1220] text-white">
+                    <span className="ui-chip absolute -bottom-4 left-8 bg-[#0B1220] dark:bg-[#1b2745] text-white">
                       ⚡ Aviso de service enviado
                     </span>
                   </div>
@@ -317,7 +317,7 @@ export default async function LandingPage() {
                   className="aspect-[16/10]"
                   priority
                 />
-                <span className="ui-chip absolute -bottom-4 left-4 bg-white dark:bg-[#141821] text-foreground">
+                <span className="ui-chip absolute -bottom-4 left-4 bg-card text-foreground">
                   ✓ Factura ARCA emitida
                 </span>
               </div>
@@ -343,12 +343,12 @@ export default async function LandingPage() {
             <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Negocios reales que ya fluyen con Cauce
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70 grayscale">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70 grayscale dark:opacity-90">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/casos/motos-fernandez-logo.png"
                 alt="Motos Fernández"
-                className="h-9 w-auto object-contain"
+                className="h-9 w-auto object-contain dark:invert"
               />
               <span className="font-display text-lg font-medium text-muted-foreground">
                 Vespa Bahía
@@ -366,7 +366,7 @@ export default async function LandingPage() {
               <img
                 src="/avefenix/logo.png"
                 alt="Ave Fénix Publicidad"
-                className="h-8 w-auto rounded-md bg-[#111] object-contain px-2 py-1"
+                className="h-8 w-auto rounded-md bg-foreground object-contain px-2 py-1"
               />
             </div>
           </Reveal>
@@ -375,7 +375,7 @@ export default async function LandingPage() {
 
       {/* ══ CÓMO FUNCIONA — mega-tarjeta clara, columna sticky + línea que se dibuja ══ */}
       <section id="como-funciona" className="scroll-mt-24 px-3 sm:px-4">
-        <div className="mx-auto max-w-6xl rounded-[32px] border border-black/5 bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
+        <div className="mx-auto max-w-6xl rounded-[32px] border border-border bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           <div className="grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
             <div className="lg:sticky lg:top-32 lg:self-start">
               <Reveal>
@@ -489,7 +489,7 @@ export default async function LandingPage() {
                     alt="Facturación ARCA — Vespa Bahía"
                     className="aspect-[4/3]"
                   />
-                  <span className="ui-chip absolute -bottom-3 left-3 bg-white dark:bg-[#141821] text-[#111111] dark:text-white">
+                  <span className="ui-chip absolute -bottom-3 left-3 bg-card text-foreground">
                     ✓ Factura ARCA emitida
                   </span>
                 </div>
@@ -519,7 +519,7 @@ export default async function LandingPage() {
                     alt="Calendario del mes — La Base"
                     className="aspect-[4/3]"
                   />
-                  <span className="ui-chip absolute -bottom-3 right-3 bg-[#0B1220] text-white ring-1 ring-white/15">
+                  <span className="ui-chip absolute -bottom-3 right-3 bg-[#0B1220] dark:bg-[#1b2745] text-white ring-1 ring-white/15">
                     📷 Publicado en Instagram
                   </span>
                 </div>
@@ -531,7 +531,7 @@ export default async function LandingPage() {
 
       {/* ══ ÁREAS — mega-tarjeta clara con chips + grilla ══ */}
       <section className="mt-6 px-3 sm:px-4">
-        <div className="mx-auto max-w-6xl rounded-[32px] border border-black/5 bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
+        <div className="mx-auto max-w-6xl rounded-[32px] border border-border bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           <div className="mx-auto max-w-3xl text-center">
             <Reveal>
               <h2 className="title-mega text-4xl sm:text-5xl lg:text-[56px]">
@@ -573,7 +573,7 @@ export default async function LandingPage() {
             {areaCard("FINANZAS", 0)}
             {areaCard("OPERACIONES", 80)}
             <Reveal delay={160} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-black/5 bg-background p-6">
+              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
                 <div className="flex items-center gap-3">
                   <span
                     aria-hidden
@@ -614,7 +614,7 @@ export default async function LandingPage() {
             {areaCard("VENTAS_CRM", 160)}
             {areaCard("RRHH", 0)}
             <Reveal delay={80} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-black/5 bg-background p-6">
+              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
                 <div className="flex items-center gap-3">
                   <span
                     aria-hidden
@@ -657,7 +657,7 @@ export default async function LandingPage() {
           <Reveal className="mt-12 text-center">
             <Link
               href="/casos"
-              className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-7 text-sm font-medium transition hover:bg-black/5"
+              className="inline-flex h-12 items-center rounded-full border border-border bg-card px-7 text-sm font-medium transition hover:bg-muted"
             >
               Ver negocios reales que ya funcionan con Cauce →
             </Link>
@@ -780,7 +780,7 @@ export default async function LandingPage() {
               href={WA_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-12 items-center rounded-full bg-white dark:bg-[#141821] px-7 text-sm font-semibold text-[#111111] dark:text-white transition hover:bg-white/90 dark:bg-[#101319]/90"
+              className="inline-flex h-12 items-center rounded-full bg-card px-7 text-sm font-semibold text-foreground transition hover:bg-card/90"
             >
               Armemos tu presupuesto por WhatsApp →
             </a>
