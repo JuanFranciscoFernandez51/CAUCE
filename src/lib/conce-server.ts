@@ -25,6 +25,8 @@ export type ConceSettings = {
   facebook?: string;
   mercadolibre?: string;
   horarios?: string;
+  razonSocial?: string;
+  cuit?: string;
   sucursales?: ConceSucursal[];
   whatsapps?: string[]; // solo dígitos con 549...
   nosotros?: {
@@ -432,6 +434,10 @@ export async function concretarOperacion(opts: {
     });
     await recalcularBalances(tx, opts.clientId, [cuenta.id]);
   });
+
+  // Financiación propia de la casa: el plan de cuotas se arma solo.
+  const { financiacionDeBoleto } = await import("@/lib/conce-fin-server");
+  await financiacionDeBoleto({ clientId: opts.clientId, operacionId: opts.operacionId });
 
   const op = await db.conceOperacion.findFirst({
     where: { id: opts.operacionId, clientId: opts.clientId },

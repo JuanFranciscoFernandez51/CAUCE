@@ -54,7 +54,7 @@ export function ConceShell({ info, children }: { info: ConceShellInfo; children:
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Escribinos por WhatsApp"
-          className="fixed bottom-5 left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)] transition-transform hover:scale-105"
+          className="fixed bottom-[78px] right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)] transition-transform hover:scale-105"
           style={{ backgroundColor: "#25D366" }}
         >
           <IconWhatsapp className="h-6 w-6" />
@@ -66,7 +66,7 @@ export function ConceShell({ info, children }: { info: ConceShellInfo; children:
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Seguinos en Instagram"
-          className="fixed bottom-[74px] left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(193,53,132,0.65)] transition-transform hover:scale-105"
+          className="fixed bottom-[138px] right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(193,53,132,0.65)] transition-transform hover:scale-105"
           style={{ background: "linear-gradient(45deg,#F58529,#DD2A7B,#8134AF)" }}
         >
           <IconInstagram className="h-6 w-6" />
@@ -94,8 +94,6 @@ function Header({ info }: { info: ConceShellInfo }) {
 
   const links = [
     { href: base, label: "Inicio", exact: true },
-    { href: `${base}/catalogo?condicion=0km`, label: "0KM" },
-    { href: `${base}/catalogo?condicion=usado`, label: "Usados" },
     { href: `${base}/catalogo`, label: "Catálogo" },
     { href: `${base}/nosotros`, label: "Nosotros" },
     { href: `${base}/blog`, label: "Blog" },

@@ -10,15 +10,21 @@ export function Imprimible({
   primary,
   titulo,
   subtitulo,
+  fecha: fechaProp,
+  datosNegocio,
   children,
 }: {
   negocio: string;
   primary: string;
   titulo: string;
   subtitulo?: string;
+  /** Fecha del documento. Si no viene, usa la de hoy. */
+  fecha?: string;
+  /** Línea(s) fiscales y de contacto del negocio, bajo el nombre. */
+  datosNegocio?: string;
   children: ReactNode;
 }) {
-  const fecha = new Date().toLocaleDateString("es-AR", {
+  const fecha = fechaProp ?? new Date().toLocaleDateString("es-AR", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -44,7 +50,11 @@ export function Imprimible({
             <p className="text-xl font-bold" style={{ color: primary }}>
               {negocio}
             </p>
-            <p className="text-sm text-gray-500">{fecha}</p>
+            {datosNegocio ? (
+              <p className="whitespace-pre-line text-[11px] leading-snug text-gray-500">{datosNegocio}</p>
+            ) : (
+              <p className="text-sm text-gray-500">{fecha}</p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-lg font-bold">{titulo}</p>

@@ -49,9 +49,11 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
       }),
       db.conceVehiculo.count({ where: { ...activos, condicion: "0km" } }),
       db.conceVehiculo.count({ where: { ...activos, condicion: "usado" } }),
+      // Portada por categoría: el vehículo más caro que tengamos en stock de ese tipo
+      // (los USD primero, que son los de mayor valor). Cambia solo con el stock real.
       db.conceVehiculo.findMany({
-        where: activos,
-        orderBy: [{ destacado: "desc" }, { visitas: "desc" }],
+        where: { ...activos, publicado: true },
+        orderBy: [{ moneda: "desc" }, { precio: "desc" }],
         distinct: ["tipo"],
         select: { tipo: true, fotos: true },
       }),
@@ -71,7 +73,7 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
       {/* ── Hero con buscador ── */}
       <section className="px-3 pt-4">
         <div
-          className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] px-5 py-14 sm:px-10 sm:py-20"
+          className="relative mx-auto max-w-[1500px] overflow-hidden rounded-[2.5rem] px-5 py-20 sm:px-12 sm:py-28 lg:py-32"
           style={{ backgroundColor: RC.negro }}
         >
           {heroFoto ? (
@@ -91,10 +93,10 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
               <IconAuto className="h-4 w-4" />
               Multimarcas 0KM y Usados · Bahía Blanca
             </p>
-            <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
+            <h1 className="mt-6 max-w-4xl text-5xl font-extrabold leading-[1.02] tracking-tight text-white sm:text-7xl lg:text-[84px]">
               Encontrá tu <span style={{ color: RC.dorado }}>auto ideal</span>
             </h1>
-            <p className="mt-4 max-w-xl text-base text-gray-300 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base text-gray-300 sm:text-xl">
               {s.claim ??
                 "Más de 15 años acompañándote en la compra de tu vehículo, con permutas, gestoría y atención personalizada."}
             </p>
