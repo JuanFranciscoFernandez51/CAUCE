@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { guardConceApi } from "../../_guard";
-import { concretarOperacion } from "@/lib/conce-server";
+import { permutaSchema } from "../route";
+import {
+  anularOperacion,
+  concretarOperacion,
+  firmarOperacion,
+  vincularContacto,
+} from "@/lib/conce-server";
 
 /**
- * Edición y cambio de estado de un mandato/boleto.
- * estado=CONCRETADA dispara los efectos (Finanzas + vehículo vendido) una
- * sola vez, vía concretarOperacion (idempotente).
+ * Edición y cambio de estado de un mandato/boleto. Cada estado dispara sus
+ * automatizaciones (idempotentes):
+ *  - FIRMADO    → el mandato mete el vehículo en el stock SIN publicar.
+ *  - CONCRETADA → vehículo vendido + ingreso en Finanzas + permutas al stock.
+ *  - CANCELADA  → lo que entró por la operación sale de circulación.
  */
 
 const docSchema = z.object({ item: z.string().trim().min(1).max(120), ok: z.boolean() });
@@ -21,6 +30,12 @@ const patchSchema = z
     telefono: z.string().trim().max(40).nullable(),
     email: z.string().trim().max(120).nullable(),
     vehiculoTexto: z.string().trim().max(300).nullable(),
+    vehiculoId: z.string().trim().max(60).nullable(),
+    vehMarca: z.string().trim().max(80).nullable(),
+    vehModelo: z.string().trim().max(120).nullable(),
+    vehAnio: z.number().int().min(1950).max(2030).nullable(),
+    vehKm: z.number().int().min(0).nullable(),
+    permutas: z.array(permutaSchema).max(10),
     dominio: z.string().trim().max(20).nullable(),
     chasis: z.string().trim().max(60).nullable(),
     motorNro: z.string().trim().max(60).nullable(),
@@ -32,7 +47,7 @@ const patchSchema = z
     formaPago: z.string().trim().max(80).nullable(),
     condiciones: z.string().trim().max(4000).nullable(),
     observaciones: z.string().trim().max(4000).nullable(),
-    estado: z.enum(["VIGENTE", "CONCRETADA", "CANCELADA"]),
+    estado: z.enum(["VIGENTE", "FIRMADO", "CONCRETADA", "CANCELADA"]),
   })
   .partial();
 
@@ -55,42 +70,62 @@ export async function PATCH(
 
   const op = await db.conceOperacion.findFirst({
     where: { id, clientId: g.tenant.id },
-    select: { id: true, estado: true, vehiculoId: true },
+    select: { id: true, tipo: true, estado: true, vehiculoId: true, nombre: true },
   });
   if (!op) return NextResponse.json({ error: "No existe" }, { status: 404 });
 
-  // Concretar: efectos completos (una sola vez).
-  if (d.estado === "CONCRETADA" && op.estado !== "CONCRETADA") {
-    const { estado: _estado, fecha: _fecha, ...resto } = d;
-    if (Object.keys(resto).length > 0) {
-      await db.conceOperacion.update({
-        where: { id },
-        data: {
-          ...resto,
-          ...(d.fecha ? { fecha: new Date(`${d.fecha}T12:00:00-03:00`) } : {}),
-        },
+  // Campos "planos" (todo menos el estado, que dispara automatizaciones).
+  const { estado: nuevoEstado, fecha, vehiculoId, permutas, ...resto } = d;
+
+  // El vehículo del stock tiene que ser de ESTE tenant.
+  let vehiculoIdFinal: string | null | undefined;
+  if (vehiculoId !== undefined) {
+    vehiculoIdFinal = null;
+    if (vehiculoId) {
+      const v = await db.conceVehiculo.findFirst({
+        where: { id: vehiculoId, clientId: g.tenant.id },
+        select: { id: true },
       });
+      vehiculoIdFinal = v?.id ?? null;
     }
+  }
+
+  const datosPlanos = {
+    ...resto,
+    ...(fecha ? { fecha: new Date(`${fecha}T12:00:00-03:00`) } : {}),
+    ...(vehiculoIdFinal !== undefined ? { vehiculoId: vehiculoIdFinal } : {}),
+    ...(permutas !== undefined
+      ? { permutas: permutas.filter((p) => p.marca.trim()) as unknown as Prisma.InputJsonValue }
+      : {}),
+  };
+
+  if (Object.keys(datosPlanos).length > 0) {
+    await db.conceOperacion.update({ where: { id }, data: datosPlanos });
+    // Si tocaron los datos de la persona, mantenemos el cliente del CRM al día.
+    if (resto.nombre || resto.telefono !== undefined || resto.email !== undefined) {
+      const actual = await db.conceOperacion.findFirst({
+        where: { id, clientId: g.tenant.id },
+        select: { nombre: true, telefono: true, email: true, dni: true, contactId: true },
+      });
+      if (actual && !actual.contactId) {
+        const contactId = await vincularContacto(db, g.tenant.id, actual);
+        if (contactId) await db.conceOperacion.update({ where: { id }, data: { contactId } });
+      }
+    }
+  }
+
+  // Firmar: el mandato mete el vehículo al stock (sin publicar).
+  if (nuevoEstado === "FIRMADO" && op.estado !== "FIRMADO" && op.estado !== "CONCRETADA") {
+    await firmarOperacion({ clientId: g.tenant.id, operacionId: id });
+  } else if (nuevoEstado === "CONCRETADA" && op.estado !== "CONCRETADA") {
     await concretarOperacion({ clientId: g.tenant.id, operacionId: id });
-    const actualizada = await db.conceOperacion.findFirst({ where: { id } });
-    return NextResponse.json({ ok: true, operacion: actualizada });
+  } else if (nuevoEstado === "CANCELADA" && op.estado !== "CANCELADA") {
+    await anularOperacion({ clientId: g.tenant.id, operacionId: id });
+  } else if (nuevoEstado && nuevoEstado !== op.estado) {
+    await db.conceOperacion.update({ where: { id }, data: { estado: nuevoEstado } });
   }
 
-  // Cancelar un boleto libera el vehículo reservado.
-  if (d.estado === "CANCELADA" && op.estado !== "CANCELADA" && op.vehiculoId) {
-    await db.conceVehiculo.updateMany({
-      where: { id: op.vehiculoId, clientId: g.tenant.id, estado: "reservado" },
-      data: { estado: "disponible" },
-    });
-  }
-
-  const operacion = await db.conceOperacion.update({
-    where: { id },
-    data: {
-      ...d,
-      ...(d.fecha ? { fecha: new Date(`${d.fecha}T12:00:00-03:00`) } : {}),
-    },
-  });
+  const operacion = await db.conceOperacion.findFirst({ where: { id, clientId: g.tenant.id } });
   return NextResponse.json({ ok: true, operacion });
 }
 

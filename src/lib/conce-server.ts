@@ -1,7 +1,8 @@
-import type { Client, Prisma, PrismaClient } from "@prisma/client";
+import type { Client, ConceOperacion, Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
 import { recalcularBalances } from "@/app/os/[slug]/_lib/finanzas-data";
-import { nombreVehiculo } from "@/lib/conce";
+import { nombreVehiculo, numeroOperacion, permutasDe, type Permuta } from "@/lib/conce";
+import { registrarActividad } from "@/lib/actividad";
 
 /**
  * Lado server del template CONCESIONARIA: tenant, settings tipados y efectos
@@ -77,6 +78,272 @@ export async function proximoNumeroOperacion(
   return (ultimo?.numero ?? 0) + 1;
 }
 
+// ── Cliente único (CRM) ───────────────────────────────────────────────────
+
+/**
+ * Busca o crea el Contact (cliente del CRM) de la persona de una operación.
+ * Regla de oro de Cauce: TODO cliente entra al CRM único. Matchea por
+ * teléfono → email → nombre, así no duplica al mismo señor.
+ */
+export async function vincularContacto(
+  tx: Tx,
+  clientId: string,
+  datos: { nombre: string; telefono?: string | null; email?: string | null; dni?: string | null }
+): Promise<string | null> {
+  const nombre = datos.nombre?.trim();
+  if (!nombre) return null;
+  const telefono = datos.telefono?.trim() || null;
+  const email = datos.email?.trim() || null;
+
+  const existente =
+    (telefono
+      ? await tx.contact.findFirst({ where: { clientId, phone: telefono }, select: { id: true } })
+      : null) ??
+    (email
+      ? await tx.contact.findFirst({
+          where: { clientId, email: { equals: email, mode: "insensitive" } },
+          select: { id: true },
+        })
+      : null) ??
+    (await tx.contact.findFirst({
+      where: { clientId, name: { equals: nombre, mode: "insensitive" } },
+      select: { id: true },
+    }));
+
+  if (existente) {
+    // Completamos huecos sin pisar lo que ya haya cargado el vendedor.
+    await tx.contact.update({
+      where: { id: existente.id },
+      data: {
+        ...(telefono ? { phone: telefono } : {}),
+        ...(email ? { email } : {}),
+        lastTouchAt: new Date(),
+      },
+    });
+    return existente.id;
+  }
+
+  const creado = await tx.contact.create({
+    data: {
+      clientId,
+      name: nombre,
+      phone: telefono,
+      email,
+      source: "operacion",
+      stage: "cliente",
+      notes: datos.dni ? `DNI/CUIT: ${datos.dni}` : null,
+      lastTouchAt: new Date(),
+    },
+    select: { id: true },
+  });
+  return creado.id;
+}
+
+// ── Alta automática al stock (mandato firmado / permuta tomada) ───────────
+
+/** Crea un vehículo en el stock SIN PUBLICAR, con rastro de por dónde entró. */
+async function crearVehiculoAutomatico(
+  tx: Tx,
+  clientId: string,
+  datos: {
+    marca: string;
+    modelo: string;
+    anio: number;
+    km?: number;
+    precio?: number | null;
+    moneda?: string;
+    dominio?: string | null;
+    descripcion?: string | null;
+    origenTipo: "MANDATO" | "PERMUTA";
+    origenOperacionId: string;
+  }
+): Promise<string> {
+  const anio = Number.isFinite(datos.anio) ? datos.anio : new Date().getFullYear();
+  const v = await tx.conceVehiculo.create({
+    data: {
+      clientId,
+      slug: await slugUnicoVehiculo(
+        tx,
+        clientId,
+        `${datos.marca} ${datos.modelo} ${anio} en bahia blanca`
+      ),
+      marca: datos.marca,
+      modelo: datos.modelo,
+      anio,
+      km: datos.km && datos.km > 0 ? Math.round(datos.km) : 0,
+      precio: datos.precio && datos.precio > 0 ? datos.precio : null,
+      moneda: datos.moneda === "USD" ? "USD" : "ARS",
+      condicion: "usado",
+      dominio: datos.dominio || null,
+      descripcion: datos.descripcion || null,
+      estado: "disponible",
+      publicado: false, // entra al stock pero NO sale a la web hasta que lo revisen
+      origenTipo: datos.origenTipo,
+      origenOperacionId: datos.origenOperacionId,
+    },
+    select: { id: true },
+  });
+  return v.id;
+}
+
+/**
+ * Da de alta en el stock las permutas cargadas en un boleto (idempotente:
+ * cada permuta guarda el vehiculoId que generó).
+ */
+async function sincronizarPermutas(
+  tx: Tx,
+  clientId: string,
+  op: ConceOperacion
+): Promise<{ creados: number; permutas: Permuta[] }> {
+  const permutas = permutasDe(op.permutas);
+  if (permutas.length === 0) return { creados: 0, permutas };
+
+  let creados = 0;
+  const salida: Permuta[] = [];
+  for (const p of permutas) {
+    if (p.vehiculoId || !p.marca?.trim()) {
+      salida.push(p);
+      continue;
+    }
+    const vehiculoId = await crearVehiculoAutomatico(tx, clientId, {
+      marca: p.marca.trim(),
+      modelo: (p.modelo ?? "").trim() || "—",
+      anio: Number(p.anio) || new Date().getFullYear(),
+      km: Number(p.km) || 0,
+      precio: null, // lo tasan ellos: el valor tomado NO es el precio de venta
+      moneda: op.moneda,
+      dominio: p.dominio ?? null,
+      descripcion: `Tomado en permuta en el boleto ${numeroOperacion(op.tipo, op.numero)} por $ ${Math.round(
+        Number(p.valorTomado) || 0
+      ).toLocaleString("es-AR")}.`,
+      origenTipo: "PERMUTA",
+      origenOperacionId: op.id,
+    });
+    salida.push({ ...p, vehiculoId });
+    creados++;
+  }
+
+  if (creados > 0) {
+    await tx.conceOperacion.update({
+      where: { id: op.id },
+      data: { permutas: salida as unknown as Prisma.InputJsonValue },
+    });
+  }
+  return { creados, permutas: salida };
+}
+
+/**
+ * MANDATO FIRMADO → el vehículo entra SOLO al stock, sin publicar, vinculado
+ * al mandato. Idempotente: si el mandato ya tiene vehículo, no duplica.
+ * En un BOLETO firmado sincroniza las permutas tomadas.
+ */
+export async function firmarOperacion(opts: {
+  clientId: string;
+  operacionId: string;
+}): Promise<{ vehiculoCreado: boolean; permutasCreadas: number }> {
+  const resultado = await db.$transaction(async (tx) => {
+    const op = await tx.conceOperacion.findFirst({
+      where: { id: opts.operacionId, clientId: opts.clientId },
+    });
+    if (!op) return { vehiculoCreado: false, permutasCreadas: 0, op: null };
+
+    let vehiculoCreado = false;
+    if (op.tipo === "MANDATO" && !op.vehiculoId) {
+      const marca = (op.vehMarca ?? "").trim() || (op.vehiculoTexto ?? "").trim().split(" ")[0] || "";
+      const modelo =
+        (op.vehModelo ?? "").trim() ||
+        (op.vehiculoTexto ?? "").trim().split(" ").slice(1).join(" ") ||
+        "—";
+      if (marca) {
+        const vehiculoId = await crearVehiculoAutomatico(tx, opts.clientId, {
+          marca,
+          modelo,
+          anio: op.vehAnio ?? new Date().getFullYear(),
+          km: op.vehKm ?? 0,
+          precio: op.precio,
+          moneda: op.moneda,
+          dominio: op.dominio,
+          descripcion: `Ingresó en consignación por el mandato ${numeroOperacion(op.tipo, op.numero)}.`,
+          origenTipo: "MANDATO",
+          origenOperacionId: op.id,
+        });
+        await tx.conceOperacion.update({ where: { id: op.id }, data: { vehiculoId } });
+        vehiculoCreado = true;
+      }
+    }
+
+    // Si el mandato ya apuntaba a un vehículo del stock, lo dejamos disponible.
+    if (op.tipo === "MANDATO" && op.vehiculoId) {
+      await tx.conceVehiculo.updateMany({
+        where: { id: op.vehiculoId, clientId: opts.clientId, estado: "vendido" },
+        data: { estado: "disponible" },
+      });
+    }
+
+    const { creados } = await sincronizarPermutas(tx, opts.clientId, op);
+
+    await tx.conceOperacion.update({
+      where: { id: op.id },
+      data: { estado: "FIRMADO", firmadoEl: op.firmadoEl ?? new Date() },
+    });
+
+    return { vehiculoCreado, permutasCreadas: creados, op };
+  });
+
+  if (resultado.op) {
+    const ref = numeroOperacion(resultado.op.tipo, resultado.op.numero);
+    await registrarActividad(
+      opts.clientId,
+      "operacion_firmada",
+      `${ref} — ${resultado.op.nombre}${
+        resultado.vehiculoCreado ? " · el vehículo entró al stock sin publicar" : ""
+      }${resultado.permutasCreadas > 0 ? ` · ${resultado.permutasCreadas} permuta(s) al stock` : ""}`
+    );
+  }
+  return {
+    vehiculoCreado: resultado.vehiculoCreado,
+    permutasCreadas: resultado.permutasCreadas,
+  };
+}
+
+/**
+ * Operación anulada: los vehículos que habían entrado SOLOS por ella salen de
+ * circulación (sin publicar) y el vehículo reservado por un boleto se libera.
+ */
+export async function anularOperacion(opts: {
+  clientId: string;
+  operacionId: string;
+}): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const op = await tx.conceOperacion.findFirst({
+      where: { id: opts.operacionId, clientId: opts.clientId },
+    });
+    if (!op) return;
+
+    // Lo que entró por esta operación vuelve atrás: fuera de la web.
+    await tx.conceVehiculo.updateMany({
+      where: { clientId: opts.clientId, origenOperacionId: op.id },
+      data: { publicado: false, estado: "reservado" },
+    });
+
+    // Un boleto cancelado libera el vehículo que tenía reservado.
+    if (op.vehiculoId) {
+      await tx.conceVehiculo.updateMany({
+        where: {
+          id: op.vehiculoId,
+          clientId: opts.clientId,
+          estado: "reservado",
+          origenOperacionId: null,
+        },
+        data: { estado: "disponible" },
+      });
+    }
+
+    await tx.conceOperacion.update({ where: { id: op.id }, data: { estado: "CANCELADA" } });
+  });
+  await registrarActividad(opts.clientId, "operacion_cancelada", opts.operacionId);
+}
+
 // ── Efectos de "boleto concretado" ────────────────────────────────────────
 
 /**
@@ -102,12 +369,17 @@ export async function concretarOperacion(opts: {
       data: { estado: "CONCRETADA" },
     });
 
+    // Vehículo entregado: pasa a VENDIDO, sale del stock disponible y de la
+    // web, con la fecha de la entrega.
     if (op.vehiculoId) {
       await tx.conceVehiculo.updateMany({
         where: { id: op.vehiculoId, clientId: opts.clientId },
-        data: { estado: "vendido" },
+        data: { estado: "vendido", publicado: false, vendidoEl: new Date() },
       });
     }
+
+    // Permutas tomadas en el boleto → entran al stock (sin publicar).
+    await sincronizarPermutas(tx, opts.clientId, op);
 
     // Ingreso en Finanzas
     const esBoleto = op.tipo === "BOLETO";
@@ -160,4 +432,16 @@ export async function concretarOperacion(opts: {
     });
     await recalcularBalances(tx, opts.clientId, [cuenta.id]);
   });
+
+  const op = await db.conceOperacion.findFirst({
+    where: { id: opts.operacionId, clientId: opts.clientId },
+    select: { tipo: true, numero: true, nombre: true },
+  });
+  if (op) {
+    await registrarActividad(
+      opts.clientId,
+      "operacion_concretada",
+      `${numeroOperacion(op.tipo, op.numero)} — ${op.nombre}`
+    );
+  }
 }

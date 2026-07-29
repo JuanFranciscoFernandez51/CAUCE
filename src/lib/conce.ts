@@ -73,9 +73,70 @@ export const OPERACION_TIPO_LABEL: Record<string, string> = {
 
 export const OPERACION_ESTADO_LABEL: Record<string, string> = {
   VIGENTE: "Vigente",
+  FIRMADO: "Firmado",
   CONCRETADA: "Concretada",
   CANCELADA: "Cancelada",
 };
+
+export const OPERACION_ESTADOS = ["VIGENTE", "FIRMADO", "CONCRETADA", "CANCELADA"] as const;
+
+/** Numeración con prefijo por tipo: mandatos MV-0012, boletos BC-0012. */
+export function numeroOperacion(tipo: string, numero: number): string {
+  return `${tipo === "MANDATO" ? "MV" : "BC"}-${String(numero).padStart(4, "0")}`;
+}
+
+/** Ruta del módulo según el tipo: mandatos y boletos son módulos SEPARADOS. */
+export function rutaOperacion(tipo: string): string {
+  return tipo === "MANDATO" ? "mandatos" : "boletos";
+}
+
+// ── Permutas tomadas dentro de un boleto ──────────────────────────────────
+
+export type Permuta = {
+  marca: string;
+  modelo: string;
+  anio: number;
+  km: number;
+  valorTomado: number;
+  dominio?: string;
+  /** Vehículo del stock que generó (lo completa el server; evita duplicar). */
+  vehiculoId?: string | null;
+};
+
+export function permutasDe(json: unknown): Permuta[] {
+  if (!Array.isArray(json)) return [];
+  return json.filter(
+    (p): p is Permuta =>
+      Boolean(p) && typeof p === "object" && typeof (p as Permuta).marca === "string"
+  );
+}
+
+export const PERMUTA_VACIA: Permuta = {
+  marca: "",
+  modelo: "",
+  anio: new Date().getFullYear(),
+  km: 0,
+  valorTomado: 0,
+  dominio: "",
+  vehiculoId: null,
+};
+
+/** Cartelito de origen de un vehículo que entró solo al stock. */
+export function origenVehiculoTexto(
+  origenTipo: string | null | undefined,
+  numero: number | null | undefined,
+  tipoOperacion: string | null | undefined
+): string | null {
+  if (!origenTipo) return null;
+  const ref = numero != null && tipoOperacion ? numeroOperacion(tipoOperacion, numero) : null;
+  if (origenTipo === "MANDATO") {
+    return `Este vehículo entró por el mandato ${ref ?? "de venta"}`;
+  }
+  if (origenTipo === "PERMUTA") {
+    return `Este vehículo entró como permuta del boleto ${ref ?? ""}`.trim();
+  }
+  return null;
+}
 
 /** Checklist default de documentación para mandatos/boletos de autos. */
 export const DOCS_DEFAULT: { item: string; ok: boolean }[] = [

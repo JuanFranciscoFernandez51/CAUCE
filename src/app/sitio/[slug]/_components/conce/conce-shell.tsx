@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { ConceShellInfo } from "../../_lib/conce-site";
 import { Chatbot } from "./chatbot";
@@ -54,10 +54,10 @@ export function ConceShell({ info, children }: { info: ConceShellInfo; children:
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Escribinos por WhatsApp"
-          className="fixed bottom-5 left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)] transition-transform hover:scale-105"
+          className="fixed bottom-5 left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)] transition-transform hover:scale-105"
           style={{ backgroundColor: "#25D366" }}
         >
-          <IconWhatsapp className="h-7 w-7" />
+          <IconWhatsapp className="h-6 w-6" />
         </a>
       ) : null}
       {info.instagram ? (
@@ -66,7 +66,7 @@ export function ConceShell({ info, children }: { info: ConceShellInfo; children:
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Seguinos en Instagram"
-          className="fixed bottom-[86px] left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(193,53,132,0.65)] transition-transform hover:scale-105"
+          className="fixed bottom-[74px] left-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(193,53,132,0.65)] transition-transform hover:scale-105"
           style={{ background: "linear-gradient(45deg,#F58529,#DD2A7B,#8134AF)" }}
         >
           <IconInstagram className="h-6 w-6" />
@@ -83,6 +83,14 @@ function Header({ info }: { info: ConceShellInfo }) {
   const base = `/sitio/${info.slug}`;
   const pathname = usePathname();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [scrolleado, setScrolleado] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolleado(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const links = [
     { href: base, label: "Inicio", exact: true },
@@ -101,10 +109,25 @@ function Header({ info }: { info: ConceShellInfo }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3">
+    <header className="sticky top-0 z-40 px-3 pt-3 transition-all duration-300">
       <div
-        className="mx-auto flex max-w-6xl items-center gap-2 rounded-full px-4 py-2.5 shadow-lg backdrop-blur"
-        style={{ backgroundColor: "rgba(10,10,10,0.94)" }}
+        className="mx-auto flex max-w-[1500px] items-center gap-2 rounded-full px-4 py-2 transition-all duration-300"
+        style={
+          scrolleado
+            ? {
+                backgroundColor: "rgba(10,10,10,0.82)",
+                backdropFilter: "saturate(180%) blur(14px)",
+                WebkitBackdropFilter: "saturate(180%) blur(14px)",
+                boxShadow: "0 10px 40px -18px rgba(0,0,0,0.8)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }
+            : {
+                backgroundColor: "rgba(10,10,10,0.35)",
+                backdropFilter: "saturate(140%) blur(8px)",
+                WebkitBackdropFilter: "saturate(140%) blur(8px)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }
+        }
       >
         <Link href={base} className="flex shrink-0 items-center gap-2.5">
           {info.logo ? (
@@ -112,7 +135,7 @@ function Header({ info }: { info: ConceShellInfo }) {
             <img
               src={info.logo}
               alt={info.nombre}
-              className="h-10 w-10 rounded-full bg-white object-contain"
+              className="h-11 w-auto max-w-[92px] object-contain"
             />
           ) : (
             <IconAuto className="h-8 w-8 text-white" />
@@ -239,7 +262,7 @@ function Footer({ info }: { info: ConceShellInfo }) {
               <img
                 src={info.logo}
                 alt={info.nombre}
-                className="h-12 w-12 rounded-full bg-white object-contain"
+                className="h-14 w-auto max-w-[120px] object-contain"
               />
             ) : (
               <IconAuto className="h-10 w-10 text-white" />

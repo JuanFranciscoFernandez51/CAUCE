@@ -2,12 +2,22 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardConceApi } from "../_guard";
-import { proximoNumeroOperacion } from "@/lib/conce-server";
+import { proximoNumeroOperacion, vincularContacto } from "@/lib/conce-server";
 import { DOCS_DEFAULT } from "@/lib/conce";
 
 /** Alta de mandatos de venta y boletos/órdenes de compra. */
 
 const docSchema = z.object({ item: z.string().trim().min(1).max(120), ok: z.boolean() });
+
+export const permutaSchema = z.object({
+  marca: z.string().trim().max(80).default(""),
+  modelo: z.string().trim().max(120).default(""),
+  anio: z.number().int().min(1950).max(2030).default(new Date().getFullYear()),
+  km: z.number().int().min(0).default(0),
+  valorTomado: z.number().min(0).default(0),
+  dominio: z.string().trim().max(20).optional().default(""),
+  vehiculoId: z.string().trim().max(60).nullable().optional(),
+});
 
 const createSchema = z.object({
   tipo: z.enum(["MANDATO", "BOLETO"]),
@@ -19,6 +29,11 @@ const createSchema = z.object({
   email: z.string().trim().max(120).optional().default(""),
   vehiculoId: z.string().trim().max(60).optional(),
   vehiculoTexto: z.string().trim().max(300).optional().default(""),
+  vehMarca: z.string().trim().max(80).optional().default(""),
+  vehModelo: z.string().trim().max(120).optional().default(""),
+  vehAnio: z.number().int().min(1950).max(2030).nullable().optional(),
+  vehKm: z.number().int().min(0).nullable().optional(),
+  permutas: z.array(permutaSchema).max(10).optional(),
   dominio: z.string().trim().max(20).optional().default(""),
   chasis: z.string().trim().max(60).optional().default(""),
   motorNro: z.string().trim().max(60).optional().default(""),
@@ -56,11 +71,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     if (v) vehiculoId = v.id;
   }
 
+  // Todo cliente entra al CRM único (busca por teléfono/email/nombre).
+  const contactId = await vincularContacto(db, g.tenant.id, {
+    nombre: d.nombre,
+    telefono: d.telefono,
+    email: d.email,
+    dni: d.dni,
+  });
+
   const operacion = await db.conceOperacion.create({
     data: {
       clientId: g.tenant.id,
       tipo: d.tipo,
       numero: await proximoNumeroOperacion(db, g.tenant.id, d.tipo),
+      contactId,
       fecha: d.fecha ? new Date(`${d.fecha}T12:00:00-03:00`) : new Date(),
       nombre: d.nombre,
       dni: d.dni || null,
@@ -69,6 +93,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
       email: d.email || null,
       vehiculoId,
       vehiculoTexto: d.vehiculoTexto || null,
+      vehMarca: d.vehMarca || null,
+      vehModelo: d.vehModelo || null,
+      vehAnio: d.vehAnio ?? null,
+      vehKm: d.vehKm ?? null,
+      permutas: (d.permutas ?? []).filter((p) => p.marca.trim()),
       dominio: d.dominio || null,
       chasis: d.chasis || null,
       motorNro: d.motorNro || null,

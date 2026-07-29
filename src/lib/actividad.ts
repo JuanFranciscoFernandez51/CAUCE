@@ -19,6 +19,9 @@ export const ACCION_LABELS: Record<string, string> = {
   presupuesto_creado: "Creó un presupuesto",
   presupuesto_aceptado: "Presupuesto aceptado (pasó a OT)",
   contactos_importados: "Importó contactos al CRM",
+  operacion_firmada: "Firmó un mandato/boleto",
+  operacion_concretada: "Concretó un mandato/boleto",
+  operacion_cancelada: "Anuló un mandato/boleto",
 };
 
 /**

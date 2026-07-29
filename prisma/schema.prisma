@@ -417,6 +417,7 @@ model Contact {
   ventas       Venta[]
   presupuestosTaller PresupuestoTaller[]
   pantallaContratos PantallaContrato[]
+  conceOperaciones ConceOperacion[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -1337,6 +1338,14 @@ model ConceVehiculo {
   destacado   Boolean  @default(false)
   oferta      Boolean  @default(false)
   estado      String   @default("disponible") // disponible | reservado | vendido
+  /// false = está en el stock pero NO se muestra en la web (sin publicar).
+  /// Los vehículos que entran solos (mandato firmado / permuta) nacen en false.
+  publicado   Boolean  @default(true)
+  /// De dónde entró al stock: null = carga manual | MANDATO | PERMUTA
+  origenTipo        String?
+  /// Operación (mandato/boleto) que lo hizo entrar al stock.
+  origenOperacionId String?
+  vendidoEl   DateTime?
   visitas     Int      @default(0)
   ingresadoEl DateTime @default(now()) // para "stock viejo" (+90 días)
   createdAt   DateTime @default(now())
@@ -1348,6 +1357,7 @@ model ConceVehiculo {
 
   @@unique([clientId, slug])
   @@index([clientId, estado])
+  @@index([clientId, origenOperacionId])
   @@index([clientId, condicion])
   @@index([clientId, tipo])
   @@index([clientId, marca])
@@ -1385,13 +1395,24 @@ model ConceOperacion {
   domicilio     String?
   telefono      String?
   email         String?
+  // Cliente del CRM (uno solo por persona): se crea/vincula solo al guardar.
+  contactId     String?
+  contacto      Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   // Vehículo: del stock o texto libre
   vehiculoId    String?
   vehiculo      ConceVehiculo? @relation(fields: [vehiculoId], references: [id], onDelete: SetNull)
   vehiculoTexto String? // descripción libre si no está en el stock
+  // Datos estructurados de la unidad (los usa el alta automática al stock)
+  vehMarca      String?
+  vehModelo     String?
+  vehAnio       Int?
+  vehKm         Int?
   dominio       String?
   chasis        String?
   motorNro      String?
+  /// Permutas tomadas dentro del boleto: [{marca, modelo, anio, km, valorTomado, dominio, vehiculoId}]
+  permutas      Json           @default("[]")
+  firmadoEl     DateTime?
   // Documentación (checklist [{item, ok}])
   documentacion Json           @default("[]")
   // Condiciones económicas
@@ -1401,7 +1422,7 @@ model ConceOperacion {
   sena          Float          @default(0) // seña / anticipo (boleto)
   formaPago     String? // contado | transferencia | financiado | permuta + efectivo
   condiciones   String?        @db.Text
-  estado        String         @default("VIGENTE") // VIGENTE | CONCRETADA | CANCELADA
+  estado        String         @default("VIGENTE") // VIGENTE | FIRMADO | CONCRETADA | CANCELADA
   observaciones String?        @db.Text
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -1409,6 +1430,7 @@ model ConceOperacion {
   @@unique([clientId, tipo, numero])
   @@index([clientId, estado])
   @@index([clientId, tipo])
+  @@index([clientId, contactId])
 }
 
 /// Publicación de un vehículo en Instagram o Mercado Libre (borrador/programada/publicada).

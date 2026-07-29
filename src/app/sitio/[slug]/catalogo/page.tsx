@@ -194,7 +194,7 @@ export default async function CatalogoPage({
 
   return (
     <ConceShell info={info}>
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-[1500px] px-3 py-6 sm:px-5 sm:py-8">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
           {condicion === "0km" ? "Vehículos 0KM" : condicion === "usado" ? "Vehículos usados" : "Catálogo"}
         </h1>
@@ -209,17 +209,17 @@ export default async function CatalogoPage({
         <div className="mt-5 flex gap-2">
           {[
             { valor: "", label: "Todos" },
-            { valor: "0km", label: "🆕 0KM" },
+            { valor: "0km", label: "0KM" },
             { valor: "usado", label: "Usados" },
           ].map((t) => (
             <Link
               key={t.valor}
               href={url({ condicion: t.valor || undefined, pagina: undefined })}
-              className="rounded-full px-5 py-2 text-sm font-bold transition-colors"
+              className="rounded-full px-5 py-2 text-sm font-bold transition-all"
               style={
                 condicion === t.valor
-                  ? { backgroundColor: RC.negro, color: "#fff" }
-                  : { backgroundColor: "#fff", border: `1px solid ${RC.borde}` }
+                  ? { backgroundColor: RC.dorado, color: "#0A0A0A" }
+                  : { backgroundColor: RC.doradoSuave, color: RC.doradoTexto }
               }
             >
               {t.label}
@@ -227,11 +227,19 @@ export default async function CatalogoPage({
           ))}
         </div>
 
-        {/* Filtros avanzados (form GET server-side) */}
+        <div className="mt-5 grid items-start gap-5 lg:grid-cols-[268px_minmax(0,1fr)]">
+        {/* ── Filtros: sidebar en PC, desplegable en celular ── */}
+        <aside className="lg:sticky lg:top-24">
+        <details className="group rounded-3xl bg-white lg:open" open style={{ border: `1px solid ${RC.borde}` }}>
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold lg:hidden">
+            Filtrar y ordenar
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden>
+              <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </summary>
         <form
           method="get"
-          className="mt-4 grid grid-cols-2 items-end gap-3 rounded-3xl bg-white p-4 sm:grid-cols-3 lg:grid-cols-6"
-          style={{ border: `1px solid ${RC.borde}` }}
+          className="grid grid-cols-2 items-end gap-3 p-4 pt-0 lg:grid-cols-1 lg:pt-4"
         >
           {condicion ? <input type="hidden" name="condicion" value={condicion} /> : null}
           <div className="col-span-2 sm:col-span-1">
@@ -306,19 +314,31 @@ export default async function CatalogoPage({
               ))}
             </select>
           </div>
-          <button
-            type="submit"
-            className="h-10 rounded-full text-sm font-bold transition-opacity hover:opacity-90"
-            style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
-          >
-            Aplicar filtros
-          </button>
+          <div className="col-span-2 flex gap-2 lg:col-span-1">
+            <button
+              type="submit"
+              className="h-11 flex-1 rounded-full text-sm font-bold transition-opacity hover:opacity-90"
+              style={{ backgroundColor: RC.dorado, color: "#0A0A0A" }}
+            >
+              Aplicar filtros
+            </button>
+            <Link
+              href={`${base}/catalogo${condicion ? `?condicion=${condicion}` : ""}`}
+              className="flex h-11 items-center justify-center rounded-full px-4 text-sm font-semibold"
+              style={{ backgroundColor: RC.doradoSuave, color: RC.doradoTexto }}
+            >
+              Limpiar
+            </Link>
+          </div>
         </form>
+        </details>
+        </aside>
 
+        {/* ── Resultados ── */}
+        <div>
         {/* Grilla */}
         {vehiculos.length === 0 ? (
           <div className="py-20 text-center">
-            <div className="text-5xl">🚗</div>
             <p className="mt-3 font-semibold">No encontramos vehículos con esos filtros.</p>
             <Link
               href={`${base}/catalogo`}
@@ -329,7 +349,7 @@ export default async function CatalogoPage({
             </Link>
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {vehiculos.map((v) => (
               <VehiculoCard key={v.id} slug={tenant.slug} v={aCardVehiculo(v)} />
             ))}
@@ -362,6 +382,8 @@ export default async function CatalogoPage({
             ) : null}
           </nav>
         ) : null}
+        </div>
+        </div>
       </div>
     </ConceShell>
   );

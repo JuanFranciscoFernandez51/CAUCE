@@ -167,25 +167,7 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
       </section>
 
       {/* ── Banda de beneficios ── */}
-      <section className="mx-auto max-w-6xl px-4 py-6">
-        <div className="grid grid-cols-2 gap-2 text-center text-[13px] font-semibold sm:grid-cols-4">
-          {[
-            { Icono: IconLlave, texto: "Tomamos tu usado" },
-            { Icono: IconBillete, texto: "Financiación a tu medida" },
-            { Icono: IconDoc, texto: "Gestoría incluida" },
-            { Icono: IconMedalla, texto: "+15 años de trayectoria" },
-          ].map(({ Icono, texto }) => (
-            <div
-              key={texto}
-              className="flex items-center justify-center gap-2.5 rounded-2xl bg-white px-4 py-4 shadow-sm"
-              style={{ border: `1px solid ${RC.borde}` }}
-            >
-              <Icono className="h-5 w-5 shrink-0" style={{ color: RC.dorado }} />
-              <span>{texto}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <BandaBeneficios />
 
       {/* ── 0KM / Usados ── */}
       <section className="mx-auto max-w-6xl px-4 py-8">
@@ -415,5 +397,37 @@ export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceS
         </Reveal>
       </section>
     </ConceShell>
+  );
+}
+
+
+/** Banda de beneficios que se desplaza sola (marquee CSS, sin JS ni librerías). */
+function BandaBeneficios() {
+  const items = [
+    { Icono: IconLlave, texto: "Tomamos tu usado en parte de pago" },
+    { Icono: IconBillete, texto: "Financiación a tu medida" },
+    { Icono: IconDoc, texto: "Gestoría y transferencia incluidas" },
+    { Icono: IconMedalla, texto: "+15 años de trayectoria en Bahía Blanca" },
+    { Icono: IconAuto, texto: "0KM y usados seleccionados" },
+  ];
+  const fila = [...items, ...items];
+  return (
+    <section className="overflow-hidden border-y py-3.5" style={{ borderColor: RC.borde, backgroundColor: "#fff" }}>
+      <style>{`
+        @keyframes conce-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .conce-marquee { animation: conce-marquee 32s linear infinite; }
+        .conce-marquee:hover { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) { .conce-marquee { animation: none; } }
+      `}</style>
+      <div className="conce-marquee flex w-max items-center gap-10 pr-10">
+        {fila.map(({ Icono, texto }, i) => (
+          <span key={i} className="flex shrink-0 items-center gap-2.5 text-[13.5px] font-semibold tracking-wide text-gray-700">
+            <Icono className="h-[18px] w-[18px] shrink-0" style={{ color: RC.dorado }} />
+            {texto}
+            <span className="ml-8 h-1 w-1 rounded-full" style={{ backgroundColor: RC.dorado }} />
+          </span>
+        ))}
+      </div>
+    </section>
   );
 }
