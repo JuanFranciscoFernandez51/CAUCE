@@ -32,6 +32,9 @@ export type OperacionFormData = {
   comisionPct: number | null;
   sena: number;
   formaPago: string;
+  finCuotas: number | null;
+  finValorCuota: number | null;
+  finDiaVenc: number | null;
   condiciones: string;
   observaciones: string;
 };
@@ -104,6 +107,9 @@ export function OperacionForm({
         comisionPct: esMandato ? form.comisionPct : null,
         sena: form.sena || 0,
         formaPago: form.formaPago.trim(),
+        finCuotas: form.formaPago === "financiado" ? form.finCuotas : null,
+        finValorCuota: form.formaPago === "financiado" ? form.finValorCuota : null,
+        finDiaVenc: form.formaPago === "financiado" ? form.finDiaVenc : null,
         condiciones: form.condiciones.trim(),
         observaciones: form.observaciones.trim(),
       };
@@ -403,6 +409,51 @@ export function OperacionForm({
             </Select>
           </Field>
         </div>
+        {!esMandato && form.formaPago === "financiado" ? (
+          <div className="grid gap-3 rounded-lg border border-primary/30 bg-primary-soft/30 p-3 sm:grid-cols-3">
+            <p className="text-xs text-muted-foreground sm:col-span-3">
+              Financiación propia de la casa: al marcar el boleto como <strong>entregado</strong>, la
+              financiación y todas sus cuotas se crean solas en el módulo Financiaciones.
+            </p>
+            <Field label="Cantidad de cuotas">
+              <Input
+                type="number"
+                min={1}
+                max={120}
+                value={form.finCuotas ?? ""}
+                placeholder="12"
+                onChange={(e) =>
+                  setForm({ ...form, finCuotas: e.target.value === "" ? null : Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Valor de cuota" help="Vacío = se reparte el saldo solo.">
+              <Input
+                type="number"
+                min={0}
+                value={form.finValorCuota ?? ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    finValorCuota: e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+              />
+            </Field>
+            <Field label="Día de vencimiento">
+              <Input
+                type="number"
+                min={1}
+                max={28}
+                value={form.finDiaVenc ?? ""}
+                placeholder="10"
+                onChange={(e) =>
+                  setForm({ ...form, finDiaVenc: e.target.value === "" ? null : Number(e.target.value) })
+                }
+              />
+            </Field>
+          </div>
+        ) : null}
         <Field label="Condiciones pactadas">
           <Textarea
             value={form.condiciones}

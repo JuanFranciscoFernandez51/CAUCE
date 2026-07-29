@@ -51,77 +51,78 @@ enum ClientStatus {
 }
 
 model Client {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String       @unique // subdominio: slug.cauce.app
-  rubro       String? // libre: "taller de motos", "consultorio", etc.
-  pack        Pack         @default(NONE)
-  status      ClientStatus @default(PROSPECT)
-  mrr         Float        @default(0) // USD mensual
-  setupPaid   Float        @default(0) // USD setup cobrado
-  costEstUsd  Float        @default(0) // costo variable estimado/mes
-  health      Int          @default(100) // 0-100 salud de la cuenta
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique // subdominio: slug.cauce.app
+  rubro        String? // libre: "taller de motos", "consultorio", etc.
+  pack         Pack         @default(NONE)
+  status       ClientStatus @default(PROSPECT)
+  mrr          Float        @default(0) // USD mensual
+  setupPaid    Float        @default(0) // USD setup cobrado
+  costEstUsd   Float        @default(0) // costo variable estimado/mes
+  health       Int          @default(100) // 0-100 salud de la cuenta
   // Cauce OS — personalización por configuración, JAMÁS fork
-  branding    Json? // { logo, colors:{primary,...}, font }
-  modules     String[]     @default([]) // ["crm","turnos","catalogo","rrhh","caja"]
+  branding     Json? // { logo, colors:{primary,...}, font }
+  modules      String[]     @default([]) // ["crm","turnos","catalogo","rrhh","caja"]
   customFields Json? // { contact:[{key,label,type}], appointment:[...], product:[...] }
-  domain      String? // dominio propio opcional
-  settings    Json? // horarios, datos del negocio, FAQs del bot, etc.
-  contactName String?
-  email       String?
-  phone       String?
-  whatsapp    String?
-  notes       String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  domain       String? // dominio propio opcional
+  settings     Json? // horarios, datos del negocio, FAQs del bot, etc.
+  contactName  String?
+  email        String?
+  phone        String?
+  whatsapp     String?
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  users        User[]
-  leads        Lead[]
-  projects     Project[]
-  procesos     Proceso[]
-  pantallas         Pantalla[]
-  pantallaContratos PantallaContrato[]
-  proveedores       Proveedor[]
-  usages       Usage[]
-  subscriptions Subscription[]
-  invoices     Invoice[]
-  reports      Report[]
-  credentials  Credential[]
-  contacts     Contact[]
-  appointments Appointment[]
-  availability Availability[]
-  tasks        CrmTask[]
-  products     Product[]
-  employees    Employee[]
-  timeEntries  TimeEntry[]
-  cashMovements CashMovement[]
-  cajaDias     CajaDia[]
-  outreach     OutreachTarea[]
-  listaEspera  ListaEspera[]
-  costosFijos  CostoFijo[]
-  ordenesTrabajo OrdenTrabajo[]
-  ventas       Venta[]
-  eventos      Evento[]
-  actividad    Actividad[]
-  presupuestosTaller PresupuestoTaller[]
-  accounts     Account[]
+  users                 User[]
+  leads                 Lead[]
+  projects              Project[]
+  procesos              Proceso[]
+  pantallas             Pantalla[]
+  pantallaContratos     PantallaContrato[]
+  proveedores           Proveedor[]
+  usages                Usage[]
+  subscriptions         Subscription[]
+  invoices              Invoice[]
+  reports               Report[]
+  credentials           Credential[]
+  contacts              Contact[]
+  appointments          Appointment[]
+  availability          Availability[]
+  tasks                 CrmTask[]
+  products              Product[]
+  employees             Employee[]
+  timeEntries           TimeEntry[]
+  cashMovements         CashMovement[]
+  cajaDias              CajaDia[]
+  outreach              OutreachTarea[]
+  listaEspera           ListaEspera[]
+  costosFijos           CostoFijo[]
+  ordenesTrabajo        OrdenTrabajo[]
+  ventas                Venta[]
+  eventos               Evento[]
+  actividad             Actividad[]
+  presupuestosTaller    PresupuestoTaller[]
+  accounts              Account[]
   categoriasFinancieras CategoriaFinanciera[]
-  cheques      Cheque[]
-  cuentasPorCobrar CuentaPorCobrar[]
-  records      ContactRecord[]
-  attachments  Attachment[]
-  listings     Listing[]
-  proyectos    Proyecto[]
-  proyectoTareas ProyectoTarea[]
-  bazarProductos     BazarProducto[]
-  bazarPedidos       BazarPedido[]
-  bazarCuentas       BazarCuenta[]
-  bazarConsultas     BazarConsulta[]
-  bazarPublicaciones BazarPublicacion[]
-  conceVehiculos     ConceVehiculo[]
-  conceConsultas     ConceConsulta[]
-  conceOperaciones   ConceOperacion[]
-  concePublicaciones ConcePublicacion[]
+  cheques               Cheque[]
+  cuentasPorCobrar      CuentaPorCobrar[]
+  records               ContactRecord[]
+  attachments           Attachment[]
+  listings              Listing[]
+  proyectos             Proyecto[]
+  proyectoTareas        ProyectoTarea[]
+  bazarProductos        BazarProducto[]
+  bazarPedidos          BazarPedido[]
+  bazarCuentas          BazarCuenta[]
+  bazarConsultas        BazarConsulta[]
+  bazarPublicaciones    BazarPublicacion[]
+  conceVehiculos        ConceVehiculo[]
+  conceConsultas        ConceConsulta[]
+  conceOperaciones      ConceOperacion[]
+  concePublicaciones    ConcePublicacion[]
+  conceFinanciaciones   ConceFinanciacion[]
 }
 
 // Credenciales de canales del cliente — SIEMPRE cifradas AES-256-GCM
@@ -158,22 +159,22 @@ enum LeadStatus {
 }
 
 model Lead {
-  id        String     @id @default(cuid())
-  source    LeadSource
-  status    LeadStatus @default(NEW)
-  name      String
-  business  String?
-  rubro     String?
-  email     String?
-  phone     String?
-  whatsapp  String?
-  score     Int        @default(0) // 0-100
+  id          String     @id @default(cuid())
+  source      LeadSource
+  status      LeadStatus @default(NEW)
+  name        String
+  business    String?
+  rubro       String?
+  email       String?
+  phone       String?
+  whatsapp    String?
+  score       Int        @default(0) // 0-100
   temperatura String? // frio | tibio | caliente
-  intake    Json? // respuestas del scorecard: dolor, frecuencia, apps, urgencia, presupuesto
-  clientId  String? // si se convirtió
-  client    Client?    @relation(fields: [clientId], references: [id])
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  intake      Json? // respuestas del scorecard: dolor, frecuencia, apps, urgencia, presupuesto
+  clientId    String? // si se convirtió
+  client      Client?    @relation(fields: [clientId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   projects     Project[]
   blueprints   Blueprint[]
@@ -295,17 +296,17 @@ enum ProcesoEstado {
 }
 
 model Proceso {
-  id          String        @id @default(cuid())
-  clientId    String
-  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  nombre      String // "Recordatorio de service"
-  queHace     String // "Le avisa al cliente por WhatsApp que le toca el service"
-  cuando      String // "Todos los días a las 9:00" | "Cuando entra una consulta"
-  estado      ProcesoEstado @default(ACTIVO)
-  orden       Int           @default(0)
+  id            String        @id @default(cuid())
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre        String // "Recordatorio de service"
+  queHace       String // "Le avisa al cliente por WhatsApp que le toca el service"
+  cuando        String // "Todos los días a las 9:00" | "Cuando entra una consulta"
+  estado        ProcesoEstado @default(ACTIVO)
+  orden         Int           @default(0)
   ultimaCorrida DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@index([clientId, orden])
 }
@@ -335,15 +336,15 @@ enum SubStatus {
 }
 
 model Subscription {
-  id             String    @id @default(cuid())
-  clientId       String
-  client         Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  pack           Pack
-  monthlyUsd     Float
-  status         SubStatus @default(ACTIVE)
+  id              String    @id @default(cuid())
+  clientId        String
+  client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  pack            Pack
+  monthlyUsd      Float
+  status          SubStatus @default(ACTIVE)
   mpPreapprovalId String? // Mercado Pago — F8 (diferido)
-  startedAt      DateTime  @default(now())
-  cancelledAt    DateTime?
+  startedAt       DateTime  @default(now())
+  cancelledAt     DateTime?
 }
 
 enum InvoiceType {
@@ -395,29 +396,30 @@ model PricingConfig {
 
 // Módulo CRM
 model Contact {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   clientId    String // tenant
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   name        String
   phone       String?
   email       String?
-  stage       String   @default("nuevo") // pipeline simple configurable
-  temperatura String   @default("tibio") // caliente | tibio | frio (urgencia comercial)
+  stage       String    @default("nuevo") // pipeline simple configurable
+  temperatura String    @default("tibio") // caliente | tibio | frio (urgencia comercial)
   source      String? // bot | manual | web
   notes       String?
   custom      Json? // campos custom del tenant
   lastTouchAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  appointments Appointment[]
-  tasks        CrmTask[]
-  records      ContactRecord[]
-  ordenesTrabajo OrdenTrabajo[]
-  ventas       Venta[]
-  presupuestosTaller PresupuestoTaller[]
-  pantallaContratos PantallaContrato[]
-  conceOperaciones ConceOperacion[]
+  appointments        Appointment[]
+  tasks               CrmTask[]
+  records             ContactRecord[]
+  ordenesTrabajo      OrdenTrabajo[]
+  ventas              Venta[]
+  presupuestosTaller  PresupuestoTaller[]
+  pantallaContratos   PantallaContrato[]
+  conceOperaciones    ConceOperacion[]
+  conceFinanciaciones ConceFinanciacion[]
 
   @@index([clientId])
   @@index([clientId, lastTouchAt])
@@ -446,22 +448,22 @@ enum ApptStatus {
 }
 
 model Appointment {
-  id        String     @id @default(cuid())
-  clientId  String // tenant
-  client    Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  contactId String?
-  contact   Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  id         String     @id @default(cuid())
+  clientId   String // tenant
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contactId  String?
+  contact    Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
   employeeId String? // recurso (profe/doctor/empleado) con quien es el turno
   employee   Employee?  @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-  title     String
-  startsAt  DateTime
-  endsAt    DateTime
-  status    ApptStatus @default(PENDING)
-  source    String     @default("manual") // bot | manual | web | auto-agendado
-  notes     String?
-  custom    Json?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  title      String
+  startsAt   DateTime
+  endsAt     DateTime
+  status     ApptStatus @default(PENDING)
+  source     String     @default("manual") // bot | manual | web | auto-agendado
+  notes      String?
+  custom     Json?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@index([clientId, startsAt])
   @@index([employeeId])
@@ -532,23 +534,23 @@ model TimeEntry {
 
 // Módulo Caja & Reportes (F7 — modelo listo)
 model CashMovement {
-  id        String   @id @default(cuid())
-  clientId  String
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  kind      String // venta (→INGRESO) | gasto (→GASTO) | ajuste | transferencia (→TRANSFERENCIA)
-  concept   String
-  amountArs Float // en transferencias nuevas (2 patas) va CON SIGNO: sale negativo, entra positivo
-  categoria String? // categoría financiera (string denormalizado; null = "Sin categoría")
-  moneda    String   @default("ARS") // ARS | USD (copia de la moneda de la cuenta)
-  method    String? // efectivo | mp | transferencia
-  date      DateTime @default(now()) // fecha contable del movimiento (mediodía -03:00)
-  accountId String? // cuenta afectada
-  account   Account? @relation("AccountMovements", fields: [accountId], references: [id], onDelete: SetNull)
-  toAccountId String? // cuenta destino (solo transferencias viejas de 1 fila)
-  toAccount   Account? @relation("AccountTransfersIn", fields: [toAccountId], references: [id], onDelete: SetNull)
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  kind            String // venta (→INGRESO) | gasto (→GASTO) | ajuste | transferencia (→TRANSFERENCIA)
+  concept         String
+  amountArs       Float // en transferencias nuevas (2 patas) va CON SIGNO: sale negativo, entra positivo
+  categoria       String? // categoría financiera (string denormalizado; null = "Sin categoría")
+  moneda          String   @default("ARS") // ARS | USD (copia de la moneda de la cuenta)
+  method          String? // efectivo | mp | transferencia
+  date            DateTime @default(now()) // fecha contable del movimiento (mediodía -03:00)
+  accountId       String? // cuenta afectada
+  account         Account? @relation("AccountMovements", fields: [accountId], references: [id], onDelete: SetNull)
+  toAccountId     String? // cuenta destino (solo transferencias viejas de 1 fila)
+  toAccount       Account? @relation("AccountTransfersIn", fields: [toAccountId], references: [id], onDelete: SetNull)
   transferenciaId String? // une las 2 patas de una transferencia nueva
-  attachmentUrl String? // comprobante (Cloudinary)
-  createdAt DateTime @default(now())
+  attachmentUrl   String? // comprobante (Cloudinary)
+  createdAt       DateTime @default(now())
 
   @@index([clientId])
   @@index([clientId, date])
@@ -570,23 +572,23 @@ enum OtEstado {
 }
 
 model OrdenTrabajo {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   clientId      String
-  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   numero        Int // secuencial por tenant (OT-0042)
   contactId     String?
-  contact       Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contact       Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
   equipo        String // "Vespa Primavera 150 · AB123CD", "Bici MTB rodado 29"...
   motivoIngreso String
   diagnostico   String?
   trabajos      String? // qué se le hizo
   items         Json? // [{descripcion, cantidad, precioArs, tipo: "repuesto"|"mano_obra"}]
-  totalArs      Float    @default(0)
-  pagadoArs     Float    @default(0)
-  estado        OtEstado @default(INGRESADA)
+  totalArs      Float     @default(0)
+  pagadoArs     Float     @default(0)
+  estado        OtEstado  @default(INGRESADA)
   entregadaAt   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([clientId, numero])
   @@index([clientId, estado])
@@ -846,22 +848,22 @@ model CajaSaldo {
 
 // Módulo Finanzas — cuentas/billeteras del negocio con saldo propio
 model Account {
-  id        String   @id @default(cuid())
-  clientId  String
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  name      String // "Efectivo", "Banco Galicia", "Mercado Pago", "Dólares"...
-  kind      String   @default("efectivo") // efectivo | banco | mp | dolares | cheques | otro
-  currency  String   @default("ARS") // ARS | USD
-  saldoInicial Float @default(0) // lo que había ANTES de empezar a cargar movimientos
-  balance   Float    @default(0) // cache: saldoInicial + Σ movimientos (la verdad se calcula)
-  excluirDeResultado Boolean @default(false) // no suma a ingresos/gastos (ej: cuenta de un tercero)
-  orden     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  clientId           String
+  client             Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name               String // "Efectivo", "Banco Galicia", "Mercado Pago", "Dólares"...
+  kind               String   @default("efectivo") // efectivo | banco | mp | dolares | cheques | otro
+  currency           String   @default("ARS") // ARS | USD
+  saldoInicial       Float    @default(0) // lo que había ANTES de empezar a cargar movimientos
+  balance            Float    @default(0) // cache: saldoInicial + Σ movimientos (la verdad se calcula)
+  excluirDeResultado Boolean  @default(false) // no suma a ingresos/gastos (ej: cuenta de un tercero)
+  orden              Int      @default(0)
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  movements    CashMovement[] @relation("AccountMovements")
-  transfersIn  CashMovement[] @relation("AccountTransfersIn")
+  movements   CashMovement[] @relation("AccountMovements")
+  transfersIn CashMovement[] @relation("AccountTransfersIn")
 
   @@index([clientId])
 }
@@ -947,9 +949,9 @@ model ContactRecord {
 
 // Adjuntos (fotos, PDFs, documentos) guardados en Cloudinary, scopeados por tenant
 model Attachment {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   clientId  String
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client    Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   recordId  String?
   record    ContactRecord? @relation(fields: [recordId], references: [id], onDelete: Cascade)
   // Adjunto genérico: cuelga de cualquier entidad del OS por referencia.
@@ -960,7 +962,7 @@ model Attachment {
   name      String
   mime      String?
   bytes     Int?
-  createdAt DateTime @default(now())
+  createdAt DateTime       @default(now())
 
   @@index([clientId])
   @@index([recordId])
@@ -1001,38 +1003,38 @@ model Listing {
 
 // Proyectos de la agencia (gestión de principio a fin)
 model Proyecto {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   clientId    String
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   name        String
   clienteName String? // el cliente de la agencia para quien es el proyecto
-  status      String   @default("propuesta") // propuesta | en_curso | revision | entregado | pausado
+  status      String    @default("propuesta") // propuesta | en_curso | revision | entregado | pausado
   area        String? // branding | ads | redes | web | contenido | SEO
   budgetUsd   Float?
   startDate   DateTime?
   dueDate     DateTime?
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  tareas      ProyectoTarea[]
+  tareas ProyectoTarea[]
 
   @@index([clientId])
 }
 
 model ProyectoTarea {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   clientId   String
-  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   proyectoId String
-  proyecto   Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  proyecto   Proyecto  @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
   title      String
-  status     String   @default("pendiente") // pendiente | haciendo | revision | hecho
+  status     String    @default("pendiente") // pendiente | haciendo | revision | hecho
   assigneeId String? // Employee del tenant
   dueAt      DateTime?
   hours      Float? // horas estimadas/cargadas
-  orderIdx   Int      @default(0)
-  createdAt  DateTime @default(now())
+  orderIdx   Int       @default(0)
+  createdAt  DateTime  @default(now())
 
   @@index([clientId])
   @@index([proyectoId])
@@ -1297,10 +1299,26 @@ model Proveedor {
   activo       Boolean @default(true)
   orden        Int     @default(0)
   notas        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  // Ficha comercial completa (módulo Proveedores)
+  cuit      String?
+  rubro     String? // "autos 0km", "repuestos", "seguros", "gestoría"…
+  direccion String?
+  ciudad    String?
+  sitio     String? // web o link de catálogo
+
+  /// Contactos múltiples: [{ id, nombre, rol, telefono, email }]
+  contactos        Json @default("[]")
+  /// Cuentas bancarias: [{ id, banco, tipo, numero, cbu, alias, titular, moneda }]
+  cuentasBancarias Json @default("[]")
+  /// Lista de precios manual: [{ id, concepto, precio, moneda, notas }]
+  listaPrecios     Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([clientId])
+  @@index([clientId, activo])
 }
 
 /// Banderas simples del sistema (ej: pausar el agente nocturno de leads desde el admin).
@@ -1314,42 +1332,42 @@ model Bandera {
 
 /// Vehículo del stock de la concesionaria. precio null = "Consultar precio".
 model ConceVehiculo {
-  id          String   @id @default(cuid())
-  clientId    String
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  slug        String // URL /sitio/<tenant>/vehiculo/<slug>
-  marca       String
-  modelo      String
-  version     String?
-  anio        Int
-  km          Int      @default(0)
-  precio      Float? // null = "Consultar precio"
-  moneda      String   @default("ARS") // ARS | USD
-  condicion   String   @default("usado") // 0km | usado
-  tipo        String   @default("sedan") // sedan | suv | pickup | hatchback | ...
-  transmision String? // Manual | Automática
-  combustible String? // Nafta | Diésel | GNC | Híbrido
-  color       String?
-  motor       String?
-  puertas     Int?
-  dominio     String? // patente (interno, NO se muestra en la web)
-  descripcion String?  @db.Text
-  fotos       Json     @default("[]") // URLs Cloudinary; el orden ES el carrusel
-  destacado   Boolean  @default(false)
-  oferta      Boolean  @default(false)
-  estado      String   @default("disponible") // disponible | reservado | vendido
+  id                String    @id @default(cuid())
+  clientId          String
+  client            Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  slug              String // URL /sitio/<tenant>/vehiculo/<slug>
+  marca             String
+  modelo            String
+  version           String?
+  anio              Int
+  km                Int       @default(0)
+  precio            Float? // null = "Consultar precio"
+  moneda            String    @default("ARS") // ARS | USD
+  condicion         String    @default("usado") // 0km | usado
+  tipo              String    @default("sedan") // sedan | suv | pickup | hatchback | ...
+  transmision       String? // Manual | Automática
+  combustible       String? // Nafta | Diésel | GNC | Híbrido
+  color             String?
+  motor             String?
+  puertas           Int?
+  dominio           String? // patente (interno, NO se muestra en la web)
+  descripcion       String?   @db.Text
+  fotos             Json      @default("[]") // URLs Cloudinary; el orden ES el carrusel
+  destacado         Boolean   @default(false)
+  oferta            Boolean   @default(false)
+  estado            String    @default("disponible") // disponible | reservado | vendido
   /// false = está en el stock pero NO se muestra en la web (sin publicar).
   /// Los vehículos que entran solos (mandato firmado / permuta) nacen en false.
-  publicado   Boolean  @default(true)
+  publicado         Boolean   @default(true)
   /// De dónde entró al stock: null = carga manual | MANDATO | PERMUTA
   origenTipo        String?
   /// Operación (mandato/boleto) que lo hizo entrar al stock.
   origenOperacionId String?
-  vendidoEl   DateTime?
-  visitas     Int      @default(0)
-  ingresadoEl DateTime @default(now()) // para "stock viejo" (+90 días)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  vendidoEl         DateTime?
+  visitas           Int       @default(0)
+  ingresadoEl       DateTime  @default(now()) // para "stock viejo" (+90 días)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   consultas     ConceConsulta[]
   publicaciones ConcePublicacion[]
@@ -1424,8 +1442,14 @@ model ConceOperacion {
   condiciones   String?        @db.Text
   estado        String         @default("VIGENTE") // VIGENTE | FIRMADO | CONCRETADA | CANCELADA
   observaciones String?        @db.Text
+  // Financiación propia de la casa: al CONCRETAR el boleto se arma sola.
+  finCuotas     Int? // cantidad de cuotas pactadas
+  finValorCuota Float? // valor de cada cuota (si lo dejan vacío se reparte el saldo)
+  finDiaVenc    Int? // día del mes en que vence cada cuota (default 10)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+
+  financiaciones ConceFinanciacion[]
 
   @@unique([clientId, tipo, numero])
   @@index([clientId, estado])
@@ -1452,4 +1476,72 @@ model ConcePublicacion {
 
   @@index([clientId, estado])
   @@index([clientId, canal])
+}
+
+/// Financiación propia de la casa (patrón MF `FinanciacionOC` adaptado a autos):
+/// plan de cuotas de un boleto o cargado a mano, con pagos parciales.
+model ConceFinanciacion {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero   Int // FIN-0001 (secuencial por tenant)
+
+  // Vínculos: el cliente del CRM único y el boleto que la originó.
+  contactId   String?
+  contacto    Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  operacionId String?
+  operacion   ConceOperacion? @relation(fields: [operacionId], references: [id], onDelete: SetNull)
+
+  /// Snapshot del vehículo/motivo por si después borran el boleto.
+  descripcion String?
+  origen      String  @default("MANUAL") // MANUAL | BOLETO_AUTOMATICA
+
+  montoTotal     Float // capital a financiar (sin la entrega)
+  entrega        Float  @default(0)
+  cantidadCuotas Int
+  valorCuota     Float
+  moneda         String @default("ARS") // ARS | USD
+
+  fechaInicio    DateTime @default(now())
+  diaVencimiento Int      @default(10)
+
+  estado        String  @default("ACTIVA") // ACTIVA | COMPLETADA | CANCELADA
+  observaciones String? @db.Text
+
+  cuotas ConceCuota[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
+  @@index([clientId, contactId])
+}
+
+/// Cuota de una financiación. montoPagado permite pagos parciales:
+/// PAGADA cuando montoPagado >= monto.
+model ConceCuota {
+  id             String            @id @default(cuid())
+  clientId       String // desnormalizado: las bandejas de avisos filtran por tenant
+  financiacionId String
+  financiacion   ConceFinanciacion @relation(fields: [financiacionId], references: [id], onDelete: Cascade)
+
+  numero           Int
+  monto            Float
+  montoPagado      Float     @default(0)
+  fechaVencimiento DateTime
+  fechaPago        DateTime?
+  estado           String    @default("PENDIENTE") // PENDIENTE | PAGADA | VENCIDA
+  metodoPago       String? // efectivo | transferencia | tarjeta | cheque
+  comprobante      String?
+  observaciones    String?
+  /// Última vez que se le avisó por WhatsApp (para no cansar al cliente).
+  avisadoEl        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([financiacionId, numero])
+  @@index([clientId, estado])
+  @@index([clientId, fechaVencimiento])
 }

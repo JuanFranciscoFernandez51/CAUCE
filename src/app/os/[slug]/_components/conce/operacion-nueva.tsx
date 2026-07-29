@@ -71,6 +71,9 @@ export async function OperacionNueva({
           comisionPct: tipo === "MANDATO" ? 5 : null,
           sena: 0,
           formaPago: "",
+          finCuotas: null,
+          finValorCuota: null,
+          finDiaVenc: null,
           condiciones: "",
           observaciones: "",
         }}

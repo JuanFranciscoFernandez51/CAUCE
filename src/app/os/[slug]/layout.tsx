@@ -170,6 +170,8 @@ export default async function OsLayout({
       { label: "Stock", href: `${base}/stock`, icon: "🚗" },
       { label: "Mandatos", href: `${base}/mandatos`, icon: "📝" },
       { label: "Boletos", href: `${base}/boletos`, icon: "🧾" },
+      { label: "Financiaciones", href: `${base}/financiaciones`, icon: "💳" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
       { label: "Clientes", href: `${base}/clientes`, icon: "🧑" },
       { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
       { label: "Publicar", href: `${base}/publicar`, icon: "📣" }

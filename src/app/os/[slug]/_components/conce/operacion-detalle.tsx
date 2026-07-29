@@ -194,6 +194,9 @@ export async function OperacionDetalle({
           comisionPct: op.comisionPct,
           sena: op.sena,
           formaPago: op.formaPago ?? "",
+          finCuotas: op.finCuotas,
+          finValorCuota: op.finValorCuota,
+          finDiaVenc: op.finDiaVenc,
           condiciones: op.condiciones ?? "",
           observaciones: op.observaciones ?? "",
         }}
