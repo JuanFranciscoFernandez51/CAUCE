@@ -26,6 +26,16 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cauceapp.com.ar"),
+  openGraph: {
+    type: "website",
+    siteName: "Cauce",
+    locale: "es_AR",
+    title: "Cauce — Que tu negocio fluya",
+    description:
+      "Software hecho 100% a la medida de tu negocio: tu web, tu gestión y tus avisos automáticos, con tu marca.",
+  },
+  twitter: { card: "summary_large_image" },
   title: {
     default: "Cauce — Que tu negocio fluya",
     template: "%s · Cauce",
