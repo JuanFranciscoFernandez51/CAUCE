@@ -177,6 +177,15 @@ export default async function OsLayout({
       { label: "Publicar", href: `${base}/publicar`, icon: "📣" }
     );
   }
+  // Template dooh (circuito de pantallas LED): la carpeta de clientes va
+  // pegada a Pantallas, que es su módulo principal.
+  if (tpl === "dooh") {
+    opsItems.splice(
+      Math.max(opsItems.findIndex((i) => i.href === `${base}/pantallas`), 0) + 1,
+      0,
+      { label: "Clientes", href: `${base}/clientes`, icon: "🧑" }
+    );
+  }
   opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.

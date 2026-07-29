@@ -2,19 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { getTenantBySlug } from "@/lib/tenant";
+import { esDooh, getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
 import { Badge } from "@/components/ui";
 import { ClientesTable, type ClienteRow } from "../_components/conce/clientes-table";
+import { ListaClientesDooh } from "./lista-dooh";
 
 export const dynamic = "force-dynamic";
 
 type SP = { q?: string };
 
 /**
- * Clientes de la concesionaria: TODOS los que pasaron por un mandato, un
- * boleto o el CRM. Buscador + edición inline de teléfono/email, y ficha
- * individual con sus vehículos y sus documentos.
+ * Carpeta de clientes del tenant. Buscador + edición inline y ficha individual.
+ * Cada template arma sus columnas: la concesionaria muestra mandatos/boletos y
+ * vehículos; el circuito de pantallas (DOOH) muestra pantallas y abono mensual.
  */
 export default async function ClientesPage({
   params,
@@ -26,10 +27,15 @@ export default async function ClientesPage({
   const { slug } = await params;
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant || !esConcesionaria(tenant)) notFound();
+  if (!tenant) notFound();
+  const q = (sp.q ?? "").trim();
+
+  // Circuito de pantallas LED: su propia carpeta de clientes (anunciantes).
+  if (esDooh(tenant)) return <ListaClientesDooh tenant={tenant} q={q} />;
+
+  if (!esConcesionaria(tenant)) notFound();
   const base = `/os/${tenant.slug}`;
 
-  const q = (sp.q ?? "").trim();
   const where: Prisma.ContactWhereInput = {
     clientId: tenant.id,
     ...(q

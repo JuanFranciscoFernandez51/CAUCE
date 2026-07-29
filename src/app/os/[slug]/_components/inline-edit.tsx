@@ -21,6 +21,12 @@ type Props = {
   placeholder?: string;
   /** Campos extra que van en el mismo PATCH (ej: { id }) */
   extraBody?: Record<string, unknown>;
+  /**
+   * Si el campo vive DENTRO del Json `custom` (ej: CUIT, domicilio), pasá acá
+   * el custom completo del registro: el PATCH manda `custom` entero con la
+   * clave `field` pisada, así no se pierden los otros valores.
+   */
+  customBase?: Record<string, string | number>;
 };
 
 /**
@@ -38,6 +44,7 @@ export function InlineEdit({
   alignRight,
   placeholder = "—",
   extraBody,
+  customBase,
 }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -70,10 +77,14 @@ export function InlineEdit({
     try {
       const parsedVal =
         type === "number" ? (val === "" ? null : Number(val)) : val;
+      // Campo dentro de `custom`: mandamos el Json completo (vacío = se borra).
+      const payload = customBase
+        ? { ...(extraBody ?? {}), custom: { ...customBase, [field]: parsedVal ?? "" } }
+        : { ...(extraBody ?? {}), [field]: parsedVal };
       const res = await fetch(endpoint, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...(extraBody ?? {}), [field]: parsedVal }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error();
       setEditing(false);

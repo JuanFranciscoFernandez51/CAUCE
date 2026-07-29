@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { getTenantBySlug } from "@/lib/tenant";
+import { esDooh, getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
 import {
   fmtPrecioVehiculo,
@@ -15,6 +15,7 @@ import {
 import { Badge, Card, EmptyState } from "@/components/ui";
 import { Adjuntos, type AdjuntoData } from "../../_components/adjuntos";
 import { InlineEdit } from "../../_components/inline-edit";
+import { FichaClienteDooh } from "./ficha-dooh";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,12 @@ export default async function ClienteFichaPage({
 }) {
   const { slug, id } = await params;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant || !esConcesionaria(tenant)) notFound();
+  if (!tenant) notFound();
+
+  // Circuito de pantallas LED: ficha propia (contratos, pagos, documentos).
+  if (esDooh(tenant)) return <FichaClienteDooh tenant={tenant} id={id} />;
+
+  if (!esConcesionaria(tenant)) notFound();
   const base = `/os/${tenant.slug}`;
 
   const cliente = await db.contact.findFirst({

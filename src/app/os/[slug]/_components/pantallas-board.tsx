@@ -157,7 +157,8 @@ function PantallaCard({
   }
 
   return (
-    <Card className={`p-0 ${!pantalla.activa ? "opacity-60" : ""}`}>
+    // El id permite linkear a una pantalla puntual desde la ficha del cliente.
+    <Card id={`pantalla-${pantalla.id}`} className={`scroll-mt-4 p-0 ${!pantalla.activa ? "opacity-60" : ""}`}>
       {/* Cabecera de la pantalla con ocupación */}
       <div className="flex flex-wrap items-center gap-3 border-b px-3 py-2.5 sm:px-4">
         <div className="min-w-0 flex-1">

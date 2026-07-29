@@ -96,6 +96,16 @@ export function hasModule(client: Client, mod: OsModule): boolean {
   return tenantModules(client).includes(mod);
 }
 
+/** Template elegido para el tenant (bazar | concesionaria | dooh | …). */
+export function tenantTemplate(client: Client): string | null {
+  return (client.settings as { template?: string } | null)?.template ?? null;
+}
+
+/** Circuito de pantallas LED (DOOH): Ave Fénix y los que vengan. */
+export function esDooh(client: Client): boolean {
+  return tenantTemplate(client) === "dooh";
+}
+
 export function tenantCustomFields(client: Client): TenantCustomFields {
   return (client.customFields as TenantCustomFields | null) ?? {};
 }
