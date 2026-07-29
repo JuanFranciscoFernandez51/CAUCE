@@ -368,4 +368,8 @@ export const EN: Record<string, string> = {
   "Perseguir pagos vencidos da vergüenza y lleva tiempo. Facturar a mano, conciliar transferencias y saber cuánta plata entró de verdad es un trabajo aparte.":
     "Chasing overdue payments is awkward and slow. Invoicing by hand, reconciling transfers and knowing how much actually came in is a job of its own.",
   "cada uno": "each",
+  "La base": "The base",
+  Escala: "Enterprise",
+  "/mes": "/month",
+  "Ver el caso →": "See the case →",
 };
