@@ -116,7 +116,7 @@ function Shot({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_24px_70px_-24px_rgba(11,15,22,0.45)] ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-black/10 bg-white dark:bg-[#141821] shadow-[0_24px_70px_-24px_rgba(11,15,22,0.45)] ${className}`}
     >
       <Image
         src={src}
@@ -221,7 +221,7 @@ export default async function LandingPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1fr]">
             <div>
               <Reveal>
-                <span className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-1.5 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-4 py-1.5 text-xs font-medium text-muted-foreground">
                   Web + sistema de gestión a medida — Bahía Blanca, Argentina
                 </span>
               </Reveal>
@@ -246,13 +246,13 @@ export default async function LandingPage() {
                     href={WA_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-12 items-center rounded-full bg-[#111111] px-7 text-sm font-medium text-white transition hover:bg-black"
+                    className="inline-flex h-12 items-center rounded-full bg-[#111111] dark:bg-white dark:text-[#111111] px-7 text-sm font-medium text-white transition hover:bg-black"
                   >
                     Armemos el tuyo por WhatsApp
                   </a>
                   <Link
                     href="/casos"
-                    className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white px-7 text-sm font-medium transition hover:bg-black/5"
+                    className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-7 text-sm font-medium transition hover:bg-black/5"
                   >
                     Ver casos reales →
                   </Link>
@@ -272,7 +272,7 @@ export default async function LandingPage() {
                       className="aspect-[16/10]"
                       priority
                     />
-                    <span className="ui-chip absolute -bottom-4 right-8 bg-white text-foreground">
+                    <span className="ui-chip absolute -bottom-4 right-8 bg-white dark:bg-[#141821] text-foreground">
                       ✓ Factura ARCA emitida
                     </span>
                   </div>
@@ -317,7 +317,7 @@ export default async function LandingPage() {
                   className="aspect-[16/10]"
                   priority
                 />
-                <span className="ui-chip absolute -bottom-4 left-4 bg-white text-foreground">
+                <span className="ui-chip absolute -bottom-4 left-4 bg-white dark:bg-[#141821] text-foreground">
                   ✓ Factura ARCA emitida
                 </span>
               </div>
@@ -489,7 +489,7 @@ export default async function LandingPage() {
                     alt="Facturación ARCA — Vespa Bahía"
                     className="aspect-[4/3]"
                   />
-                  <span className="ui-chip absolute -bottom-3 left-3 bg-white text-[#111111]">
+                  <span className="ui-chip absolute -bottom-3 left-3 bg-white dark:bg-[#141821] text-[#111111] dark:text-white">
                     ✓ Factura ARCA emitida
                   </span>
                 </div>
@@ -657,7 +657,7 @@ export default async function LandingPage() {
           <Reveal className="mt-12 text-center">
             <Link
               href="/casos"
-              className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white px-7 text-sm font-medium transition hover:bg-black/5"
+              className="inline-flex h-12 items-center rounded-full border border-black/10 bg-white dark:bg-[#141821] px-7 text-sm font-medium transition hover:bg-black/5"
             >
               Ver negocios reales que ya funcionan con Cauce →
             </Link>
@@ -780,7 +780,7 @@ export default async function LandingPage() {
               href={WA_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-12 items-center rounded-full bg-white px-7 text-sm font-semibold text-[#111111] transition hover:bg-white/90"
+              className="inline-flex h-12 items-center rounded-full bg-white dark:bg-[#141821] px-7 text-sm font-semibold text-[#111111] dark:text-white transition hover:bg-white/90 dark:bg-[#101319]/90"
             >
               Armemos tu presupuesto por WhatsApp →
             </a>
