@@ -8,8 +8,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/** Módulo MANDATOS: lista propia, numeración propia y PDF propio. */
-export default async function MandatosPage({
+/** Módulo BOLETOS: lista propia, numeración propia y PDF propio. */
+export default async function BoletosPage({
   params,
   searchParams,
 }: {
@@ -21,5 +21,5 @@ export default async function MandatosPage({
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esConcesionaria(tenant)) notFound();
 
-  return <OperacionesLista tenant={tenant} tipo="MANDATO" sp={sp} />;
+  return <OperacionesLista tenant={tenant} tipo="BOLETO" sp={sp} />;
 }

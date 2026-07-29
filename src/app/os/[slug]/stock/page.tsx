@@ -5,12 +5,13 @@ import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
 import { Badge } from "@/components/ui";
+import { origenVehiculoTexto, rutaOperacion } from "@/lib/conce";
 import { StockTable, type VehiculoRow } from "../_components/conce/stock-table";
 import { ImportarVehiculosCsv } from "../_components/conce/importar-vehiculos-csv";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; condicion?: string; estado?: string; marca?: string };
+type SP = { q?: string; condicion?: string; estado?: string; marca?: string; web?: string };
 
 /**
  * Stock de la concesionaria: lista con edición inline, buscador, filtros por
@@ -35,11 +36,13 @@ export default async function StockPage({
     ? (sp.estado as string)
     : "";
   const marca = (sp.marca ?? "").trim();
+  const web = sp.web === "sin" ? "sin" : "";
 
   const where: Prisma.ConceVehiculoWhereInput = {
     clientId: tenant.id,
     ...(condicion ? { condicion } : {}),
     ...(estado ? { estado } : {}),
+    ...(web === "sin" ? { publicado: false } : {}),
     ...(marca ? { marca } : {}),
     ...(q
       ? {
@@ -53,7 +56,7 @@ export default async function StockPage({
       : {}),
   };
 
-  const [vehiculos, totales, marcas] = await Promise.all([
+  const [vehiculos, totales, marcas, sinPublicar] = await Promise.all([
     db.conceVehiculo.findMany({
       where,
       orderBy: [{ estado: "asc" }, { ingresadoEl: "desc" }],
@@ -70,11 +73,14 @@ export default async function StockPage({
         condicion: true,
         tipo: true,
         estado: true,
+        publicado: true,
         destacado: true,
         oferta: true,
         visitas: true,
         dominio: true,
         fotos: true,
+        origenTipo: true,
+        origenOperacionId: true,
       },
     }),
     db.conceVehiculo.groupBy({
@@ -87,7 +93,29 @@ export default async function StockPage({
       where: { clientId: tenant.id },
       orderBy: { marca: "asc" },
     }),
+    db.conceVehiculo.count({ where: { clientId: tenant.id, publicado: false } }),
   ]);
+
+  // Cartelito de por dónde entró cada unidad al stock (mandato firmado / permuta).
+  const origenIds = vehiculos
+    .map((v) => v.origenOperacionId)
+    .filter((id): id is string => Boolean(id));
+  const origenes = origenIds.length
+    ? await db.conceOperacion.findMany({
+        where: { clientId: tenant.id, id: { in: origenIds } },
+        select: { id: true, tipo: true, numero: true },
+      })
+    : [];
+  const origenPorId = new Map(origenes.map((o) => [o.id, o]));
+
+  const filas: VehiculoRow[] = vehiculos.map((v) => {
+    const op = v.origenOperacionId ? origenPorId.get(v.origenOperacionId) : null;
+    return {
+      ...v,
+      origenTexto: origenVehiculoTexto(v.origenTipo, op?.numero ?? null, op?.tipo ?? null),
+      origenHref: op ? `${base}/${rutaOperacion(op.tipo)}/${op.id}` : null,
+    };
+  });
 
   const conteo = new Map(totales.map((t) => [t.estado, t._count._all]));
 
@@ -110,6 +138,7 @@ export default async function StockPage({
       condicion: condicion || undefined,
       estado: estado || undefined,
       marca: marca || undefined,
+      web: web || undefined,
       ...cambios,
     };
     for (const [k, v] of Object.entries(estadoFinal)) if (v) p.set(k, v);
@@ -123,7 +152,9 @@ export default async function StockPage({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Stock</h1>
           <p className="text-sm text-muted-foreground">
-            Editá precio, moneda, estado, ⭐ destacado y 🔥 oferta directo desde la lista.
+            Editá precio, moneda, estado, 🌐 publicado, ⭐ destacado y 🔥 oferta directo desde la
+            lista. Lo que entra solo (mandato firmado, permuta) queda SIN publicar hasta que lo
+            revises.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -147,6 +178,8 @@ export default async function StockPage({
         {chip(urlCon({ condicion: undefined }), !condicion, "0KM + Usados")}
         {chip(urlCon({ condicion: "0km" }), condicion === "0km", "🆕 0KM")}
         {chip(urlCon({ condicion: "usado" }), condicion === "usado", "Usados")}
+        <span className="mx-1 text-muted-foreground">|</span>
+        {chip(urlCon({ web: web === "sin" ? undefined : "sin" }), web === "sin", `🌐 Sin publicar · ${sinPublicar}`)}
       </div>
 
       {/* Buscador + marca */}
@@ -187,7 +220,7 @@ export default async function StockPage({
         </span>
       </form>
 
-      <StockTable slug={tenant.slug} vehiculos={vehiculos as VehiculoRow[]} />
+      <StockTable slug={tenant.slug} vehiculos={filas} />
     </div>
   );
 }

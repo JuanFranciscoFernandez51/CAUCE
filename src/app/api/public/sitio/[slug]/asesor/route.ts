@@ -75,7 +75,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   // Catálogo real (compacto) como contexto.
   const stock = await db.conceVehiculo.findMany({
-    where: { clientId: tenant.id, estado: "disponible" },
+    where: { clientId: tenant.id, estado: "disponible", publicado: true },
     orderBy: [{ destacado: "desc" }, { visitas: "desc" }],
     take: 90,
     select: {

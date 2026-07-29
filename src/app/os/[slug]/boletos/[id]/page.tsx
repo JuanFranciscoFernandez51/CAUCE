@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
-import { OperacionImprimir } from "../../../_components/conce/operacion-imprimir";
+import { OperacionDetalle } from "../../_components/conce/operacion-detalle";
 
-export default async function ImprimirMandatoPage({
+export const dynamic = "force-dynamic";
+
+export default async function BoletoDetallePage({
   params,
 }: {
   params: Promise<{ slug: string; id: string }>;
@@ -12,5 +14,5 @@ export default async function ImprimirMandatoPage({
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esConcesionaria(tenant)) notFound();
 
-  return <OperacionImprimir tenant={tenant} id={id} tipo="MANDATO" />;
+  return <OperacionDetalle tenant={tenant} id={id} tipo="BOLETO" />;
 }

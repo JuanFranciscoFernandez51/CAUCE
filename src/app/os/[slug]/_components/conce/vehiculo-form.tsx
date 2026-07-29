@@ -24,6 +24,7 @@ export type VehiculoFormData = {
   descripcion: string;
   destacado: boolean;
   oferta: boolean;
+  publicado: boolean;
   estado: string;
   fotos: string[];
 };
@@ -69,6 +70,7 @@ export function VehiculoForm({ slug, inicial }: { slug: string; inicial: Vehicul
         descripcion: form.descripcion.trim(),
         destacado: form.destacado,
         oferta: form.oferta,
+        publicado: form.publicado,
         estado: form.estado,
       };
       const res = await fetch(
@@ -240,6 +242,10 @@ export function VehiculoForm({ slug, inicial }: { slug: string; inicial: Vehicul
           />
         </Field>
         <div className="flex flex-wrap gap-6 text-sm">
+          <label className="flex items-center gap-2" title="Si está apagado, el vehículo NO se ve en la web">
+            <input type="checkbox" checked={form.publicado} onChange={(e) => setForm({ ...form, publicado: e.target.checked })} />
+            🌐 Publicado en la web
+          </label>
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.destacado} onChange={(e) => setForm({ ...form, destacado: e.target.checked })} />
             ⭐ Destacado en la home

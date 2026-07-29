@@ -1,25 +1,19 @@
 import { notFound } from "next/navigation";
 import { getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
-import {
-  OperacionesLista,
-  type OperacionesSP,
-} from "../_components/conce/operaciones-lista";
+import { OperacionNueva } from "../../_components/conce/operacion-nueva";
 
-export const dynamic = "force-dynamic";
-
-/** Módulo MANDATOS: lista propia, numeración propia y PDF propio. */
-export default async function MandatosPage({
+export default async function NuevoBoletoPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<OperacionesSP>;
+  searchParams: Promise<{ vehiculo?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esConcesionaria(tenant)) notFound();
 
-  return <OperacionesLista tenant={tenant} tipo="MANDATO" sp={sp} />;
+  return <OperacionNueva tenant={tenant} tipo="BOLETO" vehiculoId={sp.vehiculo} />;
 }

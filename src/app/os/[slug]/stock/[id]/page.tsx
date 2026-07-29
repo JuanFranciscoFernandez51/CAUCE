@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
-import { fotosDeVehiculo, nombreVehiculo } from "@/lib/conce";
+import { fotosDeVehiculo, nombreVehiculo, origenVehiculoTexto, rutaOperacion } from "@/lib/conce";
+import { Card } from "@/components/ui";
 import { VehiculoForm } from "../../_components/conce/vehiculo-form";
 
 export default async function EditarVehiculoPage({
@@ -17,6 +18,15 @@ export default async function EditarVehiculoPage({
 
   const v = await db.conceVehiculo.findFirst({ where: { id, clientId: tenant.id } });
   if (!v) notFound();
+
+  // Rastro: de dónde salió esta unidad (mandato firmado / permuta de un boleto).
+  const origen = v.origenOperacionId
+    ? await db.conceOperacion.findFirst({
+        where: { id: v.origenOperacionId, clientId: tenant.id },
+        select: { id: true, tipo: true, numero: true, nombre: true },
+      })
+    : null;
+  const origenTexto = origenVehiculoTexto(v.origenTipo, origen?.numero ?? null, origen?.tipo ?? null);
 
   return (
     <div className="space-y-4">
@@ -46,6 +56,25 @@ export default async function EditarVehiculoPage({
           </Link>
         </div>
       </div>
+      {origenTexto && origen ? (
+        <Card className="flex flex-wrap items-center gap-2 border-primary/30 bg-primary-soft/40 p-3 text-sm">
+          <span>
+            {v.origenTipo === "PERMUTA" ? "↔" : "📝"} {origenTexto} — {origen.nombre}.
+          </span>
+          {v.publicado ? null : (
+            <span className="text-muted-foreground">
+              Todavía NO se publica en la web: revisá fotos y precio y prendé 🌐.
+            </span>
+          )}
+          <Link
+            href={`/os/${tenant.slug}/${rutaOperacion(origen.tipo)}/${origen.id}`}
+            className="ml-auto font-medium text-primary hover:underline"
+          >
+            Ver la operación →
+          </Link>
+        </Card>
+      ) : null}
+
       <VehiculoForm
         slug={tenant.slug}
         inicial={{
@@ -67,6 +96,7 @@ export default async function EditarVehiculoPage({
           descripcion: v.descripcion ?? "",
           destacado: v.destacado,
           oferta: v.oferta,
+          publicado: v.publicado,
           estado: v.estado,
           fotos: fotosDeVehiculo(v.fotos),
         }}

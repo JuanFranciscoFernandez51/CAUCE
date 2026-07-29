@@ -26,6 +26,7 @@ const createSchema = z.object({
   destacado: z.boolean().optional().default(false),
   oferta: z.boolean().optional().default(false),
   estado: z.enum(["disponible", "reservado", "vendido"]).optional().default("disponible"),
+  publicado: z.boolean().optional().default(true),
   fotos: z.array(z.string().url()).max(40).optional().default([]),
 });
 
@@ -69,6 +70,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
       destacado: d.destacado,
       oferta: d.oferta,
       estado: d.estado,
+      publicado: d.publicado,
       fotos: d.fotos,
     },
   });
@@ -115,6 +117,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       condicion: true,
       tipo: true,
       estado: true,
+      publicado: true,
       destacado: true,
       oferta: true,
       visitas: true,

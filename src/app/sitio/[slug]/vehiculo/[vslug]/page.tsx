@@ -64,7 +64,7 @@ export default async function VehiculoPage({
   const v = await db.conceVehiculo.findFirst({
     where: { clientId: tenant.id, slug: vslug },
   });
-  if (!v || v.estado === "vendido") notFound();
+  if (!v || v.estado === "vendido" || !v.publicado) notFound();
 
   const fotos = fotosDeVehiculo(v.fotos);
   const titulo = `${nombreVehiculo(v)} ${v.anio}`;
@@ -74,6 +74,7 @@ export default async function VehiculoPage({
     where: {
       clientId: tenant.id,
       estado: { not: "vendido" },
+      publicado: true,
       id: { not: v.id },
       OR: [{ tipo: v.tipo }, { marca: v.marca }],
     },

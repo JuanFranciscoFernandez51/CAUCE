@@ -149,7 +149,7 @@ export function aCardVehiculo(v: {
 export async function conceMarcas(clientId: string): Promise<string[]> {
   const rows = await db.conceVehiculo.groupBy({
     by: ["marca"],
-    where: { clientId, estado: { not: "vendido" } },
+    where: { clientId, estado: { not: "vendido" }, publicado: true },
     _count: { _all: true },
     orderBy: { _count: { marca: "desc" } },
   });

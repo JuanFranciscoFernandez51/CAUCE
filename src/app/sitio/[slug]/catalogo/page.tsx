@@ -110,6 +110,7 @@ export default async function CatalogoPage({
   const where: Prisma.ConceVehiculoWhereInput = {
     clientId: tenant.id,
     estado: { not: "vendido" },
+    publicado: true,
     ...(marca ? { marca } : {}),
     ...(tipo ? { tipo } : {}),
     ...(condicion ? { condicion } : {}),
@@ -155,11 +156,11 @@ export default async function CatalogoPage({
     conceMarcas(tenant.id),
     db.conceVehiculo.groupBy({
       by: ["transmision"],
-      where: { clientId: tenant.id, estado: { not: "vendido" }, transmision: { not: null } },
+      where: { clientId: tenant.id, estado: { not: "vendido" }, publicado: true, transmision: { not: null } },
     }),
     db.conceVehiculo.groupBy({
       by: ["combustible"],
-      where: { clientId: tenant.id, estado: { not: "vendido" }, combustible: { not: null } },
+      where: { clientId: tenant.id, estado: { not: "vendido" }, publicado: true, combustible: { not: null } },
     }),
   ]);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));

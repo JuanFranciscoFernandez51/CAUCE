@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (ids.length === 0) return NextResponse.json({ vehiculos: [] });
 
   const rows = await db.conceVehiculo.findMany({
-    where: { clientId: tenant.id, id: { in: ids }, estado: { not: "vendido" } },
+    where: { clientId: tenant.id, id: { in: ids }, estado: { not: "vendido" }, publicado: true },
     select: {
       id: true,
       slug: true,

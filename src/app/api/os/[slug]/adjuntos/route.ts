@@ -50,7 +50,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const buffer = Buffer.from(await file.arrayBuffer());
   const up = await uploadToTenant({
     slug,
-    scope: ["adjuntos", refType, refId],
+    // Los papeles de una persona viven en la carpeta del cliente.
+    scope: refType === "contact" ? ["clientes", refId] : ["adjuntos", refType, refId],
     buffer,
     originalName: file.name,
   });

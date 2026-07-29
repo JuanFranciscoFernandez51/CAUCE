@@ -168,7 +168,9 @@ export default async function OsLayout({
   if (tpl === "concesionaria") {
     opsItems.unshift(
       { label: "Stock", href: `${base}/stock`, icon: "🚗" },
-      { label: "Mandatos & Boletos", href: `${base}/mandatos`, icon: "📋" },
+      { label: "Mandatos", href: `${base}/mandatos`, icon: "📝" },
+      { label: "Boletos", href: `${base}/boletos`, icon: "🧾" },
+      { label: "Clientes", href: `${base}/clientes`, icon: "🧑" },
       { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
       { label: "Publicar", href: `${base}/publicar`, icon: "📣" }
     );

@@ -3,7 +3,7 @@ import { getTenantBySlug } from "@/lib/tenant";
 import { esConcesionaria } from "@/lib/conce-server";
 import { OperacionImprimir } from "../../../_components/conce/operacion-imprimir";
 
-export default async function ImprimirMandatoPage({
+export default async function ImprimirBoletoPage({
   params,
 }: {
   params: Promise<{ slug: string; id: string }>;
@@ -12,5 +12,5 @@ export default async function ImprimirMandatoPage({
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esConcesionaria(tenant)) notFound();
 
-  return <OperacionImprimir tenant={tenant} id={id} tipo="MANDATO" />;
+  return <OperacionImprimir tenant={tenant} id={id} tipo="BOLETO" />;
 }

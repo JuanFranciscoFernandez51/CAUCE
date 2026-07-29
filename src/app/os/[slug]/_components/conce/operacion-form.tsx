@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, ErrorState, Field, Input, Select, Textarea } from "@/components/ui";
-import { DOCS_DEFAULT } from "@/lib/conce";
+import { DOCS_DEFAULT, PERMUTA_VACIA, rutaOperacion, type Permuta } from "@/lib/conce";
 
 export type VehiculoOpcion = { id: string; etiqueta: string; dominio: string | null };
 
@@ -18,6 +18,11 @@ export type OperacionFormData = {
   email: string;
   vehiculoId: string;
   vehiculoTexto: string;
+  vehMarca: string;
+  vehModelo: string;
+  vehAnio: number | null;
+  vehKm: number | null;
+  permutas: Permuta[];
   dominio: string;
   chasis: string;
   motorNro: string;
@@ -69,8 +74,27 @@ export function OperacionForm({
         domicilio: form.domicilio.trim(),
         telefono: form.telefono.trim(),
         email: form.email.trim(),
-        ...(esNuevo ? { vehiculoId: form.vehiculoId || undefined } : {}),
-        vehiculoTexto: form.vehiculoTexto.trim(),
+        ...(esNuevo ? { vehiculoId: form.vehiculoId || undefined } : { vehiculoId: form.vehiculoId || null }),
+        vehiculoTexto:
+          form.vehiculoTexto.trim() ||
+          [form.vehMarca, form.vehModelo, form.vehAnio].filter(Boolean).join(" ").trim(),
+        vehMarca: form.vehMarca.trim(),
+        vehModelo: form.vehModelo.trim(),
+        vehAnio: form.vehAnio || null,
+        vehKm: form.vehKm || null,
+        permutas: esMandato
+          ? []
+          : form.permutas
+              .filter((p) => p.marca.trim())
+              .map((p) => ({
+                marca: p.marca.trim(),
+                modelo: p.modelo.trim(),
+                anio: Number(p.anio) || new Date().getFullYear(),
+                km: Number(p.km) || 0,
+                valorTomado: Number(p.valorTomado) || 0,
+                dominio: (p.dominio ?? "").trim(),
+                vehiculoId: p.vehiculoId ?? null,
+              })),
         dominio: form.dominio.trim(),
         chasis: form.chasis.trim(),
         motorNro: form.motorNro.trim(),
@@ -94,7 +118,7 @@ export function OperacionForm({
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar");
       if (esNuevo) {
-        router.push(`/os/${slug}/mandatos/${data.operacion.id}`);
+        router.push(`/os/${slug}/${rutaOperacion(form.tipo)}/${data.operacion.id}`);
       }
       router.refresh();
     } catch (err) {
@@ -102,6 +126,13 @@ export function OperacionForm({
     } finally {
       setGuardando(false);
     }
+  }
+
+  function cambiarPermuta(i: number, cambios: Partial<Permuta>) {
+    setForm((f) => ({
+      ...f,
+      permutas: f.permutas.map((p, idx) => (idx === i ? { ...p, ...cambios } : p)),
+    }));
   }
 
   function toggleDoc(i: number) {
@@ -143,26 +174,65 @@ export function OperacionForm({
 
       <Card className="space-y-4 p-4">
         <h2 className="text-sm font-semibold">🚗 Vehículo</h2>
+        {esMandato ? (
+          <p className="rounded-md bg-primary-soft/50 px-3 py-2 text-xs text-muted-foreground">
+            Si el auto todavía NO está en el stock, cargá marca, modelo y año: cuando marques el
+            mandato como <strong>firmado</strong>, el vehículo entra solo al stock sin publicar.
+          </p>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {esNuevo ? (
-            <Field
-              label="Del stock"
-              help={esMandato ? "Si el auto entra en consignación al stock, elegilo acá." : "El boleto reserva el vehículo elegido."}
+          <Field
+            label="Del stock"
+            help={esMandato ? "Si el auto YA está cargado, elegilo acá." : "El boleto reserva el vehículo elegido."}
+          >
+            <Select
+              value={form.vehiculoId}
+              onChange={(e) => setForm({ ...form, vehiculoId: e.target.value })}
             >
-              <Select
-                value={form.vehiculoId}
-                onChange={(e) => setForm({ ...form, vehiculoId: e.target.value })}
-              >
-                <option value="">— Fuera del stock (texto libre) —</option>
-                {vehiculos.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.etiqueta}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          ) : null}
-          <Field label="Descripción libre" help="Si no está en el stock: marca, modelo, año.">
+              <option value="">— Fuera del stock (cargar los datos abajo) —</option>
+              {vehiculos.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.etiqueta}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Marca">
+            <Input
+              value={form.vehMarca}
+              onChange={(e) => setForm({ ...form, vehMarca: e.target.value })}
+              placeholder="Ej: Peugeot"
+            />
+          </Field>
+          <Field label="Modelo / versión">
+            <Input
+              value={form.vehModelo}
+              onChange={(e) => setForm({ ...form, vehModelo: e.target.value })}
+              placeholder="Ej: 208 Allure"
+            />
+          </Field>
+          <Field label="Año">
+            <Input
+              type="number"
+              min={1950}
+              max={2030}
+              value={form.vehAnio ?? ""}
+              onChange={(e) =>
+                setForm({ ...form, vehAnio: e.target.value === "" ? null : Number(e.target.value) })
+              }
+            />
+          </Field>
+          <Field label="Kilómetros">
+            <Input
+              type="number"
+              min={0}
+              value={form.vehKm ?? ""}
+              onChange={(e) =>
+                setForm({ ...form, vehKm: e.target.value === "" ? null : Number(e.target.value) })
+              }
+            />
+          </Field>
+          <Field label="Descripción libre" help="Lo que sale en el PDF si no elegiste uno del stock.">
             <Input
               value={form.vehiculoTexto}
               onChange={(e) => setForm({ ...form, vehiculoTexto: e.target.value })}
@@ -180,6 +250,96 @@ export function OperacionForm({
           </Field>
         </div>
       </Card>
+
+      {!esMandato ? (
+        <Card className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold">↔ Permutas tomadas</h2>
+              <p className="text-xs text-muted-foreground">
+                Cada permuta entra SOLA al stock (sin publicar) cuando el boleto se firma o se
+                entrega.
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setForm({ ...form, permutas: [...form.permutas, { ...PERMUTA_VACIA }] })}
+            >
+              + Agregar permuta
+            </Button>
+          </div>
+
+          {form.permutas.length === 0 ? (
+            <p className="rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
+              Sin permutas en esta operación.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {form.permutas.map((p, i) => (
+                <div key={i} className="grid gap-3 rounded-md border p-3 sm:grid-cols-3 lg:grid-cols-6">
+                  <Field label="Marca">
+                    <Input value={p.marca} onChange={(e) => cambiarPermuta(i, { marca: e.target.value })} />
+                  </Field>
+                  <Field label="Modelo">
+                    <Input value={p.modelo} onChange={(e) => cambiarPermuta(i, { modelo: e.target.value })} />
+                  </Field>
+                  <Field label="Año">
+                    <Input
+                      type="number"
+                      min={1950}
+                      max={2030}
+                      value={p.anio || ""}
+                      onChange={(e) => cambiarPermuta(i, { anio: Number(e.target.value) || 0 })}
+                    />
+                  </Field>
+                  <Field label="Km">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={p.km || ""}
+                      onChange={(e) => cambiarPermuta(i, { km: Number(e.target.value) || 0 })}
+                    />
+                  </Field>
+                  <Field label="Valor tomado">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={p.valorTomado || ""}
+                      onChange={(e) => cambiarPermuta(i, { valorTomado: Number(e.target.value) || 0 })}
+                    />
+                  </Field>
+                  <Field label="Dominio">
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        value={p.dominio ?? ""}
+                        onChange={(e) => cambiarPermuta(i, { dominio: e.target.value.toUpperCase() })}
+                      />
+                      <button
+                        type="button"
+                        title={p.vehiculoId ? "Ya entró al stock" : "Quitar permuta"}
+                        disabled={Boolean(p.vehiculoId)}
+                        onClick={() =>
+                          setForm({ ...form, permutas: form.permutas.filter((_, idx) => idx !== i) })
+                        }
+                        className="shrink-0 text-muted-foreground/60 hover:text-destructive disabled:opacity-30"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </Field>
+                  {p.vehiculoId ? (
+                    <p className="text-xs text-success sm:col-span-3 lg:col-span-6">
+                      ✔ Ya está en el stock (sin publicar).
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      ) : null}
 
       <Card className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">📄 Documentación</h2>
@@ -268,7 +428,7 @@ export function OperacionForm({
         <Button type="submit" disabled={guardando}>
           {guardando ? "Guardando…" : esNuevo ? (esMandato ? "Crear mandato" : "Crear boleto") : "Guardar cambios"}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => router.push(`/os/${slug}/mandatos`)}>
+        <Button type="button" variant="ghost" onClick={() => router.push(`/os/${slug}/${rutaOperacion(form.tipo)}`)}>
           Volver
         </Button>
       </div>

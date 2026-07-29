@@ -19,11 +19,15 @@ export type VehiculoRow = {
   condicion: string;
   tipo: string;
   estado: string;
+  publicado: boolean;
   destacado: boolean;
   oferta: boolean;
   visitas: number;
   dominio: string | null;
   fotos: unknown;
+  origenTipo: string | null;
+  origenTexto: string | null;
+  origenHref: string | null;
 };
 
 /**
@@ -103,6 +107,7 @@ export function StockTable({ slug, vehiculos }: { slug: string; vehiculos: Vehic
             <Th>Moneda</Th>
             <Th className="text-right">Km</Th>
             <Th>Estado</Th>
+            <Th className="text-center">🌐</Th>
             <Th className="text-center">⭐</Th>
             <Th className="text-center">🔥</Th>
             <Th className="text-right">Vistas</Th>
@@ -135,6 +140,11 @@ export function StockTable({ slug, vehiculos }: { slug: string; vehiculos: Vehic
                     {v.condicion === "0km" ? " · 0KM" : ""}
                     {v.dominio ? ` · ${v.dominio}` : ""}
                   </span>
+                  {v.origenTexto ? (
+                    <span className="block text-xs text-primary" title={v.origenTexto}>
+                      {v.origenTipo === "PERMUTA" ? "↔" : "📝"} {v.origenTexto}
+                    </span>
+                  ) : null}
                 </Td>
                 <Td className="text-right">
                   <InlineEdit
@@ -182,6 +192,20 @@ export function StockTable({ slug, vehiculos }: { slug: string; vehiculos: Vehic
                       </Badge>
                     )}
                   />
+                </Td>
+                <Td className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => patch(v.id, { publicado: !v.publicado })}
+                    title={
+                      v.publicado
+                        ? "Se ve en la web — click para bajarlo"
+                        : "NO se ve en la web — click para publicarlo"
+                    }
+                    className={`text-lg transition-opacity ${v.publicado ? "" : "opacity-25 hover:opacity-60"}`}
+                  >
+                    🌐
+                  </button>
                 </Td>
                 <Td className="text-center">
                   <button

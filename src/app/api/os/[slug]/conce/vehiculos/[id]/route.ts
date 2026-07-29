@@ -25,6 +25,7 @@ const patchSchema = z
     destacado: z.boolean(),
     oferta: z.boolean(),
     estado: z.enum(["disponible", "reservado", "vendido"]),
+    publicado: z.boolean(),
     fotos: z.array(z.string().url()).max(40),
   })
   .partial();

@@ -40,6 +40,7 @@ export default async function NuevoVehiculoPage({
           descripcion: "",
           destacado: false,
           oferta: false,
+          publicado: true,
           estado: "disponible",
           fotos: [],
         }}

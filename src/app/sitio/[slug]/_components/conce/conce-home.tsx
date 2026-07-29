@@ -24,7 +24,7 @@ import { IconAuto, IconLlave, IconBillete, IconDoc, IconMedalla, IconEstrella } 
 export async function ConceHome({ tenant, info }: { tenant: Client; info: ConceShellInfo }) {
   const base = `/sitio/${tenant.slug}`;
   const s = conceSettings(tenant);
-  const activos = { clientId: tenant.id, estado: { not: "vendido" } } as const;
+  const activos = { clientId: tenant.id, estado: { not: "vendido" }, publicado: true } as const;
 
   const [marcas, destacados, ofertas, recientes, count0km, countUsados, tiposFotos] =
     await Promise.all([
