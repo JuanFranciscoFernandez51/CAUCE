@@ -29,6 +29,7 @@ export async function generateMetadata({
 type SP = {
   q?: string;
   categoria?: string;
+  moto?: string; // "Honda CG Titan 150" — filtra por compatibilidad
   min?: string;
   max?: string;
   stock?: string;
@@ -66,6 +67,7 @@ export default async function TiendaPage({
 
   const q = (sp.q ?? "").trim();
   const categoria = (sp.categoria ?? "").trim();
+  const moto = (sp.moto ?? "").trim();
   const min = Number.parseInt(sp.min ?? "", 10);
   const max = Number.parseInt(sp.max ?? "", 10);
   const soloStock = sp.stock === "1";
@@ -76,6 +78,8 @@ export default async function TiendaPage({
     clientId: tenant.id,
     activo: true,
     ...(categoria ? { categoria } : {}),
+    // el cliente busca por su moto, no por código
+    ...(moto ? { compatibilidades: { has: moto } } : {}),
     ...(soloStock ? { stock: { gt: 0 } } : {}),
     ...(Number.isFinite(min) || Number.isFinite(max)
       ? {
@@ -112,6 +116,7 @@ export default async function TiendaPage({
     const p = new URLSearchParams();
     const estado: SP = {
       q: q || undefined,
+      moto: moto || undefined,
       categoria: categoria || undefined,
       min: sp.min,
       max: sp.max,
@@ -134,6 +139,15 @@ export default async function TiendaPage({
         </h1>
         <p className="mt-1 text-sm text-gray-500">
           {total.toLocaleString("es-AR")} producto{total === 1 ? "" : "s"}
+          {moto ? (
+            <>
+              {" "}
+              que le entran a tu <strong>{moto}</strong>{" "}
+              <a href={`/sitio/${slug}/tienda`} className="underline underline-offset-2 opacity-70 hover:opacity-100">
+                (quitar filtro)
+              </a>
+            </>
+          ) : null}
           {q ? ` para “${q}”` : ""}
           {categoria ? ` en ${categoria}` : ""}
         </p>

@@ -12,6 +12,7 @@ import { siteContent } from "./_lib/site-content";
 import { DoohSite } from "./_components/dooh-site";
 import { getBazarSite } from "./_lib/bazar-site";
 import { BazarHome } from "./_components/bazar/bazar-home";
+import { RepuestosHome } from "./_components/repuestos/repuestos-home";
 import { getConceSite } from "./_lib/conce-site";
 import { ConceHome } from "./_components/conce/conce-home";
 
@@ -67,6 +68,13 @@ export default async function SitioHome({
     const site = await getBazarSite(slug);
     if (!site) notFound();
     return <BazarHome tenant={site.tenant} info={site.info} />;
+  }
+
+  // Template REPUESTOS (Fernández Repuestos): buscador por moto adelante.
+  if (tpl === "repuestos") {
+    const site = await getBazarSite(slug);
+    if (!site) notFound();
+    return <RepuestosHome tenant={site.tenant} info={site.info} />;
   }
 
   // Template CONCESIONARIA (Ri Cars): home propia con buscador y stock real.

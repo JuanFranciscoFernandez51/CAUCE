@@ -2,6 +2,7 @@ import type { Client } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule, tenantBranding } from "@/lib/tenant";
 import { bazarSettings, esBazar } from "@/lib/bazar-server";
+import { BZ } from "./bazar-paleta";
 
 /**
  * Helpers server del TEMPLATE BAZAR del sitio público.
@@ -19,6 +20,12 @@ export type BazarShellInfo = {
   direccion: string | null;
   horarios: string | null;
   categorias: string[];
+  /** Identidad del tenant: el shell es compartido, la cara no. */
+  emoji: string; // motivo (🐚 el bazar, 🏍 repuestos)
+  color: string; // color principal de botones y acentos
+  colorSuave: string; // bordes y fondos suaves
+  sobreColor: string; // texto que va encima del color principal
+  buscarPlaceholder: string;
 };
 
 export type BazarSite = {
@@ -26,12 +33,33 @@ export type BazarSite = {
   info: BazarShellInfo;
 };
 
+/** Cada template pone su cara sobre la misma tienda. */
+function caraDelTemplate(tenant: Client, primario?: string) {
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "repuestos")
+    return {
+      emoji: "🏍",
+      color: primario || "#F5B301",
+      colorSuave: "#E5E5E5",
+      sobreColor: "#111111",
+      buscarPlaceholder: "Buscá por repuesto o código: cadena, pastillas, batería…",
+    };
+  return {
+    emoji: "🐚",
+    color: BZ.aqua,
+    colorSuave: BZ.aquaClaro,
+    sobreColor: "#ffffff",
+    buscarPlaceholder: "Buscá vajilla, textiles, deco…",
+  };
+}
+
 export async function getBazarSite(slug: string): Promise<BazarSite | null> {
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !hasModule(tenant, "sitio") || !esBazar(tenant)) return null;
 
   const branding = tenantBranding(tenant);
   const settings = bazarSettings(tenant);
+  const cara = caraDelTemplate(tenant, branding.primary);
 
   const categoriasRaw = await db.bazarProducto.groupBy({
     by: ["categoria"],
@@ -52,6 +80,11 @@ export async function getBazarSite(slug: string): Promise<BazarSite | null> {
       direccion: settings.datosNegocio?.direccion ?? null,
       horarios: settings.horarios ?? null,
       categorias: categoriasRaw.map((c) => c.categoria),
+      emoji: cara.emoji,
+      color: cara.color,
+      colorSuave: cara.colorSuave,
+      sobreColor: cara.sobreColor,
+      buscarPlaceholder: cara.buscarPlaceholder,
     },
   };
 }

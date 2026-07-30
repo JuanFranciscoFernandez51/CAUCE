@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
-import { esConcesionaria } from "@/lib/conce-server";
+import { tieneProveedores } from "@/lib/conce-server";
 import { Badge } from "@/components/ui";
 import { contactosDe, cuentasDe, preciosDe } from "@/lib/conce-fin";
 import {
@@ -27,7 +27,7 @@ export default async function ProveedoresPage({
   const { slug } = await params;
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant || !esConcesionaria(tenant)) notFound();
+  if (!tenant || !tieneProveedores(tenant)) notFound();
 
   const base = `/os/${tenant.slug}/proveedores`;
   const q = (sp.q ?? "").trim();

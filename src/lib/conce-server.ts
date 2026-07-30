@@ -15,6 +15,12 @@ export function esConcesionaria(tenant: Client): boolean {
   return (tenant.settings as { template?: string } | null)?.template === "concesionaria";
 }
 
+/** Templates con carpeta de proveedores (compras, CBU, listas de precios). */
+export function tieneProveedores(tenant: Client): boolean {
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  return tpl === "concesionaria" || tpl === "repuestos";
+}
+
 export type ConceSucursal = { direccion: string; maps?: string; whatsapp?: string };
 
 /** Settings tipados que usa el sitio de la concesionaria. */
@@ -82,43 +88,86 @@ export async function proximoNumeroOperacion(
 
 // ── Cliente único (CRM) ───────────────────────────────────────────────────
 
+/** custom:Json de un Contact → Record<string,string> (mismo criterio que el CRM). */
+function customDeContacto(custom: unknown): Record<string, string> {
+  if (!custom || typeof custom !== "object" || Array.isArray(custom)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(custom as Record<string, unknown>)) {
+    if (v === null || v === undefined) continue;
+    out[k] = String(v);
+  }
+  return out;
+}
+
 /**
  * Busca o crea el Contact (cliente del CRM) de la persona de una operación.
- * Regla de oro de Cauce: TODO cliente entra al CRM único. Matchea por
- * teléfono → email → nombre, así no duplica al mismo señor.
+ * Regla de oro de Cauce: TODO cliente entra al CRM único.
+ *
+ * - Si el vendedor lo eligió del buscador viene `contactId`: ese manda.
+ * - Si no, matchea por teléfono → email → nombre, así no duplica al mismo señor.
+ *
+ * El DNI/CUIT y el domicilio viven en `Contact.custom` (mismo criterio que la
+ * carpeta de clientes). Completamos huecos SIN pisar lo que ya esté cargado.
  */
 export async function vincularContacto(
   tx: Tx,
   clientId: string,
-  datos: { nombre: string; telefono?: string | null; email?: string | null; dni?: string | null }
+  datos: {
+    nombre: string;
+    telefono?: string | null;
+    email?: string | null;
+    dni?: string | null;
+    domicilio?: string | null;
+    contactId?: string | null;
+  }
 ): Promise<string | null> {
   const nombre = datos.nombre?.trim();
   if (!nombre) return null;
   const telefono = datos.telefono?.trim() || null;
   const email = datos.email?.trim() || null;
+  const dni = datos.dni?.trim() || null;
+  const domicilio = datos.domicilio?.trim() || null;
+
+  const elegido = datos.contactId?.trim()
+    ? await tx.contact.findFirst({
+        where: { id: datos.contactId.trim(), clientId },
+        select: { id: true, custom: true },
+      })
+    : null;
 
   const existente =
+    elegido ??
     (telefono
-      ? await tx.contact.findFirst({ where: { clientId, phone: telefono }, select: { id: true } })
+      ? await tx.contact.findFirst({
+          where: { clientId, phone: telefono },
+          select: { id: true, custom: true },
+        })
       : null) ??
     (email
       ? await tx.contact.findFirst({
           where: { clientId, email: { equals: email, mode: "insensitive" } },
-          select: { id: true },
+          select: { id: true, custom: true },
         })
       : null) ??
     (await tx.contact.findFirst({
       where: { clientId, name: { equals: nombre, mode: "insensitive" } },
-      select: { id: true },
+      select: { id: true, custom: true },
     }));
 
   if (existente) {
     // Completamos huecos sin pisar lo que ya haya cargado el vendedor.
+    const custom = customDeContacto(existente.custom);
+    const customNuevo = { ...custom };
+    if (dni && !custom.dni) customNuevo.dni = dni;
+    if (domicilio && !custom.domicilio) customNuevo.domicilio = domicilio;
+    const cambioCustom = Object.keys(customNuevo).length !== Object.keys(custom).length;
+
     await tx.contact.update({
       where: { id: existente.id },
       data: {
         ...(telefono ? { phone: telefono } : {}),
         ...(email ? { email } : {}),
+        ...(cambioCustom ? { custom: customNuevo } : {}),
         lastTouchAt: new Date(),
       },
     });
@@ -133,7 +182,10 @@ export async function vincularContacto(
       email,
       source: "operacion",
       stage: "cliente",
-      notes: datos.dni ? `DNI/CUIT: ${datos.dni}` : null,
+      custom: {
+        ...(dni ? { dni } : {}),
+        ...(domicilio ? { domicilio } : {}),
+      },
       lastTouchAt: new Date(),
     },
     select: { id: true },

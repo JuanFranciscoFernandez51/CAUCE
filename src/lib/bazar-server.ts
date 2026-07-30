@@ -13,8 +13,12 @@ import { ESTADOS_PAGOS, itemsDe, type PedidoEstado } from "@/lib/bazar";
 
 // ── Tenant ────────────────────────────────────────────────────────────────
 
+/** Templates que usan la tienda del bazar (catálogo, carrito, checkout, pedidos). */
+const CON_TIENDA = ["bazar", "repuestos"];
+
 export function esBazar(tenant: Client): boolean {
-  return (tenant.settings as { template?: string } | null)?.template === "bazar";
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  return !!tpl && CON_TIENDA.includes(tpl);
 }
 
 /** Settings tipados que usa el sitio del bazar. */

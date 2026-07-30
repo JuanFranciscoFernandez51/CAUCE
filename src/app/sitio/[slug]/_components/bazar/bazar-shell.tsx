@@ -21,7 +21,19 @@ export { BZ };
 export function BazarShell({ info, children }: { info: BazarShellInfo; children: ReactNode }) {
   return (
     <CarritoProvider slug={info.slug}>
-      <ShellInterno info={info}>{children}</ShellInterno>
+      {/* La identidad viaja como variables CSS: el shell es el mismo, la cara no. */}
+      <div
+        style={
+          {
+            "--tpl": info.color,
+            "--tpl-suave": info.colorSuave,
+            "--tpl-sobre": info.sobreColor,
+            "--tpl-emoji": `"${info.emoji}"`,
+          } as React.CSSProperties
+        }
+      >
+        <ShellInterno info={info}>{children}</ShellInterno>
+      </div>
     </CarritoProvider>
   );
 }
@@ -42,8 +54,8 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
       <Header info={info} />
       <main className="flex-1">{children}</main>
       <Footer info={info} />
-      <DrawerCarrito base={base} />
-      <Popup5 base={base} slug={info.slug} />
+      <DrawerCarrito base={base} info={info} />
+      <Popup5 base={base} slug={info.slug} info={info} />
       {wa ? (
         <a
           href={wa}
@@ -77,7 +89,7 @@ function Header({ info }: { info: BazarShellInfo }) {
   return (
     <header
       className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur"
-      style={{ borderColor: BZ.aquaClaro }}
+      style={{ borderColor: info.colorSuave }}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link href={base} className="flex shrink-0 items-center gap-2">
@@ -87,10 +99,10 @@ function Header({ info }: { info: BazarShellInfo }) {
               src={info.logo}
               alt={info.nombre}
               className="h-11 w-11 rounded-full border object-cover"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: info.colorSuave }}
             />
           ) : (
-            <span className="text-2xl">🐚</span>
+            <span className="text-2xl">{info.emoji}</span>
           )}
           <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: BZ.azul }}>
             {info.nombre}
@@ -102,15 +114,15 @@ function Header({ info }: { info: BazarShellInfo }) {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscá vajilla, textiles, deco…"
+              placeholder={info.buscarPlaceholder}
               className="h-10 w-full rounded-full border bg-white pl-4 pr-10 text-sm outline-none transition-colors focus:border-[#3FA9A5]"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: info.colorSuave }}
             />
             <button
               type="submit"
               aria-label="Buscar"
               className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: info.color, color: info.sobreColor }}
             >
               🔍
             </button>
@@ -141,7 +153,7 @@ function Header({ info }: { info: BazarShellInfo }) {
             type="button"
             onClick={() => setDrawerAbierto(true)}
             className="relative flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-white"
-            style={{ backgroundColor: BZ.aqua }}
+            style={{ backgroundColor: info.color, color: info.sobreColor }}
           >
             <span aria-hidden>🛒</span>
             <span className="hidden sm:inline">Carrito</span>
@@ -182,14 +194,14 @@ function Header({ info }: { info: BazarShellInfo }) {
 
       {/* Menú mobile */}
       {menuAbierto ? (
-        <div className="border-t bg-white px-4 py-3 md:hidden" style={{ borderColor: BZ.aquaClaro }}>
+        <div className="border-t bg-white px-4 py-3 md:hidden" style={{ borderColor: info.colorSuave }}>
           <form onSubmit={buscar} className="mb-3">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar productos…"
               className="h-10 w-full rounded-full border bg-white px-4 text-sm outline-none"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: info.colorSuave }}
             />
           </form>
           <div className="flex flex-wrap gap-2">
@@ -197,7 +209,7 @@ function Header({ info }: { info: BazarShellInfo }) {
               href={`${base}/tienda`}
               onClick={() => setMenuAbierto(false)}
               className="rounded-full px-3 py-1.5 text-sm font-semibold text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: info.color, color: info.sobreColor }}
             >
               Tienda
             </Link>
@@ -207,7 +219,7 @@ function Header({ info }: { info: BazarShellInfo }) {
                 href={`${base}/tienda?categoria=${encodeURIComponent(c)}`}
                 onClick={() => setMenuAbierto(false)}
                 className="rounded-full border px-3 py-1.5 text-sm"
-                style={{ borderColor: BZ.aquaClaro }}
+                style={{ borderColor: info.colorSuave }}
               >
                 {c}
               </Link>
@@ -216,7 +228,7 @@ function Header({ info }: { info: BazarShellInfo }) {
               href={`${base}/quienes-somos`}
               onClick={() => setMenuAbierto(false)}
               className="rounded-full border px-3 py-1.5 text-sm"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: info.colorSuave }}
             >
               Quiénes somos
             </Link>
@@ -224,7 +236,7 @@ function Header({ info }: { info: BazarShellInfo }) {
               href={`${base}/consultas`}
               onClick={() => setMenuAbierto(false)}
               className="rounded-full border px-3 py-1.5 text-sm"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: info.colorSuave }}
             >
               Consultas
             </Link>
@@ -237,7 +249,7 @@ function Header({ info }: { info: BazarShellInfo }) {
 
 // ── Drawer del carrito ────────────────────────────────────────────────────
 
-function DrawerCarrito({ base }: { base: string }) {
+function DrawerCarrito({ base, info }: { base: string; info: BazarShellInfo }) {
   const { items, subtotal, setCant, quitar, drawerAbierto, setDrawerAbierto } = useCarrito();
 
   if (!drawerAbierto) return null;
@@ -252,10 +264,10 @@ function DrawerCarrito({ base }: { base: string }) {
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
         <div
           className="flex items-center justify-between border-b px-4 py-3"
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: info.colorSuave }}
         >
           <h2 className="text-lg font-bold" style={{ color: BZ.azul }}>
-            Tu carrito 🐚
+            Tu carrito {info.emoji}
           </h2>
           <button
             type="button"
@@ -277,7 +289,7 @@ function DrawerCarrito({ base }: { base: string }) {
                   href={`${base}/tienda`}
                   onClick={() => setDrawerAbierto(false)}
                   className="rounded-full px-4 py-2 text-sm font-semibold text-white"
-                  style={{ backgroundColor: BZ.aqua }}
+                  style={{ backgroundColor: info.color, color: info.sobreColor }}
                 >
                   Ir a la tienda
                 </Link>
@@ -293,7 +305,7 @@ function DrawerCarrito({ base }: { base: string }) {
                       src={i.foto}
                       alt={i.nombre}
                       className="h-16 w-16 shrink-0 rounded-lg border object-cover"
-                      style={{ borderColor: BZ.aquaClaro }}
+                      style={{ borderColor: info.colorSuave }}
                     />
                   ) : (
                     <div
@@ -313,7 +325,7 @@ function DrawerCarrito({ base }: { base: string }) {
                         type="button"
                         onClick={() => setCant(i.productoId, i.cant - 1)}
                         className="h-6 w-6 rounded-full border text-sm leading-none"
-                        style={{ borderColor: BZ.aquaClaro }}
+                        style={{ borderColor: info.colorSuave }}
                         aria-label="Restar uno"
                       >
                         −
@@ -323,7 +335,7 @@ function DrawerCarrito({ base }: { base: string }) {
                         type="button"
                         onClick={() => setCant(i.productoId, i.cant + 1)}
                         className="h-6 w-6 rounded-full border text-sm leading-none"
-                        style={{ borderColor: BZ.aquaClaro }}
+                        style={{ borderColor: info.colorSuave }}
                         aria-label="Sumar uno"
                       >
                         +
@@ -344,7 +356,7 @@ function DrawerCarrito({ base }: { base: string }) {
         </div>
 
         {items.length > 0 ? (
-          <div className="border-t px-4 py-4" style={{ borderColor: BZ.aquaClaro }}>
+          <div className="border-t px-4 py-4" style={{ borderColor: info.colorSuave }}>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-gray-500">Subtotal</span>
               <span className="text-lg font-bold" style={{ color: BZ.azul }}>
@@ -355,7 +367,7 @@ function DrawerCarrito({ base }: { base: string }) {
               href={`${base}/carrito`}
               onClick={() => setDrawerAbierto(false)}
               className="block w-full rounded-full py-3 text-center font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: info.color, color: info.sobreColor }}
             >
               Finalizar compra
             </Link>
@@ -371,7 +383,7 @@ function DrawerCarrito({ base }: { base: string }) {
 
 // ── Popup 5% (a los 10 segundos exactos de la primera visita) ─────────────
 
-function Popup5({ base, slug }: { base: string; slug: string }) {
+function Popup5({ base, slug, info }: { base: string; slug: string; info: BazarShellInfo }) {
   const [visible, setVisible] = useState(false);
   const KEY = `le-popup-visto-${slug}`;
 
@@ -414,7 +426,7 @@ function Popup5({ base, slug }: { base: string; slug: string }) {
             Usá el código{" "}
             <span
               className="rounded-md px-2 py-0.5 font-mono font-bold text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: info.color, color: info.sobreColor }}
             >
               {CUPON_POPUP}
             </span>{" "}
@@ -426,7 +438,7 @@ function Popup5({ base, slug }: { base: string; slug: string }) {
             href={`${base}/tienda`}
             onClick={() => setVisible(false)}
             className="rounded-full py-3 font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: BZ.aqua }}
+            style={{ backgroundColor: info.color, color: info.sobreColor }}
           >
             Ir a la tienda
           </Link>
@@ -456,7 +468,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={info.logo} alt={info.nombre} className="h-10 w-10 rounded-full object-cover" />
             ) : (
-              <span className="text-2xl">🐚</span>
+              <span className="text-2xl">{info.emoji}</span>
             )}
             <span className="font-bold" style={{ color: BZ.azul }}>
               {info.nombre}
@@ -530,7 +542,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
           </ul>
         </div>
       </div>
-      <div className="border-t py-4" style={{ borderColor: BZ.aquaClaro }}>
+      <div className="border-t py-4" style={{ borderColor: info.colorSuave }}>
         <p className="text-center text-xs text-gray-500">
           ⚡ Powered by{" "}
           <a href="https://cauce.app" className="font-medium hover:underline">

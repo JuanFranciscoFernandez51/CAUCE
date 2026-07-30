@@ -32,13 +32,13 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${sinStock ? "opacity-50 grayscale" : ""}`}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-4xl">🐚</div>
+            <div className="emoji-tpl flex h-full w-full items-center justify-center text-4xl" aria-hidden />
           )}
           <div className="absolute left-2 top-2 flex flex-col gap-1">
             {p.esNuevo && !sinStock ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: BZ.azul }}
+                style={{ backgroundColor: "var(--tpl-oscuro, " + BZ.azul + ")" }}
               >
                 NUEVO
               </span>
@@ -56,7 +56,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             {p.precioOferta != null && p.precioOferta < p.precio && !sinStock ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: BZ.aqua }}
+                style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
               >
                 OFERTA
               </span>
@@ -73,7 +73,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             {p.precioOferta != null && p.precioOferta < p.precio ? (
               <p className="text-xs text-gray-400 line-through">{fmtPrecio(p.precio)}</p>
             ) : null}
-            <p className="text-base font-bold" style={{ color: BZ.azul }}>
+            <p className="text-base font-bold" style={{ color: "var(--tpl-texto, " + BZ.azul + ")" }}>
               {fmtPrecio(vigente)}
             </p>
           </div>
@@ -85,7 +85,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               }
               aria-label={`Agregar ${p.nombre} al carrito`}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
             >
               +
             </button>

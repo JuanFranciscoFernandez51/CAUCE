@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
-import { esConcesionaria } from "@/lib/conce-server";
+import { tieneProveedores } from "@/lib/conce-server";
 import { Badge } from "@/components/ui";
 import { contactosDe, cuentasDe, preciosDe } from "@/lib/conce-fin";
 import { ProveedorFicha } from "../../_components/conce/proveedor-ficha";
@@ -17,7 +17,7 @@ export default async function ProveedorPage({
 }) {
   const { slug, id } = await params;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant || !esConcesionaria(tenant)) notFound();
+  if (!tenant || !tieneProveedores(tenant)) notFound();
 
   const p = await db.proveedor.findFirst({ where: { id, clientId: tenant.id } });
   if (!p) notFound();

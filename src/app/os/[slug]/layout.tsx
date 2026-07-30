@@ -164,6 +164,16 @@ export default async function OsLayout({
       { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
     );
   }
+  // Template repuestos (Fernández Repuestos): misma tienda, con proveedores y stock propio.
+  if (tpl === "repuestos") {
+    opsItems.unshift(
+      { label: "Repuestos & Stock", href: `${base}/productos`, icon: "🔩" },
+      { label: "Despachos", href: `${base}/despacho`, icon: "📦" },
+      { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
+      { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
+    );
+  }
   // Template concesionaria (Ri Cars): sus módulos propios primero en Operaciones.
   if (tpl === "concesionaria") {
     opsItems.unshift(

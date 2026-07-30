@@ -282,3 +282,8 @@ h3 {
     transition: none !important;
   }
 }
+
+/* Motivo del template en los huecos sin foto (lo define el shell del sitio). */
+.emoji-tpl::before {
+  content: var(--tpl-emoji, "📦");
+}
