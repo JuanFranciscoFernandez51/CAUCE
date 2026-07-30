@@ -55,7 +55,7 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
       <main className="flex-1">{children}</main>
       <Footer info={info} />
       <DrawerCarrito base={base} info={info} />
-      <Popup5 base={base} slug={info.slug} info={info} />
+      {info.popupDescuento ? <Popup5 base={base} slug={info.slug} info={info} /> : null}
       {wa ? (
         <a
           href={wa}
@@ -104,7 +104,7 @@ function Header({ info }: { info: BazarShellInfo }) {
           ) : (
             <span className="text-2xl">{info.emoji}</span>
           )}
-          <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: BZ.azul }}>
+          <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: info.colorTexto }}>
             {info.nombre}
           </span>
         </Link>
@@ -160,7 +160,7 @@ function Header({ info }: { info: BazarShellInfo }) {
             {cantidadTotal > 0 ? (
               <span
                 className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white"
-                style={{ backgroundColor: BZ.azul }}
+                style={{ backgroundColor: info.colorTexto }}
               >
                 {cantidadTotal}
               </span>
@@ -184,7 +184,8 @@ function Header({ info }: { info: BazarShellInfo }) {
             <Link
               key={c}
               href={`${base}/tienda?categoria=${encodeURIComponent(c)}`}
-              className="whitespace-nowrap rounded-full px-3 py-1 text-[13px] font-medium text-[#2C6E8A] transition-colors hover:bg-[#F6F1E8]"
+              className="whitespace-nowrap rounded-full px-3 py-1 text-[13px] font-medium transition-colors hover:bg-black/[0.06]"
+              style={{ color: info.colorTexto }}
             >
               {c}
             </Link>
@@ -266,7 +267,7 @@ function DrawerCarrito({ base, info }: { base: string; info: BazarShellInfo }) {
           className="flex items-center justify-between border-b px-4 py-3"
           style={{ borderColor: info.colorSuave }}
         >
-          <h2 className="text-lg font-bold" style={{ color: BZ.azul }}>
+          <h2 className="text-lg font-bold" style={{ color: info.colorTexto }}>
             Tu carrito {info.emoji}
           </h2>
           <button
@@ -310,14 +311,14 @@ function DrawerCarrito({ base, info }: { base: string; info: BazarShellInfo }) {
                   ) : (
                     <div
                       className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg text-xl"
-                      style={{ backgroundColor: BZ.arena }}
+                      style={{ backgroundColor: info.fondoSuave }}
                     >
                       🐚
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{i.nombre}</p>
-                    <p className="text-sm font-semibold" style={{ color: BZ.aqua }}>
+                    <p className="text-sm font-semibold" style={{ color: info.color }}>
                       {fmtPrecio(i.precio)}
                     </p>
                     <div className="mt-1 flex items-center gap-2">
@@ -359,7 +360,7 @@ function DrawerCarrito({ base, info }: { base: string; info: BazarShellInfo }) {
           <div className="border-t px-4 py-4" style={{ borderColor: info.colorSuave }}>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-gray-500">Subtotal</span>
-              <span className="text-lg font-bold" style={{ color: BZ.azul }}>
+              <span className="text-lg font-bold" style={{ color: info.colorTexto }}>
                 {fmtPrecio(subtotal)}
               </span>
             </div>
@@ -417,9 +418,9 @@ function Popup5({ base, slug, info }: { base: string; slug: string; info: BazarS
         className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white text-center shadow-2xl"
         style={{ border: `2px solid ${BZ.aquaClaro}` }}
       >
-        <div className="px-6 pb-6 pt-8" style={{ backgroundColor: BZ.arena }}>
+        <div className="px-6 pb-6 pt-8" style={{ backgroundColor: info.fondoSuave }}>
           <div className="text-5xl">🐚</div>
-          <h3 className="mt-3 text-2xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
+          <h3 className="mt-3 text-2xl font-extrabold tracking-tight" style={{ color: info.colorTexto }}>
             ¡5% OFF en tu primera compra!
           </h3>
           <p className="mt-2 text-sm text-gray-600">
@@ -460,7 +461,7 @@ function Popup5({ base, slug, info }: { base: string; slug: string; info: BazarS
 function Footer({ info }: { info: BazarShellInfo }) {
   const base = `/sitio/${info.slug}`;
   return (
-    <footer className="mt-12" style={{ backgroundColor: BZ.arena }}>
+    <footer className="mt-12" style={{ backgroundColor: info.fondoSuave }}>
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
@@ -470,12 +471,12 @@ function Footer({ info }: { info: BazarShellInfo }) {
             ) : (
               <span className="text-2xl">{info.emoji}</span>
             )}
-            <span className="font-bold" style={{ color: BZ.azul }}>
+            <span className="font-bold" style={{ color: info.colorTexto }}>
               {info.nombre}
             </span>
           </div>
           <p className="mt-3 text-sm text-gray-600">
-            Bazar de playa nacido en Monte Hermoso. De la costa a tu casa. 🌊
+            {info.descripcion}
           </p>
           <div className="mt-3 flex gap-3 text-sm">
             {info.instagram ? (
@@ -484,7 +485,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium hover:underline"
-                style={{ color: BZ.aqua }}
+                style={{ color: info.color }}
               >
                 📷 @{info.instagram}
               </a>
@@ -495,7 +496,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium hover:underline"
-                style={{ color: BZ.aqua }}
+                style={{ color: info.color }}
               >
                 💬 WhatsApp
               </a>
@@ -503,7 +504,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
           </div>
         </div>
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: BZ.azul }}>
+          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: info.colorTexto }}>
             Navegación
           </h3>
           <ul className="mt-3 space-y-2 text-sm text-gray-600">
@@ -530,7 +531,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
           </ul>
         </div>
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: BZ.azul }}>
+          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: info.colorTexto }}>
             El local
           </h3>
           <ul className="mt-3 space-y-2 text-sm text-gray-600">

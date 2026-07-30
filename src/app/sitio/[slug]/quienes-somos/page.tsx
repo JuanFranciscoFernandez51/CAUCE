@@ -29,28 +29,59 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
   const settings = bazarSettings(tenant);
   const fotos = (settings.fotos ?? []).filter(Boolean);
 
+  // El texto sale del tenant; el del bazar quedó como respaldo de su propia web.
+  const st = (tenant.settings ?? {}) as {
+    nosotros?: { historia?: string; tituloHistoria?: string; parrafos?: string[]; numeros?: { valor: string; texto: string }[] };
+    claim?: string;
+  };
+  const titulo = st.claim ?? "De la costa a tu casa";
+  const historia =
+    st.nosotros?.historia ??
+    `Somos ${info.nombre}: un bazar de playa nacido en Monte Hermoso, con el mar como excusa y la casa linda como oficio.`;
+  const parrafos =
+    st.nosotros?.parrafos ??
+    (st.nosotros?.historia
+      ? []
+      : [
+          "Dos veces al año viajamos a Buenos Aires a recorrer las expos CAFIRA y PRESENTES, donde seleccionamos las colecciones una por una: vajilla gris piedra, textiles neutros, aromas, deco elegante. Si está en la tienda, es porque nos enamoró.",
+          "Después, desde el local en Monte Hermoso, lo despachamos a todo el país. Tu casa con onda de mar, estés donde estés. 🌊",
+        ]);
+  const numeros = st.nosotros?.numeros ?? [];
+  const sucursal =
+    ((tenant.settings as { sucursales?: { direccion?: string }[] } | null)?.sucursales?.[0]?.direccion) ??
+    "Consultanos por WhatsApp";
+
   return (
     <BazarShell info={info}>
       {/* Hero */}
-      <section style={{ backgroundColor: BZ.arena }}>
+      <section style={{ backgroundColor: "#F4F4F2" }}>
         <div className="mx-auto max-w-4xl px-4 py-14 text-center">
-          <div className="text-5xl">🐚</div>
+          <div className="text-5xl">{info.emoji}</div>
           <h1
             className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl"
-            style={{ color: BZ.azul }}
+            style={{ color: info.colorTexto }}
           >
-            De la costa a tu casa
+            {titulo}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-gray-600 sm:text-lg">
-            Somos {info.nombre}: un bazar de playa nacido en Monte Hermoso, con el mar como
-            excusa y la casa linda como oficio.
+            {historia}
           </p>
+          {numeros.length ? (
+            <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3">
+              {numeros.map((n) => (
+                <div key={n.texto} className="rounded-2xl bg-white/70 px-3 py-4">
+                  <p className="text-2xl font-extrabold" style={{ color: info.colorTexto }}>{n.valor}</p>
+                  <p className="mt-0.5 text-xs text-gray-600">{n.texto}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
       {/* Historia */}
       <section className="mx-auto max-w-4xl px-4 py-12">
-        <div className="grid items-center gap-8 md:grid-cols-2">
+        <div className={`grid items-center gap-8 ${fotos[2] ?? fotos[0] ? "md:grid-cols-2" : ""}`}>
           {fotos[2] ?? fotos[0] ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -60,23 +91,15 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
             />
           ) : null}
           <div>
-            <h2 className="text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
-              Elegimos cada pieza
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: info.colorTexto }}>
+              {st.nosotros?.tituloHistoria ?? "Elegimos cada pieza"}
             </h2>
             <p className="mt-3 leading-relaxed text-gray-600">
-              {settings.sobre ??
-                "Todo lo que ves en la tienda pasó por nuestras manos primero."}
+              {settings.sobre ?? st.nosotros?.parrafos?.[0] ?? "Todo lo que ves en la tienda pasó por nuestras manos primero."}
             </p>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Dos veces al año viajamos a Buenos Aires a recorrer las expos{" "}
-              <strong>CAFIRA</strong> y <strong>PRESENTES</strong>, donde seleccionamos las
-              colecciones una por una: vajilla gris piedra, textiles neutros, aromas, deco
-              elegante. Si está en la tienda, es porque nos enamoró.
-            </p>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Después, desde el local en Monte Hermoso, lo despachamos a todo el país. Tu casa
-              con onda de mar, estés donde estés. 🌊
-            </p>
+            {(settings.sobre ? parrafos : parrafos.slice(1)).map((t, i) => (
+              <p key={i} className="mt-3 leading-relaxed text-gray-600">{t}</p>
+            ))}
           </div>
         </div>
 
@@ -102,11 +125,11 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
         <div className="mx-auto grid max-w-4xl gap-6 px-4 py-12 sm:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
             <div className="text-2xl">📍</div>
-            <h3 className="mt-2 font-bold" style={{ color: BZ.azul }}>
+            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
               El local
             </h3>
             <p className="mt-1 text-sm text-gray-600">
-              {info.direccion ?? "Monte Hermoso, Buenos Aires"}
+              {info.direccion ?? sucursal}
             </p>
             {info.horarios ? (
               <p className="mt-1 whitespace-pre-line text-xs text-gray-500">{info.horarios}</p>
@@ -114,7 +137,7 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
           </div>
           <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
             <div className="text-2xl">📷</div>
-            <h3 className="mt-2 font-bold" style={{ color: BZ.azul }}>
+            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
               Instagram
             </h3>
             {info.instagram ? (
@@ -133,7 +156,7 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
           </div>
           <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
             <div className="text-2xl">💬</div>
-            <h3 className="mt-2 font-bold" style={{ color: BZ.azul }}>
+            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
               WhatsApp
             </h3>
             {info.whatsapp ? (

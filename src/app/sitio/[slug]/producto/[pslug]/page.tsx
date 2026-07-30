@@ -174,7 +174,7 @@ export default async function ProductoPage({
 
             <ul className="mt-5 space-y-1 text-sm text-gray-500">
               <li>🚚 Envíos a todo el país</li>
-              <li>🏖️ Retiro sin cargo por el local en Monte Hermoso</li>
+              <li>🏬 Retiro sin cargo por el local{info.direccion ? ` — ${info.direccion}` : ""}</li>
             </ul>
           </div>
         </div>

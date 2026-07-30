@@ -117,7 +117,7 @@ async function main() {
       phone: "0291-4532580",
       email: "fernandeztorronluis@yahoo.com.ar",
       contactName: "Luis Fernández Torrón",
-      modules: ["crm", "caja", "sitio", "catalogo", "pedidos", "proveedores"],
+      modules: ["crm", "ventas", "caja", "sitio"], // el catálogo y los despachos los trae el template
       branding: {
         displayName: "Motos Fernández Repuestos",
         primary: "#F5B301", // amarillo del cartel
@@ -145,7 +145,13 @@ async function main() {
         proveedores: ["Maxsa"],
         nosotros: {
           historia:
-            "Motos Fernández es un local de repuestos y accesorios para motos en Bahía Blanca, atendido por su dueño. Repuestos originales y alternativos para todas las marcas, con la experiencia de quien conoce cada moto que anda por la ciudad.",
+            "Somos un local de repuestos y accesorios para motos en Bahía Blanca, atendido por su dueño. Originales y alternativos para todas las marcas, con la experiencia de quien conoce las motos que andan por la ciudad.",
+          tituloHistoria: "Verificamos antes de despachar",
+          parrafos: [
+            "Trabajamos con las marcas que aguantan: transmisión, frenos, motor, eléctrico, suspensión, neumáticos y lubricantes. Si hay una alternativa que rinde igual y sale menos, te la decimos.",
+            "Antes de despachar verificamos que el repuesto entre en tu moto. Por eso te preguntamos el modelo: preferimos chequear dos veces y que llegue lo que sirve.",
+            "Despachamos a todo el país por Correo Argentino, Andreani y Vía Cargo. Y si estás en Bahía, lo tenés en el día o podés pasar a retirarlo por Brown 1141.",
+          ],
           numeros: [
             { valor: "+2.500", texto: "repuestos en stock" },
             { valor: "Todas", texto: "las marcas" },

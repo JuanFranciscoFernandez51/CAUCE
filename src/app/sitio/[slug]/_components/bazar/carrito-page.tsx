@@ -344,7 +344,7 @@ export function CarritoPage({
                 checked={entrega === "retiro"}
                 onChange={() => setEntrega("retiro")}
               />
-              🏖️ Retiro por el local (Monte Hermoso) — <strong>gratis</strong>
+              🏬 Retiro por el local — <strong>gratis</strong>
             </label>
             <label
               className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm"

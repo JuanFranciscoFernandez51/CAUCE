@@ -25,7 +25,11 @@ export type BazarShellInfo = {
   color: string; // color principal de botones y acentos
   colorSuave: string; // bordes y fondos suaves
   sobreColor: string; // texto que va encima del color principal
+  colorTexto: string; // títulos y precios
+  fondoSuave: string; // franjas y tarjetas
   buscarPlaceholder: string;
+  descripcion: string; // la frase del pie
+  popupDescuento: boolean; // el cartelito de bienvenida con descuento
 };
 
 export type BazarSite = {
@@ -43,6 +47,10 @@ function caraDelTemplate(tenant: Client, primario?: string) {
       colorSuave: "#E5E5E5",
       sobreColor: "#111111",
       buscarPlaceholder: "Buscá por repuesto o código: cadena, pastillas, batería…",
+      colorTexto: "#111111",
+      fondoSuave: "#F4F4F2",
+      descripcion: "Repuestos y accesorios para motos en Bahía Blanca. Originales y alternativos, para todas las marcas. Despachamos a todo el país.",
+      popupDescuento: false,
     };
   return {
     emoji: "🐚",
@@ -50,6 +58,10 @@ function caraDelTemplate(tenant: Client, primario?: string) {
     colorSuave: BZ.aquaClaro,
     sobreColor: "#ffffff",
     buscarPlaceholder: "Buscá vajilla, textiles, deco…",
+    colorTexto: BZ.azul,
+    fondoSuave: BZ.arena,
+    descripcion: "Bazar de playa nacido en Monte Hermoso. De la costa a tu casa. 🌊",
+    popupDescuento: true,
   };
 }
 
@@ -85,6 +97,10 @@ export async function getBazarSite(slug: string): Promise<BazarSite | null> {
       colorSuave: cara.colorSuave,
       sobreColor: cara.sobreColor,
       buscarPlaceholder: cara.buscarPlaceholder,
+      colorTexto: cara.colorTexto,
+      fondoSuave: cara.fondoSuave,
+      descripcion: cara.descripcion,
+      popupDescuento: cara.popupDescuento,
     },
   };
 }
