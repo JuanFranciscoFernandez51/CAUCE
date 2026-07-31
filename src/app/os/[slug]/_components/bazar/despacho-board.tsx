@@ -33,6 +33,7 @@ export type PedidoBoard = {
 const COLUMNAS: { estado: PedidoEstado; titulo: string; tono: string }[] = [
   { estado: "NUEVO", titulo: "🕐 Nuevos (sin pagar)", tono: "border-t-gray-400" },
   { estado: "PAGADO", titulo: "💳 Pagados", tono: "border-t-primary" },
+  { estado: "ESPERANDO", titulo: "⏳ Esperando el producto", tono: "border-t-warning" },
   { estado: "PREPARANDO", titulo: "📦 Preparando", tono: "border-t-warning" },
   { estado: "DESPACHADO", titulo: "🚚 Despachados", tono: "border-t-accent" },
   { estado: "ENTREGADO", titulo: "✅ Entregados", tono: "border-t-success" },
@@ -41,6 +42,7 @@ const COLUMNAS: { estado: PedidoEstado; titulo: string; tono: string }[] = [
 /** El paso siguiente natural de cada estado (botón grande 1-click). */
 const SIGUIENTE: Partial<Record<PedidoEstado, { estado: PedidoEstado; label: string }>> = {
   PAGADO: { estado: "PREPARANDO", label: "→ Preparar" },
+  ESPERANDO: { estado: "PREPARANDO", label: "→ Llegó, preparar" },
   PREPARANDO: { estado: "DESPACHADO", label: "→ Despachar" },
   DESPACHADO: { estado: "ENTREGADO", label: "→ Entregado" },
 };

@@ -166,12 +166,11 @@ export default async function OsLayout({
   }
   // Template repuestos (Fernández Repuestos): misma tienda, con proveedores y stock propio.
   if (tpl === "repuestos") {
+    // Pedidos une la venta con el despacho: es el centro del negocio online.
     opsItems.unshift(
+      { label: "Pedidos", href: `${base}/pedidos`, icon: "🧾" },
       { label: "Repuestos & Stock", href: `${base}/productos`, icon: "🔩" },
-      { label: "Despachos", href: `${base}/despacho`, icon: "📦" },
-      { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
-      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
-      { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" }
     );
   }
   // Template concesionaria (Ri Cars): sus módulos propios primero en Operaciones.
@@ -204,6 +203,18 @@ export default async function OsLayout({
     { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
     ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
+    ...(tpl === "repuestos"
+      ? [
+          {
+            label: "Canales",
+            icon: "📣",
+            items: [
+              { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
+              { label: "Instagram", href: `${base}/instagram`, icon: "📷" },
+            ],
+          },
+        ]
+      : []),
     ...(owner ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
     ...(owner ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
     ...(owner

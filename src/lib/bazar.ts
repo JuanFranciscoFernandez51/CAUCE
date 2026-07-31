@@ -16,6 +16,7 @@ export type BazarItem = {
 export const PEDIDO_ESTADOS = [
   "NUEVO",
   "PAGADO",
+  "ESPERANDO", // pagado, pero el repuesto hay que pedirlo al proveedor
   "PREPARANDO",
   "DESPACHADO",
   "ENTREGADO",
@@ -26,6 +27,7 @@ export type PedidoEstado = (typeof PEDIDO_ESTADOS)[number];
 export const PEDIDO_ESTADO_LABEL: Record<PedidoEstado, string> = {
   NUEVO: "Nuevo",
   PAGADO: "Pagado",
+  ESPERANDO: "Esperando el producto",
   PREPARANDO: "Preparando",
   DESPACHADO: "Despachado",
   ENTREGADO: "Entregado",
@@ -33,7 +35,7 @@ export const PEDIDO_ESTADO_LABEL: Record<PedidoEstado, string> = {
 };
 
 /** Estados que cuentan como "pagados" (el pedido ya generó plata). */
-export const ESTADOS_PAGOS: PedidoEstado[] = ["PAGADO", "PREPARANDO", "DESPACHADO", "ENTREGADO"];
+export const ESTADOS_PAGOS: PedidoEstado[] = ["PAGADO", "ESPERANDO", "PREPARANDO", "DESPACHADO", "ENTREGADO"];
 
 /** "$ 12.900" — plata en enteros ARS, formato es-AR. */
 export function fmtPrecio(n: number): string {

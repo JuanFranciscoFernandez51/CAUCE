@@ -117,7 +117,7 @@ async function main() {
       phone: "0291-4532580",
       email: "fernandeztorronluis@yahoo.com.ar",
       contactName: "Luis Fernández Torrón",
-      modules: ["crm", "ventas", "caja", "sitio"], // el catálogo y los despachos los trae el template
+      modules: ["crm", "caja", "sitio"], // pedidos, stock y proveedores los trae el template
       branding: {
         displayName: "Motos Fernández Repuestos",
         primary: "#F5B301", // amarillo del cartel
