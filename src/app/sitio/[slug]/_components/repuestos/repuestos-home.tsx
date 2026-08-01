@@ -25,14 +25,15 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
 
   const [destacados, masPedidos, porCategoria, totalRepuestos] = await Promise.all([
     db.bazarProducto.findMany({
-      where: { clientId: tenant.id, activo: true, destacado: true },
-      orderBy: { createdAt: "desc" },
+      where: { clientId: tenant.id, activo: true },
+      orderBy: [{ destacado: "desc" }, { visitas: "desc" }, { createdAt: "desc" }],
       take: 8,
       select: BAZAR_CARD_SELECT,
     }),
     db.bazarProducto.findMany({
-      where: { clientId: tenant.id, activo: true, stock: { gt: 0 } },
-      orderBy: [{ vendidos: "desc" }, { visitas: "desc" }],
+      where: { clientId: tenant.id, activo: true },
+      orderBy: [{ vendidos: "desc" }, { createdAt: "asc" }],
+      skip: 8,
       take: 8,
       select: BAZAR_CARD_SELECT,
     }),
@@ -111,11 +112,11 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       </section>
 
       {/* ── Categorías ── */}
-      <section className="t-card">
-        <div className="mx-auto max-w-6xl px-4 py-12">
+      <section className="t-suave">
+        <div className="mx-auto max-w-6xl px-4 py-14">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">Buscá por rubro</h2>
-          <Link href={`${base}/tienda`} className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-[color:var(--t-texto)] sm:text-3xl">Buscá por rubro</h2>
+          <Link href={`${base}/tienda`} className="t-tenue text-sm font-medium transition hover:text-[color:var(--t-texto)]">
             Ver todo el catálogo →
           </Link>
         </div>
@@ -124,10 +125,10 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
             <Link
               key={c}
               href={`${base}/tienda?categoria=${encodeURIComponent(c)}`}
-              className="sube t-suave t-borde group flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm hover:border-[#F5B301]"
+              className="sube t-card t-borde group flex items-center justify-between gap-2 rounded-2xl border px-4 py-4 shadow-sm hover:border-[#F5B301]"
             >
-              <span className="text-sm font-semibold">{c}</span>
-              <span className="t-tenue rounded-full bg-black/[0.06] px-2 py-0.5 text-xs font-semibold transition group-hover:bg-[#F5B301] group-hover:!text-black dark:bg-white/10">
+              <span className="text-sm font-semibold leading-snug text-[color:var(--t-texto)]">{c}</span>
+              <span className="t-tenue shrink-0 rounded-full bg-black/[0.06] px-2 py-0.5 text-xs font-semibold tabular-nums transition group-hover:bg-[#F5B301] group-hover:!text-black dark:bg-white/10">
                 {cuenta.get(c)}
               </span>
             </Link>
@@ -139,7 +140,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       {/* ── Despachos: el foco del negocio ── */}
       <section className="bg-[#0B0B0C] py-12 text-white">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-[color:var(--t-texto)] sm:text-3xl">
             Te lo mandamos a <span className="text-[#F5B301]">donde estés</span>
           </h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -167,7 +168,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       {destacados.length ? (
         <section className="t-card px-4 py-12">
           <div className="mx-auto max-w-6xl">
-          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">Lo que más sale</h2>
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-[color:var(--t-texto)] sm:text-3xl">Lo que más sale</h2>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
             {destacados.map((p) => (
               <ProductoCard key={p.id} slug={tenant.slug} p={aCard(p)} />
@@ -182,8 +183,8 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
         <section className="t-card px-4 pb-14">
           <div className="mx-auto max-w-6xl">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">En stock ahora</h2>
-            <Link href={`${base}/tienda`} className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
+            <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-[color:var(--t-texto)] sm:text-3xl">Recién cargados</h2>
+            <Link href={`${base}/tienda`} className="t-tenue text-sm font-medium transition hover:text-[color:var(--t-texto)]">
               Ver todo →
             </Link>
           </div>

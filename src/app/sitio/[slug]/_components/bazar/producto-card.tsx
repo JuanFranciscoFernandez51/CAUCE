@@ -66,7 +66,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
       </Link>
       <div className="flex flex-1 flex-col p-3">
         <Link href={`/sitio/${slug}/producto/${p.slug}`} className="block flex-1">
-          <p className="line-clamp-2 text-sm font-medium leading-snug" style={{ color: "var(--t-texto)" }}>{p.nombre}</p>
+          <p className="line-clamp-2 text-sm font-medium leading-snug text-[color:var(--t-texto)]" style={{ color: "var(--t-texto)" }}>{p.nombre}</p>
         </Link>
         <div className="mt-2 flex items-end justify-between gap-2">
           <div>
