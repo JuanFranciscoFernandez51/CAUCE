@@ -308,9 +308,17 @@ h3 {
   --t-card: #161b22;
   --t-suave: #11161d;
   --t-texto: #f3f4f6;
-  --t-tenue: #9aa4b2;
-  --t-borde: rgba(255, 255, 255, 0.12);
+  --t-tenue: #aab3c0;
+  --t-borde: rgba(255, 255, 255, 0.14);
 }
+/* En oscuro el buscador del header se fundía con la barra: se despega un paso. */
+.dark .tienda .t-card input,
+.dark .tienda input.t-card {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--t-texto);
+}
+.dark .tienda .t-card input::placeholder { color: rgba(255, 255, 255, 0.42); }
+.dark .tienda header a { color: var(--t-texto); }
 .tienda .t-card { background: var(--t-card); border-color: var(--t-borde); }
 .tienda .t-suave { background: var(--t-suave); }
 .tienda .t-tenue { color: var(--t-tenue); }

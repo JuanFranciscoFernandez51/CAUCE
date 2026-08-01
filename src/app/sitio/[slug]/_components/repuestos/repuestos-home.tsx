@@ -23,7 +23,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
   };
   const envios = st.envios ?? {};
 
-  const [destacados, masPedidos, porCategoria] = await Promise.all([
+  const [destacados, masPedidos, porCategoria, totalRepuestos] = await Promise.all([
     db.bazarProducto.findMany({
       where: { clientId: tenant.id, activo: true, destacado: true },
       orderBy: { createdAt: "desc" },
@@ -41,6 +41,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       where: { clientId: tenant.id, activo: true },
       _count: { _all: true },
     }),
+    db.bazarProducto.count({ where: { clientId: tenant.id, activo: true } }),
   ]);
 
   const cuenta = new Map(porCategoria.map((c) => [c.categoria, c._count._all]));
@@ -50,36 +51,62 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
   return (
     <BazarShell info={info}>
       {/* ── Hero: el buscador manda ── */}
-      <section className="relative overflow-hidden bg-[#0B0B0C]">
+      <section className="relative isolate overflow-hidden bg-[#0A0A0B]">
+        {/* profundidad: dos luces cálidas y una trama fina, para que no sea un negro plano */}
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.07]"
-          style={{ backgroundImage: `radial-gradient(${AMARILLO} 1px, transparent 1px)`, backgroundSize: "22px 22px" }}
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(70% 55% at 78% 8%, rgba(245,179,1,.20), transparent 62%), radial-gradient(50% 40% at 8% 92%, rgba(245,179,1,.10), transparent 65%)",
+          }}
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:py-16 md:grid-cols-[1.05fr_1fr]">
-          <div>
-            <p className="inline-flex items-center gap-1.5 rounded-full bg-[#F5B301] px-3 py-1 text-xs font-bold uppercase tracking-wide text-black">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.045]"
+          style={{ backgroundImage: `radial-gradient(#F5B301 1px, transparent 1px)`, backgroundSize: "26px 26px" }}
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-b from-transparent to-black/60" />
+
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1fr_460px]">
+          <div className="aparece">
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-[#F5B301] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black">
               Repuestos y accesorios para motos
             </p>
-            <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[56px]">
+            <h1 className="mt-5 font-display text-[42px] font-semibold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-[64px]">
               El repuesto de tu moto,
-              <span className="block text-[#F5B301]">sin dar vueltas</span>
+              <span className="mt-1 block bg-gradient-to-r from-[#F5B301] to-[#FFD666] bg-clip-text text-transparent">
+                sin dar vueltas
+              </span>
             </h1>
-            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/70">
+            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/65 sm:text-base">
               Originales y alternativos para todas las marcas. Decinos qué moto tenés y te
               mostramos lo que le entra. Despachamos a todo el país.
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {["Envíos a todo el país", "Originales y alternativos", "Todas las marcas", "Atendido por su dueño"].map((t) => (
-                <span key={t} className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white/75">
+            <div className="mt-7 grid max-w-md grid-cols-3 gap-3 border-t border-white/10 pt-5">
+              {[
+                { v: totalRepuestos.toLocaleString("es-AR"), t: "repuestos" },
+                { v: "59", t: "modelos de moto" },
+                { v: "24 h", t: "para despachar" },
+              ].map((d) => (
+                <div key={d.t}>
+                  <p className="font-display text-2xl font-semibold text-white sm:text-[26px]">{d.v}</p>
+                  <p className="text-[11px] uppercase tracking-wide text-white/40">{d.t}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {["Envíos a todo el país", "Originales y alternativos", "Atendido por su dueño"].map((t) => (
+                <span key={t} className="rounded-full border border-white/12 px-3 py-1.5 text-xs font-medium text-white/70">
                   ✓ {t}
                 </span>
               ))}
             </div>
           </div>
 
-          <BuscadorMoto base={base} />
+          <BuscadorMoto base={base} total={totalRepuestos} />
         </div>
       </section>
 
