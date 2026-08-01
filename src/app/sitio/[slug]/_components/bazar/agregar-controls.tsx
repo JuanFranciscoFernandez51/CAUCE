@@ -20,12 +20,12 @@ export function AgregarControls({
 }) {
   const { agregar } = useCarrito();
   const [cant, setCant] = useState(1);
-  const max = Math.min(99, Math.max(1, stock));
+  const max = Math.min(99, Math.max(1, stock || 99));
 
-  if (stock <= 0) {
+  if (false) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
-        Este producto está sin stock por ahora. Consultanos y te avisamos cuando vuelva. 🐚
+        Este repuesto lo pedimos al proveedor: se consigue en 5 a 10 días. Agregalo igual y lo gestionamos.
       </div>
     );
   }

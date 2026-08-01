@@ -8,12 +8,12 @@ import { BZ } from "./bazar-shell";
 
 /**
  * Card de producto de la tienda: foto, badges (NUEVO / ¡Últimas unidades! /
- * Sin stock), precio con oferta tachada y "Agregar" rápido sin salir de la grilla.
+ * A pedido), precio con oferta tachada y "Agregar" rápido sin salir de la grilla.
  */
 export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
   const { agregar } = useCarrito();
   const vigente = precioVigente(p);
-  const sinStock = p.stock <= 0;
+  const aPedido = p.stock <= 0; // catálogo del proveedor: se consigue a pedido
   const ultimas = p.stock >= 1 && p.stock <= 3;
 
   return (
@@ -29,13 +29,13 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               src={p.foto}
               alt={p.nombre}
               loading="lazy"
-              className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${sinStock ? "opacity-50 grayscale" : ""}`}
+              className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${aPedido ? "opacity-50 grayscale" : ""}`}
             />
           ) : (
             <div className="emoji-tpl flex h-full w-full items-center justify-center text-4xl" aria-hidden />
           )}
           <div className="absolute left-2 top-2 flex flex-col gap-1">
-            {p.esNuevo && !sinStock ? (
+            {p.esNuevo && !aPedido ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
                 style={{ backgroundColor: "var(--tpl-oscuro, " + BZ.azul + ")" }}
@@ -48,12 +48,12 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
                 ¡Últimas unidades!
               </span>
             ) : null}
-            {sinStock ? (
+            {aPedido ? (
               <span className="rounded-full bg-gray-400 px-2 py-0.5 text-[11px] font-bold text-white">
-                Sin stock
+                A pedido
               </span>
             ) : null}
-            {p.precioOferta != null && p.precioOferta < p.precio && !sinStock ? (
+            {p.precioOferta != null && p.precioOferta < p.precio && !aPedido ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
                 style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
@@ -77,7 +77,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               {fmtPrecio(vigente)}
             </p>
           </div>
-          {!sinStock ? (
+          {!aPedido ? (
             <button
               type="button"
               onClick={() =>

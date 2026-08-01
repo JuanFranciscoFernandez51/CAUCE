@@ -99,7 +99,10 @@ export default async function TiendaPage({
       : {}),
   };
 
-  const [total, productos] = await Promise.all([
+  // Con una moto elegida, los rubros que se ofrecen son los de esa moto.
+  const dondeRubros = { clientId: tenant.id, activo: true, ...(moto ? { compatibilidades: { has: moto } } : {}) };
+
+  const [total, productos, rubrosRaw] = await Promise.all([
     db.bazarProducto.count({ where }),
     db.bazarProducto.findMany({
       where,
@@ -108,7 +111,14 @@ export default async function TiendaPage({
       take: POR_PAGINA,
       select: BAZAR_CARD_SELECT,
     }),
+    db.bazarProducto.groupBy({
+      by: ["categoria"],
+      where: dondeRubros,
+      _count: { _all: true },
+      orderBy: { _count: { categoria: "desc" } },
+    }),
   ]);
+  const rubros = rubrosRaw.map((r) => r.categoria);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
   /** Arma la URL de la tienda conservando los filtros, pisando lo indicado. */
@@ -159,21 +169,21 @@ export default async function TiendaPage({
             className="whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
             style={
               !categoria
-                ? { backgroundColor: BZ.aqua, borderColor: BZ.aqua, color: "#fff" }
-                : { borderColor: BZ.aquaClaro }
+                ? { backgroundColor: info.color, borderColor: info.color, color: info.sobreColor }
+                : { borderColor: "var(--t-borde)" }
             }
           >
             Todo
           </Link>
-          {info.categorias.map((c) => (
+          {rubros.map((c) => (
             <Link
               key={c}
               href={url({ categoria: c, pagina: undefined })}
               className="whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
               style={
                 categoria === c
-                  ? { backgroundColor: BZ.aqua, borderColor: BZ.aqua, color: "#fff" }
-                  : { borderColor: BZ.aquaClaro }
+                  ? { backgroundColor: info.color, borderColor: info.color, color: info.sobreColor }
+                  : { borderColor: "var(--t-borde)" }
               }
             >
               {c}
