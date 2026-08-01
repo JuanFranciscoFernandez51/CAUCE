@@ -52,7 +52,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
   return (
     <BazarShell info={info}>
       {/* ── Hero: el buscador manda ── */}
-      <section className="relative isolate overflow-hidden bg-[#0A0A0B]">
+      <section className="hero relative isolate overflow-hidden">
         {/* profundidad: dos luces cálidas y una trama fina, para que no sea un negro plano */}
         <div
           aria-hidden
@@ -67,40 +67,40 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
           className="pointer-events-none absolute inset-0 -z-10 opacity-[0.045]"
           style={{ backgroundImage: `radial-gradient(#F5B301 1px, transparent 1px)`, backgroundSize: "26px 26px" }}
         />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-b from-transparent to-black/60" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-b from-transparent to-black/10 dark:to-black/60" />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1fr_460px]">
           <div className="aparece">
             <p className="inline-flex items-center gap-1.5 rounded-full bg-[#F5B301] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black">
               Repuestos y accesorios para motos
             </p>
-            <h1 className="mt-5 font-display text-[42px] font-semibold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-[64px]">
+            <h1 className="mt-5 font-display text-[42px] font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[64px]">
               El repuesto de tu moto,
               <span className="mt-1 block bg-gradient-to-r from-[#F5B301] to-[#FFD666] bg-clip-text text-transparent">
                 sin dar vueltas
               </span>
             </h1>
-            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/65 sm:text-base">
+            <p className="hero-tenue mt-5 max-w-lg text-[15px] leading-relaxed sm:text-base">
               Originales y alternativos para todas las marcas. Decinos qué moto tenés y te
               mostramos lo que le entra. Despachamos a todo el país.
             </p>
 
-            <div className="mt-7 grid max-w-md grid-cols-3 gap-3 border-t border-white/10 pt-5">
+            <div className="hero-linea mt-7 grid max-w-md grid-cols-3 gap-3 border-t pt-5">
               {[
                 { v: totalRepuestos.toLocaleString("es-AR"), t: "repuestos" },
                 { v: "59", t: "modelos de moto" },
                 { v: "24 h", t: "para despachar" },
               ].map((d) => (
                 <div key={d.t}>
-                  <p className="font-display text-2xl font-semibold text-white sm:text-[26px]">{d.v}</p>
-                  <p className="text-[11px] uppercase tracking-wide text-white/40">{d.t}</p>
+                  <p className="font-display text-2xl font-semibold sm:text-[26px]">{d.v}</p>
+                  <p className="hero-tenue text-[11px] uppercase tracking-wide opacity-80">{d.t}</p>
                 </div>
               ))}
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
               {["Envíos a todo el país", "Originales y alternativos", "Atendido por su dueño"].map((t) => (
-                <span key={t} className="rounded-full border border-white/12 px-3 py-1.5 text-xs font-medium text-white/70">
+                <span key={t} className="hero-linea hero-tenue rounded-full border px-3 py-1.5 text-xs font-medium">
                   ✓ {t}
                 </span>
               ))}
@@ -138,9 +138,9 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       </section>
 
       {/* ── Despachos: el foco del negocio ── */}
-      <section className="bg-[#0B0B0C] py-12 text-white">
+      <section className="hero py-14">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Te lo mandamos a <span className="text-[#F5B301]">donde estés</span>
           </h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -149,15 +149,15 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
               { t: "Envío en Bahía Blanca", d: "Llega en el día o al siguiente", p: plata(envios.bahiaBlanca) },
               { t: "Envío al interior", d: (envios.correos ?? []).join(" · ") || "Correo Argentino", p: plata(envios.interior) },
             ].map((e) => (
-              <div key={e.t} className="sube rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+              <div key={e.t} className="sube hero-linea rounded-2xl border bg-black/[0.03] p-5 dark:bg-white/[0.04]">
                 <p className="text-sm font-bold text-[#F5B301]">{e.t}</p>
-                <p className="mt-1.5 text-sm text-white/65">{e.d}</p>
+                <p className="hero-tenue mt-1.5 text-sm">{e.d}</p>
                 {e.p ? <p className="mt-3 text-lg font-semibold">{e.p}</p> : null}
               </div>
             ))}
           </div>
           {envios.gratisDesde ? (
-            <p className="mt-4 text-sm text-white/60">
+            <p className="hero-tenue mt-4 text-sm">
               Envío bonificado en compras desde <strong className="text-[#F5B301]">{plata(envios.gratisDesde)}</strong>.
             </p>
           ) : null}

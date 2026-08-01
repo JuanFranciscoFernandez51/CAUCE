@@ -89,7 +89,7 @@ function Header({ info }: { info: BazarShellInfo }) {
 
   return (
     <header
-      className="t-card t-borde sticky top-0 z-40 border-b backdrop-blur-md"
+      className="barra sticky top-0 z-40 border-b"
       
     >
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">

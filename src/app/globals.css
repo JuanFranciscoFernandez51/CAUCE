@@ -294,6 +294,13 @@ h3 {
    de noche, para que el toggle funcione en todo el sitio público.
    ════════════════════════════════════════════════════════════ */
 .tienda {
+  /* El hero y las franjas anchas también siguen el modo: o todo claro o todo
+     oscuro, nunca mezclado. El amarillo de la marca se mantiene en los dos. */
+  --t-hero: #f7f7f5;
+  --t-hero-texto: #111111;
+  --t-hero-tenue: rgba(17, 17, 17, 0.62);
+  --t-hero-linea: rgba(17, 17, 17, 0.1);
+  --t-panel: rgba(255, 255, 255, 0.85);
   --t-fondo: #ffffff;
   --t-card: #ffffff;
   --t-suave: var(--tpl-suave, #f4f4f2);
@@ -304,6 +311,11 @@ h3 {
   color: var(--t-texto);
 }
 .dark .tienda {
+  --t-hero: #0a0a0b;
+  --t-hero-texto: #ffffff;
+  --t-hero-tenue: rgba(255, 255, 255, 0.62);
+  --t-hero-linea: rgba(255, 255, 255, 0.12);
+  --t-panel: rgba(20, 20, 20, 0.85);
   --t-fondo: #0d1117;
   --t-card: #161b22;
   --t-suave: #11161d;
@@ -335,3 +347,15 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .tienda .aparece, .tienda .sube { animation: none; transition: none; }
 }
+
+/* Barra superior: vidrio esmerilado y sombra suave, como la tarjeta del buscador. */
+.tienda .barra {
+  background: var(--t-panel);
+  border-color: var(--t-borde);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.55);
+}
+.tienda .hero { background: var(--t-hero); color: var(--t-hero-texto); }
+.tienda .hero-tenue { color: var(--t-hero-tenue); }
+.tienda .hero-linea { border-color: var(--t-hero-linea); }
