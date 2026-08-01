@@ -19,10 +19,10 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
   return (
     <div
       className="group relative flex flex-col overflow-hidden rounded-2xl border t-card transition-shadow hover:shadow-lg"
-      style={{ borderColor: "#E8F2F1" }}
+      style={{ borderColor: "var(--t-borde)" }}
     >
       <Link href={`/sitio/${slug}/producto/${p.slug}`} className="sube block">
-        <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: BZ.arena }}>
+        <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: "var(--t-suave)" }}>
           {p.foto ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -38,7 +38,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             {p.esNuevo && !aPedido ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: "var(--tpl-oscuro, " + BZ.azul + ")" }}
+                style={{ backgroundColor: "var(--t-texto)", color: "var(--t-fondo)" }}
               >
                 NUEVO
               </span>
@@ -66,14 +66,14 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
       </Link>
       <div className="flex flex-1 flex-col p-3">
         <Link href={`/sitio/${slug}/producto/${p.slug}`} className="block flex-1">
-          <p className="line-clamp-2 text-sm font-medium leading-snug">{p.nombre}</p>
+          <p className="line-clamp-2 text-sm font-medium leading-snug" style={{ color: "var(--t-texto)" }}>{p.nombre}</p>
         </Link>
         <div className="mt-2 flex items-end justify-between gap-2">
           <div>
             {p.precioOferta != null && p.precioOferta < p.precio ? (
               <p className="text-xs t-tenue line-through">{fmtPrecio(p.precio)}</p>
             ) : null}
-            <p className="text-base font-bold" style={{ color: "var(--tpl-texto, " + BZ.azul + ")" }}>
+            <p className="text-base font-bold" style={{ color: "var(--t-texto)" }}>
               {fmtPrecio(vigente)}
             </p>
           </div>

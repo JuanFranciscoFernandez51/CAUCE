@@ -144,7 +144,7 @@ export default async function TiendaPage({
   return (
     <BazarShell info={info}>
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
+        <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--t-texto)" }}>
           Tienda
         </h1>
         <p className="mt-1 text-sm t-tenue">
@@ -195,7 +195,7 @@ export default async function TiendaPage({
         <form
           method="get"
           className="mt-4 flex flex-wrap items-end gap-3 rounded-2xl border p-4"
-          style={{ borderColor: "#E8F2F1", backgroundColor: "#FBF9F4" }}
+          style={{ borderColor: "var(--t-borde)", backgroundColor: "var(--t-suave)" }}
         >
           {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
           <div className="min-w-40 flex-1">
@@ -207,7 +207,7 @@ export default async function TiendaPage({
               defaultValue={q}
               placeholder="Nombre o código…"
               className="h-10 w-full rounded-xl border t-card px-3 text-sm outline-none"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
           </div>
           <div>
@@ -221,7 +221,7 @@ export default async function TiendaPage({
               defaultValue={sp.min ?? ""}
               placeholder="$ mín"
               className="h-10 w-28 rounded-xl border t-card px-3 text-sm outline-none"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
           </div>
           <div>
@@ -235,7 +235,7 @@ export default async function TiendaPage({
               defaultValue={sp.max ?? ""}
               placeholder="$ máx"
               className="h-10 w-28 rounded-xl border t-card px-3 text-sm outline-none"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
           </div>
           <div>
@@ -246,7 +246,7 @@ export default async function TiendaPage({
               name="orden"
               defaultValue={orden}
               className="h-10 rounded-xl border t-card px-3 text-sm outline-none"
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             >
               {Object.entries(ORDEN_LABEL).map(([v, l]) => (
                 <option key={v} value={v}>
@@ -262,7 +262,7 @@ export default async function TiendaPage({
           <button
             type="submit"
             className="h-10 rounded-full px-5 text-sm font-semibold text-white"
-            style={{ backgroundColor: BZ.azul }}
+            style={{ backgroundColor: "var(--t-texto)", color: "var(--t-fondo)" }}
           >
             Aplicar
           </button>
@@ -296,7 +296,7 @@ export default async function TiendaPage({
               <Link
                 href={url({ pagina: String(pagina - 1) })}
                 className="rounded-full border px-4 py-2 text-sm font-medium"
-                style={{ borderColor: BZ.aquaClaro }}
+                style={{ borderColor: "var(--t-borde)" }}
               >
                 ← Anterior
               </Link>
@@ -308,7 +308,7 @@ export default async function TiendaPage({
               <Link
                 href={url({ pagina: String(pagina + 1) })}
                 className="rounded-full border px-4 py-2 text-sm font-medium"
-                style={{ borderColor: BZ.aquaClaro }}
+                style={{ borderColor: "var(--t-borde)" }}
               >
                 Siguiente →
               </Link>
