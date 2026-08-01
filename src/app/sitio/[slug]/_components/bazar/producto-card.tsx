@@ -18,10 +18,10 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl border bg-white transition-shadow hover:shadow-lg"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border t-card transition-shadow hover:shadow-lg"
       style={{ borderColor: "#E8F2F1" }}
     >
-      <Link href={`/sitio/${slug}/producto/${p.slug}`} className="block">
+      <Link href={`/sitio/${slug}/producto/${p.slug}`} className="sube block">
         <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: BZ.arena }}>
           {p.foto ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -71,7 +71,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
         <div className="mt-2 flex items-end justify-between gap-2">
           <div>
             {p.precioOferta != null && p.precioOferta < p.precio ? (
-              <p className="text-xs text-gray-400 line-through">{fmtPrecio(p.precio)}</p>
+              <p className="text-xs t-tenue line-through">{fmtPrecio(p.precio)}</p>
             ) : null}
             <p className="text-base font-bold" style={{ color: "var(--tpl-texto, " + BZ.azul + ")" }}>
               {fmtPrecio(vigente)}

@@ -287,3 +287,43 @@ h3 {
 .emoji-tpl::before {
   content: var(--tpl-emoji, "📦");
 }
+
+/* ════════════════════════════════════════════════════════════
+   TIENDA (bazar / repuestos): el shell es compartido, así que el tema
+   vive en variables. El template pinta las claras y acá va su versión
+   de noche, para que el toggle funcione en todo el sitio público.
+   ════════════════════════════════════════════════════════════ */
+.tienda {
+  --t-fondo: #ffffff;
+  --t-card: #ffffff;
+  --t-suave: var(--tpl-suave, #f4f4f2);
+  --t-texto: var(--tpl-texto, #111111);
+  --t-tenue: #6b7280;
+  --t-borde: rgba(0, 0, 0, 0.1);
+  background: var(--t-fondo);
+  color: var(--t-texto);
+}
+.dark .tienda {
+  --t-fondo: #0d1117;
+  --t-card: #161b22;
+  --t-suave: #11161d;
+  --t-texto: #f3f4f6;
+  --t-tenue: #9aa4b2;
+  --t-borde: rgba(255, 255, 255, 0.12);
+}
+.tienda .t-card { background: var(--t-card); border-color: var(--t-borde); }
+.tienda .t-suave { background: var(--t-suave); }
+.tienda .t-tenue { color: var(--t-tenue); }
+.tienda .t-borde { border-color: var(--t-borde); }
+
+/* Aparición suave al entrar en pantalla (sin librerías). */
+.tienda .aparece { animation: aparecer 0.65s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.tienda .sube { transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.2s ease; }
+.tienda .sube:hover { transform: translateY(-3px); box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.35); }
+@media (prefers-reduced-motion: reduce) {
+  .tienda .aparece, .tienda .sube { animation: none; transition: none; }
+}

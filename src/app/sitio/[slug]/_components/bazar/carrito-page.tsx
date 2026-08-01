@@ -185,7 +185,7 @@ export function CarritoPage({
         <h1 className="mt-4 text-2xl font-bold" style={{ color: BZ.azul }}>
           Tu carrito está vacío
         </h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm t-tenue">
           Descubrí la tienda y llenalo de cosas lindas.
         </p>
         <Link
@@ -263,7 +263,7 @@ export function CarritoPage({
                     <button
                       type="button"
                       onClick={() => quitar(i.productoId)}
-                      className="ml-3 text-xs text-gray-400 hover:text-red-500"
+                      className="ml-3 text-xs t-tenue hover:text-red-500"
                     >
                       Quitar
                     </button>
@@ -309,7 +309,7 @@ export function CarritoPage({
               </p>
             ) : null}
             {!cuenta ? (
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs t-tenue">
                 💡 Con una cuenta nueva tenés 10% OFF en tu primera compra —{" "}
                 <Link href={`${base}/cuenta`} className="font-semibold underline">
                   crear cuenta
@@ -429,7 +429,7 @@ export function CarritoPage({
 
           <div className="mt-4 space-y-1.5 border-t pt-4 text-sm" style={{ borderColor: "#EFF6F5" }}>
             <div className="flex justify-between">
-              <span className="text-gray-500">Subtotal</span>
+              <span className="t-tenue">Subtotal</span>
               <span>{fmtPrecio(subtotal)}</span>
             </div>
             {descuento.tipo ? (
@@ -441,7 +441,7 @@ export function CarritoPage({
               </div>
             ) : null}
             <div className="flex justify-between">
-              <span className="text-gray-500">Envío</span>
+              <span className="t-tenue">Envío</span>
               <span>{entrega === "retiro" ? "Gratis" : envio > 0 ? fmtPrecio(envio) : "A coordinar"}</span>
             </div>
             <div
@@ -467,7 +467,7 @@ export function CarritoPage({
           >
             {enviando ? "Procesando…" : "Pagar con Mercado Pago"}
           </button>
-          <p className="mt-2 text-center text-xs text-gray-400">
+          <p className="mt-2 text-center text-xs t-tenue">
             Si el pago online falla, el pedido queda registrado y lo coordinamos por WhatsApp.
           </p>
         </form>
@@ -483,7 +483,7 @@ function Exito({ titulo, children }: { titulo: string; children: React.ReactNode
       <h1 className="mt-4 text-2xl font-extrabold" style={{ color: BZ.azul }}>
         {titulo}
       </h1>
-      <div className="mt-3 text-sm text-gray-600">{children}</div>
+      <div className="mt-3 text-sm t-tenue">{children}</div>
     </div>
   );
 }

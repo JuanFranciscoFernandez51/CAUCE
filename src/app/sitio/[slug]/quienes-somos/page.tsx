@@ -59,19 +59,19 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
           <div className="text-5xl">{info.emoji}</div>
           <h1
             className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl"
-            style={{ color: info.colorTexto }}
+            style={{ color: "var(--t-texto)" }}
           >
             {titulo}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-600 sm:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-base t-tenue sm:text-lg">
             {historia}
           </p>
           {numeros.length ? (
             <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3">
               {numeros.map((n) => (
                 <div key={n.texto} className="rounded-2xl bg-white/70 px-3 py-4">
-                  <p className="text-2xl font-extrabold" style={{ color: info.colorTexto }}>{n.valor}</p>
-                  <p className="mt-0.5 text-xs text-gray-600">{n.texto}</p>
+                  <p className="text-2xl font-extrabold" style={{ color: "var(--t-texto)" }}>{n.valor}</p>
+                  <p className="mt-0.5 text-xs t-tenue">{n.texto}</p>
                 </div>
               ))}
             </div>
@@ -91,14 +91,14 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
             />
           ) : null}
           <div>
-            <h2 className="text-2xl font-bold tracking-tight" style={{ color: info.colorTexto }}>
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
               {st.nosotros?.tituloHistoria ?? "Elegimos cada pieza"}
             </h2>
-            <p className="mt-3 leading-relaxed text-gray-600">
+            <p className="mt-3 leading-relaxed t-tenue">
               {settings.sobre ?? st.nosotros?.parrafos?.[0] ?? "Todo lo que ves en la tienda pasó por nuestras manos primero."}
             </p>
             {(settings.sobre ? parrafos : parrafos.slice(1)).map((t, i) => (
-              <p key={i} className="mt-3 leading-relaxed text-gray-600">{t}</p>
+              <p key={i} className="mt-3 leading-relaxed t-tenue">{t}</p>
             ))}
           </div>
         </div>
@@ -123,21 +123,21 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
       {/* Datos de contacto */}
       <section style={{ backgroundColor: "#FBF9F4" }}>
         <div className="mx-auto grid max-w-4xl gap-6 px-4 py-12 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+          <div className="rounded-2xl t-card p-5 text-center shadow-sm">
             <div className="text-2xl">📍</div>
-            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
+            <h3 className="mt-2 font-bold" style={{ color: "var(--t-texto)" }}>
               El local
             </h3>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm t-tenue">
               {info.direccion ?? sucursal}
             </p>
             {info.horarios ? (
-              <p className="mt-1 whitespace-pre-line text-xs text-gray-500">{info.horarios}</p>
+              <p className="mt-1 whitespace-pre-line text-xs t-tenue">{info.horarios}</p>
             ) : null}
           </div>
-          <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+          <div className="rounded-2xl t-card p-5 text-center shadow-sm">
             <div className="text-2xl">📷</div>
-            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
+            <h3 className="mt-2 font-bold" style={{ color: "var(--t-texto)" }}>
               Instagram
             </h3>
             {info.instagram ? (
@@ -151,12 +151,12 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
                 @{info.instagram}
               </a>
             ) : (
-              <p className="mt-1 text-sm text-gray-500">Muy pronto</p>
+              <p className="mt-1 text-sm t-tenue">Muy pronto</p>
             )}
           </div>
-          <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+          <div className="rounded-2xl t-card p-5 text-center shadow-sm">
             <div className="text-2xl">💬</div>
-            <h3 className="mt-2 font-bold" style={{ color: info.colorTexto }}>
+            <h3 className="mt-2 font-bold" style={{ color: "var(--t-texto)" }}>
               WhatsApp
             </h3>
             {info.whatsapp ? (

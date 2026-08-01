@@ -84,10 +84,10 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       </section>
 
       {/* ── Categorías ── */}
-      <section className="bg-white text-[#111111]">
+      <section className="t-card">
         <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Buscá por rubro</h2>
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">Buscá por rubro</h2>
           <Link href={`${base}/tienda`} className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
             Ver todo el catálogo →
           </Link>
@@ -97,10 +97,10 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
             <Link
               key={c}
               href={`${base}/tienda?categoria=${encodeURIComponent(c)}`}
-              className="group flex items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-4 text-[#111111] shadow-sm transition hover:border-[#F5B301] hover:shadow-md"
+              className="sube t-suave t-borde group flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm hover:border-[#F5B301]"
             >
               <span className="text-sm font-semibold">{c}</span>
-              <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-xs font-semibold text-black/55 transition group-hover:bg-[#F5B301] group-hover:text-black">
+              <span className="t-tenue rounded-full bg-black/[0.06] px-2 py-0.5 text-xs font-semibold transition group-hover:bg-[#F5B301] group-hover:!text-black dark:bg-white/10">
                 {cuenta.get(c)}
               </span>
             </Link>
@@ -112,7 +112,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       {/* ── Despachos: el foco del negocio ── */}
       <section className="bg-[#0B0B0C] py-12 text-white">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Te lo mandamos a <span className="text-[#F5B301]">donde estés</span>
           </h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -121,7 +121,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
               { t: "Envío en Bahía Blanca", d: "Llega en el día o al siguiente", p: plata(envios.bahiaBlanca) },
               { t: "Envío al interior", d: (envios.correos ?? []).join(" · ") || "Correo Argentino", p: plata(envios.interior) },
             ].map((e) => (
-              <div key={e.t} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+              <div key={e.t} className="sube rounded-2xl border border-white/10 bg-white/[0.04] p-5">
                 <p className="text-sm font-bold text-[#F5B301]">{e.t}</p>
                 <p className="mt-1.5 text-sm text-white/65">{e.d}</p>
                 {e.p ? <p className="mt-3 text-lg font-semibold">{e.p}</p> : null}
@@ -138,9 +138,9 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
 
       {/* ── Destacados ── */}
       {destacados.length ? (
-        <section className="bg-white px-4 py-12 text-[#111111]">
+        <section className="t-card px-4 py-12">
           <div className="mx-auto max-w-6xl">
-          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Lo que más sale</h2>
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">Lo que más sale</h2>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
             {destacados.map((p) => (
               <ProductoCard key={p.id} slug={tenant.slug} p={aCard(p)} />
@@ -152,10 +152,10 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
 
       {/* ── Más pedidos ── */}
       {masPedidos.length ? (
-        <section className="bg-white px-4 pb-14 text-[#111111]">
+        <section className="t-card px-4 pb-14">
           <div className="mx-auto max-w-6xl">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">En stock ahora</h2>
+            <h2 className="aparece font-display text-2xl font-semibold tracking-tight sm:text-3xl">En stock ahora</h2>
             <Link href={`${base}/tienda`} className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
               Ver todo →
             </Link>

@@ -51,7 +51,7 @@ export function BuscadorMoto({ base }: { base: string }) {
         >
           <option value="">{marca ? "Modelo…" : "Elegí la marca"}</option>
           {modelos.map((m) => (
-            <option key={m.modelo} value={nombreMoto(m)}>{m.modelo}</option>
+            <option key={m.nombre} value={nombreMoto(m)}>{m.modelo}</option>
           ))}
         </select>
 

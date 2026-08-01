@@ -137,7 +137,7 @@ export default async function TiendaPage({
         <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
           Tienda
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm t-tenue">
           {total.toLocaleString("es-AR")} producto{total === 1 ? "" : "s"}
           {moto ? (
             <>
@@ -189,19 +189,19 @@ export default async function TiendaPage({
         >
           {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
           <div className="min-w-40 flex-1">
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide t-tenue">
               Buscar
             </label>
             <input
               name="q"
               defaultValue={q}
               placeholder="Nombre o código…"
-              className="h-10 w-full rounded-xl border bg-white px-3 text-sm outline-none"
+              className="h-10 w-full rounded-xl border t-card px-3 text-sm outline-none"
               style={{ borderColor: BZ.aquaClaro }}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide t-tenue">
               Precio desde
             </label>
             <input
@@ -210,12 +210,12 @@ export default async function TiendaPage({
               min={0}
               defaultValue={sp.min ?? ""}
               placeholder="$ mín"
-              className="h-10 w-28 rounded-xl border bg-white px-3 text-sm outline-none"
+              className="h-10 w-28 rounded-xl border t-card px-3 text-sm outline-none"
               style={{ borderColor: BZ.aquaClaro }}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide t-tenue">
               Hasta
             </label>
             <input
@@ -224,18 +224,18 @@ export default async function TiendaPage({
               min={0}
               defaultValue={sp.max ?? ""}
               placeholder="$ máx"
-              className="h-10 w-28 rounded-xl border bg-white px-3 text-sm outline-none"
+              className="h-10 w-28 rounded-xl border t-card px-3 text-sm outline-none"
               style={{ borderColor: BZ.aquaClaro }}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide t-tenue">
               Ordenar por
             </label>
             <select
               name="orden"
               defaultValue={orden}
-              className="h-10 rounded-xl border bg-white px-3 text-sm outline-none"
+              className="h-10 rounded-xl border t-card px-3 text-sm outline-none"
               style={{ borderColor: BZ.aquaClaro }}
             >
               {Object.entries(ORDEN_LABEL).map(([v, l]) => (
@@ -291,7 +291,7 @@ export default async function TiendaPage({
                 ← Anterior
               </Link>
             ) : null}
-            <span className="px-3 text-sm text-gray-500">
+            <span className="px-3 text-sm t-tenue">
               Página {pagina} de {paginas}
             </span>
             {pagina < paginas ? (

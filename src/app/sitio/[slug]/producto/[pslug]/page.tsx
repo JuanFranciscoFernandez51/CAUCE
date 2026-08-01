@@ -80,7 +80,7 @@ export default async function ProductoPage({
       <VistaPing slug={tenant.slug} productoId={producto.id} />
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Migas */}
-        <nav className="mb-5 text-sm text-gray-500">
+        <nav className="mb-5 text-sm t-tenue">
           <Link href={base} className="hover:underline">
             Inicio
           </Link>
@@ -115,12 +115,12 @@ export default async function ProductoPage({
                 {fmtPrecio(vigente)}
               </p>
               {enOferta ? (
-                <p className="pb-1 text-lg text-gray-400 line-through">
+                <p className="pb-1 text-lg t-tenue line-through">
                   {fmtPrecio(producto.precio)}
                 </p>
               ) : null}
             </div>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm t-tenue">
               3 cuotas sin recargo de <strong>{fmtCuota(vigente, 3)}</strong> · 6 cuotas de{" "}
               {fmtCuota(vigente, 6)}
             </p>
@@ -135,7 +135,7 @@ export default async function ProductoPage({
                   ⚠ ¡Últimas {producto.stock} unidad{producto.stock === 1 ? "" : "es"}!
                 </span>
               ) : (
-                <span className="font-medium text-gray-400">Sin stock</span>
+                <span className="font-medium t-tenue">Sin stock</span>
               )}
             </p>
 
@@ -166,13 +166,13 @@ export default async function ProductoPage({
                 <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: BZ.azul }}>
                   Descripción
                 </h2>
-                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-600">
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed t-tenue">
                   {producto.descripcion}
                 </p>
               </div>
             ) : null}
 
-            <ul className="mt-5 space-y-1 text-sm text-gray-500">
+            <ul className="mt-5 space-y-1 text-sm t-tenue">
               <li>🚚 Envíos a todo el país</li>
               <li>🏬 Retiro sin cargo por el local{info.direccion ? ` — ${info.direccion}` : ""}</li>
             </ul>
