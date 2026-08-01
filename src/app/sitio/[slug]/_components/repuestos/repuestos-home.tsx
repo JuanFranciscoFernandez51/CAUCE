@@ -140,7 +140,7 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
       {/* ── Despachos: el foco del negocio ── */}
       <section className="bg-[#0B0B0C] py-12 text-white">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-[color:var(--t-texto)] sm:text-3xl">
+          <h2 className="aparece font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             Te lo mandamos a <span className="text-[#F5B301]">donde estés</span>
           </h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
