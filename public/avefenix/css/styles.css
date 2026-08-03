@@ -1,0 +1,270 @@
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .text-outline {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+    color: transparent;
+  }
+
+  .text-outline-dark {
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.2);
+    color: transparent;
+  }
+
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(5, 10, 11, 0.5);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(13, 204, 242, 0.5);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(13, 204, 242, 0.8);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(13, 204, 242, 0.5) rgba(5, 10, 11, 0.5);
+  }
+
+
+  /* Infinite Scroll Animation - Corregida */
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll {
+    animation: scroll 30s linear infinite !important;
+    display: flex !important;
+    width: max-content !important;
+  }
+
+  .pause-on-hover:hover {
+    animation-play-state: paused;
+  }
+
+  /* El degradado de los costados para un efecto elegante */
+  .mask-gradient {
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+}
+
+body {
+  @apply bg-background-dark text-slate-100 font-display selection:bg-primary selection:text-background-dark;
+}
+
+/* ========== FAQ Section Animations ========== */
+
+/* Scroll Reveal Animation */
+.faq-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-animate.faq-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* FAQ Active State */
+.faq-item.faq-active .faq-trigger {
+  border-color: rgba(13, 204, 242, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.faq-item.faq-active .faq-number {
+  color: rgba(13, 204, 242, 0.15) !important;
+}
+
+.faq-item.faq-active .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-item.faq-active .faq-icon {
+  background: rgba(13, 204, 242, 0.1);
+  border-color: rgba(13, 204, 242, 0.3);
+}
+
+/* Alternate color for even items */
+.faq-item[data-faq-index="1"].faq-active .faq-trigger,
+.faq-item[data-faq-index="3"].faq-active .faq-trigger,
+.faq-item[data-faq-index="5"].faq-active .faq-trigger,
+.faq-item[data-faq-index="7"].faq-active .faq-trigger {
+  border-color: rgba(255, 140, 66, 0.25);
+}
+
+.faq-item[data-faq-index="1"].faq-active .faq-number,
+.faq-item[data-faq-index="3"].faq-active .faq-number,
+.faq-item[data-faq-index="5"].faq-active .faq-number,
+.faq-item[data-faq-index="7"].faq-active .faq-number {
+  color: rgba(255, 140, 66, 0.15) !important;
+}
+
+.faq-item[data-faq-index="1"].faq-active .faq-icon,
+.faq-item[data-faq-index="3"].faq-active .faq-icon,
+.faq-item[data-faq-index="5"].faq-active .faq-icon,
+.faq-item[data-faq-index="7"].faq-active .faq-icon {
+  background: rgba(255, 140, 66, 0.1);
+  border-color: rgba(255, 140, 66, 0.3);
+}
+
+/* Subtle glow pulse on active FAQ */
+@keyframes faqGlowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 204, 242, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 30px -10px rgba(13, 204, 242, 0.15);
+  }
+}
+
+.faq-item.faq-active .faq-trigger {
+  animation: faqGlowPulse 3s ease-in-out infinite;
+}
+
+/* ========== Live Impact Counter ========== */
+
+@keyframes counterFlash {
+  0% {
+    color: #0dccf2;
+    text-shadow: 0 0 12px rgba(13, 204, 242, 0.6);
+  }
+
+  100% {
+    color: white;
+    text-shadow: none;
+  }
+}
+
+.counter-flash {
+  animation: counterFlash 0.4s ease-out forwards;
+}
+
+/* ========== How It Works Section ========== */
+
+.hiw-animate {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hiw-animate.hiw-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Step circle entrance - scale bounce */
+.hiw-step .hiw-circle {
+  transform: scale(0.7);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.7s ease, background 0.7s ease;
+}
+
+.hiw-step.hiw-visible .hiw-circle {
+  transform: scale(1);
+}
+
+/* Traveling dot on timeline */
+@keyframes hiwTravelDot {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 1;
+  }
+
+  95% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.hiw-travel-dot.hiw-dot-active {
+  animation: hiwTravelDot 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: 0.8s;
+}
+
+/* ========== AI Chatbot Render Styles ========== */
+
+.chat-ai-response p {
+  margin-bottom: 0.5rem;
+}
+
+.chat-ai-response p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-ai-response ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.chat-ai-response li {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.chat-ai-response li::before {
+  content: '•';
+  color: #0dccf2;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.chat-ai-response ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-ai-response strong {
+  color: #0dccf2;
+  font-weight: 700;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.3s ease-out forwards;
+}

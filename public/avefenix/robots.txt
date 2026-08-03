@@ -1,0 +1,13 @@
+User-agent: * 
+Disallow: /blog/cgi-bin
+Disallow: /blog/tmp
+Disallow: /blog/cache
+Disallow: /blog/class
+Disallow: /blog/images
+Disallow: /blog/include
+Disallow: /blog/install
+Disallow: /blog/kernel
+Disallow: /blog/language
+Disallow: /blog/templates_c
+Disallow: /blog/themes
+Disallow: /blog/uploads

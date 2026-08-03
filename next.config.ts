@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "picsum.photos" },
     ],
   },
+  async rewrites() {
+    return [
+      // Ave Fénix quiso conservar su web tal cual: se sirve el sitio original
+      // desde public/avefenix, sin tocar una línea.
+      { source: "/sitio/avefenix", destination: "/avefenix/index.html" },
+      { source: "/sitio/avefenix/", destination: "/avefenix/index.html" },
+      // El sitio usa rutas relativas (logo.png, css/…): se mapea todo el árbol.
+      { source: "/sitio/avefenix/:ruta*", destination: "/avefenix/:ruta*" },
+    ];
+  },
 };
 
 export default nextConfig;
