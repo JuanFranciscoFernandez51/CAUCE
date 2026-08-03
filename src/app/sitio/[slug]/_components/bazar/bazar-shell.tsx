@@ -99,15 +99,17 @@ function Header({ info }: { info: BazarShellInfo }) {
             <img
               src={info.logo}
               alt={info.nombre}
-              className="h-11 w-11 rounded-full border object-cover"
-              
+              className="h-11 w-auto max-w-[190px] object-contain dark:rounded-lg dark:bg-white/95 dark:px-2 dark:py-1"
             />
           ) : (
             <span className="text-2xl">{info.emoji}</span>
           )}
-          <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: "var(--t-texto)" }}>
-            {info.nombre}
-          </span>
+          {/* Con logo propio el nombre al lado sobra: ya lo dice la marca. */}
+          {info.logo ? null : (
+            <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: "var(--t-texto)" }}>
+              {info.nombre}
+            </span>
+          )}
         </Link>
 
         <form onSubmit={buscar} className="mx-auto hidden max-w-md flex-1 md:block">
@@ -469,7 +471,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
           <div className="flex items-center gap-2">
             {info.logo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={info.logo} alt={info.nombre} className="h-10 w-10 rounded-full object-cover" />
+              <img src={info.logo} alt={info.nombre} className="h-10 w-auto max-w-[170px] object-contain dark:rounded-lg dark:bg-white/95 dark:px-2 dark:py-1" />
             ) : (
               <span className="text-2xl">{info.emoji}</span>
             )}
