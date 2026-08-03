@@ -99,19 +99,19 @@ export default async function ProductoPage({
           <Carrusel fotos={fotos} alt={producto.nombre} />
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: BZ.aqua }}>
+            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: "var(--tpl, #3FA9A5)" }}>
               {producto.categoria}
               {producto.sku ? ` · ${producto.sku}` : ""}
             </p>
             <h1
               className="mt-1 text-3xl font-extrabold leading-tight tracking-tight"
-              style={{ color: BZ.azul }}
+              style={{ color: "var(--t-texto)" }}
             >
               {producto.nombre}
             </h1>
 
             <div className="mt-4 flex items-end gap-3">
-              <p className="text-4xl font-extrabold" style={{ color: BZ.azul }}>
+              <p className="text-4xl font-extrabold" style={{ color: "var(--t-texto)" }}>
                 {fmtPrecio(vigente)}
               </p>
               {enOferta ? (
@@ -127,7 +127,7 @@ export default async function ProductoPage({
 
             <p className="mt-3 text-sm">
               {producto.stock > 3 ? (
-                <span className="font-medium" style={{ color: BZ.aqua }}>
+                <span className="font-medium" style={{ color: "var(--tpl, #3FA9A5)" }}>
                   ✔ En stock, listo para enviar
                 </span>
               ) : producto.stock > 0 ? (
@@ -163,7 +163,7 @@ export default async function ProductoPage({
 
             {producto.descripcion ? (
               <div className="mt-7 rounded-2xl p-5" style={{ backgroundColor: "#FBF9F4" }}>
-                <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: BZ.azul }}>
+                <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: "var(--t-texto)" }}>
                   Descripción
                 </h2>
                 <p className="mt-2 whitespace-pre-line text-sm leading-relaxed t-tenue">
@@ -182,7 +182,7 @@ export default async function ProductoPage({
         {/* Relacionados */}
         {relacionados.length > 0 ? (
           <section className="mt-14">
-            <h2 className="text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
               También te puede gustar
             </h2>
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -195,7 +195,7 @@ export default async function ProductoPage({
 
         {/* Consulta por este producto */}
         <section className="mx-auto mt-14 max-w-lg">
-          <h2 className="text-center text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
+          <h2 className="text-center text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
             ¿Tenés una duda sobre este producto?
           </h2>
           <div className="mt-5">

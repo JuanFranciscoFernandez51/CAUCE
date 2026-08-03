@@ -79,19 +79,18 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               {fmtPrecio(vigente)}
             </p>
           </div>
-          {!aPedido ? (
-            <button
-              type="button"
-              onClick={() =>
-                agregar({ productoId: p.id, nombre: p.nombre, precio: vigente, foto: p.foto })
-              }
-              aria-label={`Agregar ${p.nombre} al carrito`}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
-              style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
-            >
-              +
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={() =>
+              agregar({ productoId: p.id, nombre: p.nombre, precio: vigente, foto: p.foto })
+            }
+            aria-label={`Agregar ${p.nombre} al carrito`}
+            title={aPedido ? "Agregar — lo pedimos al proveedor" : "Agregar al carrito"}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-bold transition-transform hover:scale-105"
+            style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
+          >
+            +
+          </button>
         </div>
       </div>
     </div>

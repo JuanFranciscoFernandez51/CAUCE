@@ -22,14 +22,6 @@ export function AgregarControls({
   const [cant, setCant] = useState(1);
   const max = Math.min(99, Math.max(1, stock || 99));
 
-  if (false) {
-    return (
-      <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
-        Este repuesto lo pedimos al proveedor: se consigue en 5 a 10 días. Agregalo igual y lo gestionamos.
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div

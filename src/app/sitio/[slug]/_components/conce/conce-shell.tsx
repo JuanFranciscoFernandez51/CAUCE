@@ -378,7 +378,7 @@ function Footer({ info }: { info: ConceShellInfo }) {
       <div className="border-t py-4" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
         <p className="text-center text-xs text-gray-500">
           © {new Date().getFullYear()} {info.nombre} · Powered by{" "}
-          <a href="https://cauce.app" className="font-medium hover:text-gray-300">
+          <a href="https://cauceapp.com.ar" className="font-medium hover:text-gray-300">
             Cauce
           </a>
         </p>

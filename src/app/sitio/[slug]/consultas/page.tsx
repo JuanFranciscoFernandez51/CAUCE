@@ -32,7 +32,7 @@ export default async function ConsultasPage({ params }: { params: Promise<{ slug
           <div className="text-4xl">💬</div>
           <h1
             className="mt-3 text-3xl font-extrabold tracking-tight"
-            style={{ color: BZ.azul }}
+            style={{ color: "var(--t-texto)" }}
           >
             Consultanos lo que quieras
           </h1>
@@ -52,7 +52,7 @@ export default async function ConsultasPage({ params }: { params: Promise<{ slug
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold hover:underline"
-              style={{ color: BZ.aqua }}
+              style={{ color: "var(--tpl, #3FA9A5)" }}
             >
               WhatsApp →
             </a>

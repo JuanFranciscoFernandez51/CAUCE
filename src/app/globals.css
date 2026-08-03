@@ -359,3 +359,19 @@ h3 {
 .tienda .hero { background: var(--t-hero); color: var(--t-hero-texto); }
 .tienda .hero-tenue { color: var(--t-hero-tenue); }
 .tienda .hero-linea { border-color: var(--t-hero-linea); }
+
+/* Cinta que gira arriba del sitio con las promesas del negocio. */
+.tienda .cinta { overflow: hidden; }
+.tienda .cinta-marquesina {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: cinta 26s linear infinite;
+}
+.tienda .cinta:hover .cinta-marquesina { animation-play-state: paused; }
+@keyframes cinta {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tienda .cinta-marquesina { animation: none; }
+}

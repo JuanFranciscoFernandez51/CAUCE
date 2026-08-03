@@ -75,6 +75,23 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
 
 // ── Header ────────────────────────────────────────────────────────────────
 
+/** Cinta superior: lo que el negocio promete, girando sin parar. */
+function CintaPromesas({ info }: { info: BazarShellInfo }) {
+  if (!info.promesas?.length) return null;
+  const tanda = [...info.promesas, ...info.promesas];
+  return (
+    <div className="cinta bg-[#F5B301] text-black" style={{ backgroundColor: "var(--tpl, #F5B301)", color: "var(--tpl-sobre, #111)" }}>
+      <div className="cinta-marquesina py-1.5">
+        {tanda.concat(tanda).map((t, i) => (
+          <span key={i} className="px-6 text-[12px] font-bold uppercase tracking-wide">
+            {t} <span className="opacity-50">•</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Header({ info }: { info: BazarShellInfo }) {
   const base = `/sitio/${info.slug}`;
   const router = useRouter();
@@ -552,7 +569,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
       <div className="border-t py-4" >
         <p className="text-center text-xs t-tenue">
           ⚡ Powered by{" "}
-          <a href="https://cauce.app" className="font-medium hover:underline">
+          <a href="https://cauceapp.com.ar" className="font-medium hover:underline">
             Cauce
           </a>
         </p>

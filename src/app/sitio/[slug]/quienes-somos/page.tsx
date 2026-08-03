@@ -146,7 +146,7 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 block text-sm font-semibold hover:underline"
-                style={{ color: BZ.aqua }}
+                style={{ color: "var(--tpl, #3FA9A5)" }}
               >
                 @{info.instagram}
               </a>
@@ -165,7 +165,7 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 block text-sm font-semibold hover:underline"
-                style={{ color: BZ.aqua }}
+                style={{ color: "var(--tpl, #3FA9A5)" }}
               >
                 Escribinos →
               </a>
@@ -178,7 +178,7 @@ export default async function QuienesSomosPage({ params }: { params: Promise<{ s
         <Link
           href={`${base}/tienda`}
           className="inline-block rounded-full px-8 py-3.5 text-base font-semibold text-white shadow-lg"
-          style={{ backgroundColor: BZ.aqua }}
+          style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
         >
           Conocé la tienda →
         </Link>

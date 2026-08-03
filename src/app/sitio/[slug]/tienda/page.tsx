@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { intentosDeBusqueda } from "@/lib/buscar-repuestos";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
@@ -89,15 +90,25 @@ export default async function TiendaPage({
           },
         }
       : {}),
-    ...(q
-      ? {
-          OR: [
-            { nombre: { contains: q, mode: "insensitive" } },
-            { sku: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : {}),
   };
+
+  // La gente escribe "pastillas de freno de 110": se prueba desde lo más
+  // preciso a lo más amplio y se usa el primer intento que traiga algo, para
+  // que nunca quede la pantalla vacía.
+  const intentos = q ? intentosDeBusqueda(q) : [];
+  let filtroTexto: Prisma.BazarProductoWhereInput | null = null;
+  let busquedaAmplia = false;
+  if (intentos.length) {
+    for (const [i, intento] of intentos.entries()) {
+      const hay = await db.bazarProducto.count({ where: { ...where, ...intento } });
+      if (hay > 0) {
+        filtroTexto = intento;
+        busquedaAmplia = i > 0;
+        break;
+      }
+    }
+  }
+  if (filtroTexto) Object.assign(where, filtroTexto);
 
   // Con una moto elegida, los rubros que se ofrecen son los de esa moto.
   const dondeRubros = { clientId: tenant.id, activo: true, ...(moto ? { compatibilidades: { has: moto } } : {}) };
@@ -271,12 +282,12 @@ export default async function TiendaPage({
         {/* ── Grilla ── */}
         {productos.length === 0 ? (
           <div className="py-20 text-center">
-            <div className="text-4xl">🐚</div>
+            <div className="text-4xl"></div>
             <p className="mt-3 font-medium">No encontramos productos con esos filtros.</p>
             <Link
               href={`${base}/tienda`}
               className="mt-4 inline-block rounded-full px-5 py-2.5 text-sm font-semibold text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
             >
               Ver todo el catálogo
             </Link>

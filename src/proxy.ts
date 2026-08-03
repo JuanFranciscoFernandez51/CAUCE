@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const TENANT_BASE = process.env.TENANT_BASE_DOMAIN; // ej: "cauce.app" → cliente.cauce.app
+const TENANT_BASE = process.env.TENANT_BASE_DOMAIN; // ej: "cauceapp.com.ar" → cliente.cauceapp.com.ar
 
 // Dominios propios de clientes (Client.domain) → slug, con cache de 5 min
 const domainCache = new Map<string, { slug: string | null; exp: number }>();

@@ -257,7 +257,7 @@ export default async function OsLayout({
         <footer className="border-t py-4">
           <p className="text-center text-xs text-muted-foreground">
             ⚡ Powered by{" "}
-            <a href="https://cauce.app" className="font-medium hover:text-foreground">
+            <a href="https://cauceapp.com.ar" className="font-medium hover:text-foreground">
               Cauce
             </a>
           </p>
