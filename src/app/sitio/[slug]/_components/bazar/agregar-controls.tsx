@@ -26,7 +26,7 @@ export function AgregarControls({
     <div className="flex flex-wrap items-center gap-3">
       <div
         className="flex items-center rounded-full border"
-        style={{ borderColor: BZ.aquaClaro }}
+        style={{ borderColor: "var(--t-borde)" }}
       >
         <button
           type="button"
@@ -50,7 +50,7 @@ export function AgregarControls({
         type="button"
         onClick={() => agregar({ productoId, nombre, precio, foto }, cant)}
         className="flex-1 rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-md transition-transform hover:scale-[1.01]"
-        style={{ backgroundColor: BZ.aqua, minWidth: "12rem" }}
+        style={{ backgroundColor: "var(--tpl, #3FA9A5)", minWidth: "12rem" }}
       >
         Agregar al carrito 🛒
       </button>

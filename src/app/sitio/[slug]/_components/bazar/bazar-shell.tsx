@@ -48,7 +48,7 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
       className="tienda flex min-h-screen flex-col"
       style={{
         backgroundColor: "#ffffff",
-        color: BZ.texto,
+        color: "var(--t-texto)",
         fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
       }}
     >
@@ -105,10 +105,9 @@ function Header({ info }: { info: BazarShellInfo }) {
   }
 
   return (
-    <header
-      className="barra sticky top-0 z-40 border-b"
-      
-    >
+    <>
+      <CintaPromesas info={info} />
+      <header className="barra sticky top-0 z-40 border-b">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link href={base} className="flex shrink-0 items-center gap-2">
           {info.logo ? (
@@ -201,7 +200,7 @@ function Header({ info }: { info: BazarShellInfo }) {
       </div>
 
       {/* Categorías (desktop) */}
-      <div className="t-borde hidden border-t bg-white md:block dark:bg-black">
+      <div className="t-borde hidden border-t t-card md:block dark:bg-black">
         <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-1.5">
           {info.categorias.map((c) => (
             <Link
@@ -268,6 +267,7 @@ function Header({ info }: { info: BazarShellInfo }) {
         </div>
       ) : null}
     </header>
+    </>
   );
 }
 
@@ -336,7 +336,7 @@ function DrawerCarrito({ base, info }: { base: string; info: BazarShellInfo }) {
                       className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg text-xl t-suave"
                       
                     >
-                      🐚
+                      
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
@@ -439,10 +439,10 @@ function Popup5({ base, slug, info }: { base: string; slug: string; info: BazarS
       />
       <div
         className="t-card relative w-full max-w-sm overflow-hidden rounded-3xl text-center shadow-2xl"
-        style={{ border: `2px solid ${BZ.aquaClaro}` }}
+        style={{ border: `2px solid ${"var(--t-borde)"}` }}
       >
         <div className="px-6 pb-6 pt-8 t-suave" >
-          <div className="text-5xl">🐚</div>
+          <div className="text-5xl"></div>
           <h3 className="mt-3 text-2xl font-extrabold tracking-tight" style={{ color: "var(--t-texto)" }}>
             ¡5% OFF en tu primera compra!
           </h3>

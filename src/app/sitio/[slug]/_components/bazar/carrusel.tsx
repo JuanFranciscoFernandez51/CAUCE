@@ -12,9 +12,9 @@ export function Carrusel({ fotos, alt }: { fotos: string[]; alt: string }) {
     return (
       <div
         className="flex aspect-square w-full items-center justify-center rounded-3xl text-6xl"
-        style={{ backgroundColor: BZ.arena }}
+        style={{ backgroundColor: "var(--t-suave)" }}
       >
-        🐚
+        
       </div>
     );
   }
@@ -25,7 +25,7 @@ export function Carrusel({ fotos, alt }: { fotos: string[]; alt: string }) {
     <div className="relative">
       <div
         className="relative aspect-square w-full overflow-hidden rounded-3xl"
-        style={{ backgroundColor: BZ.arena }}
+        style={{ backgroundColor: "var(--t-suave)" }}
         onTouchStart={(e) => {
           touchX.current = e.touches[0].clientX;
         }}
@@ -67,7 +67,7 @@ export function Carrusel({ fotos, alt }: { fotos: string[]; alt: string }) {
                 aria-label={`Ir a la foto ${i + 1}`}
                 onClick={() => setIdx(i)}
                 className="h-2 w-2 rounded-full transition-colors"
-                style={{ backgroundColor: i === idx ? BZ.aqua : "rgba(255,255,255,0.8)" }}
+                style={{ backgroundColor: i === idx ? "var(--tpl, #3FA9A5)" : "rgba(255,255,255,0.8)" }}
               />
             ))}
           </div>

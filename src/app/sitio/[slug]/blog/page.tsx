@@ -34,7 +34,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     <ConceShell info={info}>
       <div className="mx-auto max-w-6xl px-4 py-10">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Blog</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm t-tenue">
           Noticias, consejos y novedades del mundo del auto.
         </p>
 
@@ -42,7 +42,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           {BLOG_CATEGORIAS.map((c) => (
             <span
               key={c}
-              className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold"
+              className="rounded-full t-card px-4 py-1.5 text-sm font-semibold"
               style={{ border: `1px solid ${RC.borde}` }}
             >
               {c}
@@ -51,14 +51,14 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         </div>
 
         <div
-          className="mt-10 rounded-[2.5rem] bg-white px-6 py-20 text-center"
+          className="mt-10 rounded-[2.5rem] t-card px-6 py-20 text-center"
           style={{ border: `1px solid ${RC.borde}` }}
         >
           <div className="text-6xl">📰</div>
           <h2 className="mt-4 text-2xl font-extrabold tracking-tight">
             Estamos preparando el primer artículo
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+          <p className="mx-auto mt-2 max-w-md text-sm t-tenue">
             Muy pronto vas a encontrar acá consejos para comprar tu próximo auto, novedades del
             salón y tips de mantenimiento. Mientras tanto, mirá lo que tenemos en stock. 👇
           </p>

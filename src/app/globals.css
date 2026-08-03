@@ -322,6 +322,14 @@ h3 {
   --t-texto: #f3f4f6;
   --t-tenue: #aab3c0;
   --t-borde: rgba(255, 255, 255, 0.14);
+  /* Declarado acá también: si alguna clase pisa el fondo del contenedor,
+     el sitio quedaba con texto claro sobre blanco. */
+  background: var(--t-fondo);
+  color: var(--t-texto);
+}
+.dark .tienda main,
+.dark .tienda section:not(.hero):not([class*="bg-"]) {
+  background: var(--t-fondo);
 }
 /* En oscuro el buscador del header se fundía con la barra: se despega un paso. */
 .dark .tienda .t-card input,

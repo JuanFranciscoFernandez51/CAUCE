@@ -190,8 +190,8 @@ export default async function CatalogoPage({
     return `${base}/catalogo${qs ? `?${qs}` : ""}`;
   };
 
-  const inputCls = "h-10 w-full rounded-xl border bg-white px-3 text-sm outline-none";
-  const labelCls = "mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-500";
+  const inputCls = "h-10 w-full rounded-xl border t-card px-3 text-sm outline-none";
+  const labelCls = "mb-1 block text-[11px] font-bold uppercase tracking-wide t-tenue";
 
   return (
     <ConceShell info={info}>
@@ -199,7 +199,7 @@ export default async function CatalogoPage({
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
           {condicion === "0km" ? "Vehículos 0KM" : condicion === "usado" ? "Vehículos usados" : "Catálogo"}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm t-tenue">
           {total.toLocaleString("es-AR")} vehículo{total === 1 ? "" : "s"}
           {q ? ` para “${q}”` : ""}
           {marca ? ` · ${marca}` : ""}
@@ -231,7 +231,7 @@ export default async function CatalogoPage({
         <div className="mt-5 grid items-start gap-5 lg:grid-cols-[268px_minmax(0,1fr)]">
         {/* ── Filtros: sidebar en PC, desplegable en celular ── */}
         <aside className="lg:sticky lg:top-24">
-        <details className="group rounded-3xl bg-white lg:open" open style={{ border: `1px solid ${RC.borde}` }}>
+        <details className="group rounded-3xl t-card lg:open" open style={{ border: `1px solid ${RC.borde}` }}>
           <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold lg:hidden">
             Filtrar y ordenar
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden>
@@ -363,19 +363,19 @@ export default async function CatalogoPage({
             {pagina > 1 ? (
               <Link
                 href={url({ pagina: String(pagina - 1) })}
-                className="rounded-full border bg-white px-4 py-2 text-sm font-semibold"
+                className="rounded-full border t-card px-4 py-2 text-sm font-semibold"
                 style={{ borderColor: RC.borde }}
               >
                 ← Anterior
               </Link>
             ) : null}
-            <span className="px-3 text-sm text-gray-500">
+            <span className="px-3 text-sm t-tenue">
               Página {pagina} de {paginas}
             </span>
             {pagina < paginas ? (
               <Link
                 href={url({ pagina: String(pagina + 1) })}
-                className="rounded-full border bg-white px-4 py-2 text-sm font-semibold"
+                className="rounded-full border t-card px-4 py-2 text-sm font-semibold"
                 style={{ borderColor: RC.borde }}
               >
                 Siguiente →

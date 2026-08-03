@@ -49,7 +49,7 @@ export default async function NosotrosPage({
           <h1 className="mx-auto mt-3 max-w-2xl text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Sobre {info.nombre}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-gray-400">
+          <p className="mx-auto mt-4 max-w-xl t-tenue">
             Tu concesionaria de confianza con más de 15 años de experiencia en la venta de
             vehículos nuevos y usados.
           </p>
@@ -61,11 +61,11 @@ export default async function NosotrosPage({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {(s.nosotros?.numeros ?? []).map((n, i) => (
             <Reveal key={n.label} delay={i * 80}>
-              <div className="rounded-3xl bg-white p-6 text-center shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>
+              <div className="rounded-3xl t-card p-6 text-center shadow-sm" style={{ border: `1px solid ${RC.borde}` }}>
                 <p className="text-4xl font-extrabold tracking-tight" style={{ color: RC.doradoTexto }}>
                   {n.valor}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-gray-600">{n.label}</p>
+                <p className="mt-1 text-sm font-semibold t-tenue">{n.label}</p>
               </div>
             </Reveal>
           ))}
@@ -76,7 +76,7 @@ export default async function NosotrosPage({
       <section className="mx-auto max-w-3xl px-4 py-6">
         <Reveal>
           <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Nuestra historia</h2>
-          <div className="mt-4 space-y-4 text-[15px] leading-relaxed text-gray-600">
+          <div className="mt-4 space-y-4 text-[15px] leading-relaxed t-tenue">
             {(s.nosotros?.historia ?? "").split("\n\n").map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -95,7 +95,7 @@ export default async function NosotrosPage({
                 <Reveal key={nombre} delay={i * 80}>
                   <div className="rounded-3xl p-6" style={{ backgroundColor: RC.doradoSuave }}>
                     <p className="font-bold">{nombre}</p>
-                    {texto ? <p className="mt-1 text-sm text-gray-600">{texto}</p> : null}
+                    {texto ? <p className="mt-1 text-sm t-tenue">{texto}</p> : null}
                   </div>
                 </Reveal>
               );
@@ -109,7 +109,7 @@ export default async function NosotrosPage({
         <Reveal>
           <div className="rounded-[2.5rem] px-6 py-12 text-center" style={{ backgroundColor: RC.negro }}>
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">Vení a conocernos</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-gray-400">
+            <p className="mx-auto mt-2 max-w-md text-sm t-tenue">
               {(info.sucursales ?? []).map((su) => su.direccion).join(" · ")}
               {info.horarios ? ` — ${info.horarios}` : ""}
             </p>

@@ -130,7 +130,7 @@ export function CarritoPage({
 
   if (retornoPago === "ok") {
     return (
-      <Exito titulo={`¡Gracias por tu compra! 🐚`}>
+      <Exito titulo={`¡Gracias por tu compra! `}>
         Tu pago del pedido {retornoPedido ? `#${retornoPedido}` : ""} fue aprobado. Te escribimos
         para coordinar la entrega.
         <VolverTienda base={base} />
@@ -182,7 +182,7 @@ export function CarritoPage({
           </div>
         ) : null}
         <div className="text-5xl">🛒</div>
-        <h1 className="mt-4 text-2xl font-bold" style={{ color: BZ.azul }}>
+        <h1 className="mt-4 text-2xl font-bold" style={{ color: "var(--t-texto)" }}>
           Tu carrito está vacío
         </h1>
         <p className="mt-2 text-sm t-tenue">
@@ -191,7 +191,7 @@ export function CarritoPage({
         <Link
           href={`${base}/tienda`}
           className="mt-6 inline-block rounded-full px-7 py-3 font-semibold text-white"
-          style={{ backgroundColor: BZ.aqua }}
+          style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
         >
           Ir a la tienda
         </Link>
@@ -203,7 +203,7 @@ export function CarritoPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
+      <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--t-texto)" }}>
         Tu carrito
       </h1>
       {retornoPago === "error" ? (
@@ -225,19 +225,19 @@ export function CarritoPage({
                     src={i.foto}
                     alt={i.nombre}
                     className="h-20 w-20 shrink-0 rounded-xl border object-cover"
-                    style={{ borderColor: BZ.aquaClaro }}
+                    style={{ borderColor: "var(--t-borde)" }}
                   />
                 ) : (
                   <div
                     className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl text-2xl"
-                    style={{ backgroundColor: BZ.arena }}
+                    style={{ backgroundColor: "var(--t-suave)" }}
                   >
-                    🐚
+                    
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{i.nombre}</p>
-                  <p className="text-sm font-semibold" style={{ color: BZ.aqua }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--tpl, #3FA9A5)" }}>
                     {fmtPrecio(i.precio)} c/u
                   </p>
                   <div className="mt-2 flex items-center gap-2">
@@ -245,7 +245,7 @@ export function CarritoPage({
                       type="button"
                       onClick={() => setCant(i.productoId, i.cant - 1)}
                       className="h-7 w-7 rounded-full border leading-none"
-                      style={{ borderColor: BZ.aquaClaro }}
+                      style={{ borderColor: "var(--t-borde)" }}
                       aria-label="Restar uno"
                     >
                       −
@@ -255,7 +255,7 @@ export function CarritoPage({
                       type="button"
                       onClick={() => setCant(i.productoId, i.cant + 1)}
                       className="h-7 w-7 rounded-full border leading-none"
-                      style={{ borderColor: BZ.aquaClaro }}
+                      style={{ borderColor: "var(--t-borde)" }}
                       aria-label="Sumar uno"
                     >
                       +
@@ -269,7 +269,7 @@ export function CarritoPage({
                     </button>
                   </div>
                 </div>
-                <p className="shrink-0 font-bold" style={{ color: BZ.azul }}>
+                <p className="shrink-0 font-bold" style={{ color: "var(--t-texto)" }}>
                   {fmtPrecio(i.precio * i.cant)}
                 </p>
               </li>
@@ -278,7 +278,7 @@ export function CarritoPage({
 
           {/* Cupón */}
           <div className="mt-4 rounded-2xl p-4" style={{ backgroundColor: "#FBF9F4" }}>
-            <label className="mb-1 block text-sm font-semibold" style={{ color: BZ.azul }}>
+            <label className="mb-1 block text-sm font-semibold" style={{ color: "var(--t-texto)" }}>
               ¿Tenés un cupón?
             </label>
             <div className="flex gap-2">
@@ -287,13 +287,13 @@ export function CarritoPage({
                 onChange={(e) => setCupon(e.target.value)}
                 placeholder={`Ej: ${CUPON_POPUP}`}
                 className={campo}
-                style={{ borderColor: BZ.aquaClaro, backgroundColor: "#fff" }}
+                style={{ borderColor: "var(--t-borde)", backgroundColor: "#fff" }}
               />
               <button
                 type="button"
                 onClick={() => setCuponAplicado(cupon.trim())}
                 className="shrink-0 rounded-xl px-4 text-sm font-semibold text-white"
-                style={{ backgroundColor: BZ.azul }}
+                style={{ backgroundColor: "var(--t-texto)", color: "var(--t-fondo)" }}
               >
                 Aplicar
               </button>
@@ -304,7 +304,7 @@ export function CarritoPage({
               </p>
             ) : null}
             {descuento.tipo ? (
-              <p className="mt-2 text-xs font-medium" style={{ color: BZ.aqua }}>
+              <p className="mt-2 text-xs font-medium" style={{ color: "var(--tpl, #3FA9A5)" }}>
                 ✔ {descuento.motivo}
               </p>
             ) : null}
@@ -324,9 +324,9 @@ export function CarritoPage({
         <form
           onSubmit={confirmar}
           className="h-fit rounded-3xl border p-5"
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         >
-          <h2 className="text-lg font-bold" style={{ color: BZ.azul }}>
+          <h2 className="text-lg font-bold" style={{ color: "var(--t-texto)" }}>
             Entrega y pago
           </h2>
 
@@ -334,7 +334,7 @@ export function CarritoPage({
             <label
               className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm"
               style={{
-                borderColor: entrega === "retiro" ? BZ.aqua : "#E8F2F1",
+                borderColor: entrega === "retiro" ? "var(--tpl, #3FA9A5)" : "#E8F2F1",
                 backgroundColor: entrega === "retiro" ? "#F0FAF9" : "#fff",
               }}
             >
@@ -349,7 +349,7 @@ export function CarritoPage({
             <label
               className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm"
               style={{
-                borderColor: entrega === "envio" ? BZ.aqua : "#E8F2F1",
+                borderColor: entrega === "envio" ? "var(--tpl, #3FA9A5)" : "#E8F2F1",
                 backgroundColor: entrega === "envio" ? "#F0FAF9" : "#fff",
               }}
             >
@@ -371,7 +371,7 @@ export function CarritoPage({
               placeholder="Nombre y apellido *"
               required
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
             <input
               value={datos.telefono}
@@ -380,7 +380,7 @@ export function CarritoPage({
               inputMode="tel"
               required
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
             <input
               value={datos.email}
@@ -388,7 +388,7 @@ export function CarritoPage({
               placeholder="Email"
               type="email"
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
             {entrega === "envio" ? (
               <>
@@ -397,7 +397,7 @@ export function CarritoPage({
                   onChange={(e) => setDatos({ ...datos, direccion: e.target.value })}
                   placeholder="Dirección (calle y número) *"
                   className={campo}
-                  style={{ borderColor: BZ.aquaClaro }}
+                  style={{ borderColor: "var(--t-borde)" }}
                 />
                 <div className="flex gap-2">
                   <input
@@ -405,14 +405,14 @@ export function CarritoPage({
                     onChange={(e) => setDatos({ ...datos, ciudad: e.target.value })}
                     placeholder="Ciudad"
                     className={campo}
-                    style={{ borderColor: BZ.aquaClaro }}
+                    style={{ borderColor: "var(--t-borde)" }}
                   />
                   <input
                     value={datos.cp}
                     onChange={(e) => setDatos({ ...datos, cp: e.target.value })}
                     placeholder="CP"
                     className={`${campo} w-24`}
-                    style={{ borderColor: BZ.aquaClaro }}
+                    style={{ borderColor: "var(--t-borde)" }}
                   />
                 </div>
               </>
@@ -423,7 +423,7 @@ export function CarritoPage({
               placeholder="Notas para tu pedido (opcional)"
               rows={2}
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
           </div>
 
@@ -433,7 +433,7 @@ export function CarritoPage({
               <span>{fmtPrecio(subtotal)}</span>
             </div>
             {descuento.tipo ? (
-              <div className="flex justify-between font-medium" style={{ color: BZ.aqua }}>
+              <div className="flex justify-between font-medium" style={{ color: "var(--tpl, #3FA9A5)" }}>
                 <span>
                   Descuento {descuento.tipo === "CUENTA10" ? "10% primera compra" : `cupón ${CUPON_POPUP}`}
                 </span>
@@ -446,7 +446,7 @@ export function CarritoPage({
             </div>
             <div
               className="flex justify-between border-t pt-2 text-lg font-extrabold"
-              style={{ borderColor: "#EFF6F5", color: BZ.azul }}
+              style={{ borderColor: "#EFF6F5", color: "var(--t-texto)" }}
             >
               <span>Total</span>
               <span>{fmtPrecio(total)}</span>
@@ -479,8 +479,8 @@ export function CarritoPage({
 function Exito({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-md px-4 py-20 text-center">
-      <div className="text-5xl">🐚✨</div>
-      <h1 className="mt-4 text-2xl font-extrabold" style={{ color: BZ.azul }}>
+      <div className="text-5xl">✨</div>
+      <h1 className="mt-4 text-2xl font-extrabold" style={{ color: "var(--t-texto)" }}>
         {titulo}
       </h1>
       <div className="mt-3 text-sm t-tenue">{children}</div>
@@ -493,7 +493,7 @@ function VolverTienda({ base }: { base: string }) {
     <Link
       href={`${base}/tienda`}
       className="mt-6 inline-block rounded-full border-2 px-6 py-2.5 font-semibold"
-      style={{ borderColor: BZ.aquaClaro, color: BZ.azul }}
+      style={{ borderColor: "var(--t-borde)", color: "var(--t-texto)" }}
     >
       Seguir comprando
     </Link>

@@ -50,22 +50,22 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
   return (
     <BazarShell info={info}>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ backgroundColor: BZ.arena }}>
+      <section className="relative overflow-hidden" style={{ backgroundColor: "var(--t-suave)" }}>
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:py-16 md:grid-cols-2">
           <div>
             <p
               className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
             >
-              🐚 Bazar de playa · Monte Hermoso
+               Bazar de playa · Monte Hermoso
             </p>
             <h1
               className="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl"
-              style={{ color: BZ.azul }}
+              style={{ color: "var(--t-texto)" }}
             >
               Tu casa con onda de mar
             </h1>
-            <p className="mt-4 max-w-md text-base text-gray-600 sm:text-lg">
+            <p className="mt-4 max-w-md text-base t-tenue sm:text-lg">
               Vajilla, textiles y deco elegidos pieza por pieza. Envíos a todo el país desde la
               costa.
             </p>
@@ -73,14 +73,14 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
               <Link
                 href={`${base}/tienda`}
                 className="rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]"
-                style={{ backgroundColor: BZ.aqua }}
+                style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
               >
                 Ver la tienda
               </Link>
               <Link
                 href={`${base}/quienes-somos`}
-                className="rounded-full border-2 bg-white px-7 py-3.5 text-base font-semibold transition-colors hover:bg-[#F6F1E8]"
-                style={{ borderColor: BZ.aquaClaro, color: BZ.azul }}
+                className="rounded-full border-2 t-card px-7 py-3.5 text-base font-semibold transition-colors hover:bg-[#F6F1E8]"
+                style={{ borderColor: "var(--t-borde)", color: "var(--t-texto)" }}
               >
                 Conocenos
               </Link>
@@ -95,8 +95,8 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
                 className="aspect-square w-full rounded-[2.5rem] object-cover shadow-xl"
               />
               <div
-                className="absolute -bottom-3 -left-3 rounded-2xl bg-white px-4 py-2 text-sm font-semibold shadow-lg"
-                style={{ color: BZ.azul }}
+                className="absolute -bottom-3 -left-3 rounded-2xl t-card px-4 py-2 text-sm font-semibold shadow-lg"
+                style={{ color: "var(--t-texto)" }}
               >
                 ✨ Colecciones elegidas en Expo CAFIRA y PRESENTES
               </div>
@@ -106,7 +106,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
       </section>
 
       {/* ── Banda de beneficios ── */}
-      <section className="border-b bg-white" style={{ borderColor: "#EFF6F5" }}>
+      <section className="border-b t-card" style={{ borderColor: "#EFF6F5" }}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-2 px-4 py-4 text-center text-sm font-medium sm:grid-cols-3">
           <p>🚚 Envíos a todo el país</p>
           <p>💳 3 y 6 cuotas</p>
@@ -116,7 +116,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
 
       {/* ── Tiles de categorías ── */}
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
+        <h2 className="text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
           Explorá por categoría
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -127,7 +127,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
                 key={c}
                 href={`${base}/tienda?categoria=${encodeURIComponent(c)}`}
                 className="group relative aspect-[4/3] overflow-hidden rounded-2xl"
-                style={{ backgroundColor: BZ.arena }}
+                style={{ backgroundColor: "var(--t-suave)" }}
               >
                 {foto ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -138,7 +138,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-3xl">🐚</div>
+                  <div className="flex h-full w-full items-center justify-center text-3xl"></div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                 <p className="absolute bottom-2 left-3 right-2 text-sm font-bold text-white drop-shadow">
@@ -156,15 +156,15 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
           <div className="mx-auto max-w-6xl px-4 py-12">
             <div className="mb-6 flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
+                <h2 className="text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
                   Nuevos ingresos
                 </h2>
-                <p className="text-sm text-gray-500">Lo último que llegó de las expos</p>
+                <p className="text-sm t-tenue">Lo último que llegó de las expos</p>
               </div>
               <Link
                 href={`${base}/tienda?orden=novedades`}
                 className="shrink-0 text-sm font-semibold hover:underline"
-                style={{ color: BZ.aqua }}
+                style={{ color: "var(--tpl, #3FA9A5)" }}
               >
                 Ver todos →
               </Link>
@@ -183,15 +183,15 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
         <section className="mx-auto max-w-6xl px-4 py-12">
           <div className="mb-6 flex items-end justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight" style={{ color: BZ.azul }}>
+              <h2 className="text-2xl font-bold tracking-tight" style={{ color: "var(--t-texto)" }}>
                 Los más pedidos
               </h2>
-              <p className="text-sm text-gray-500">Los favoritos de la comunidad</p>
+              <p className="text-sm t-tenue">Los favoritos de la comunidad</p>
             </div>
             <Link
               href={`${base}/tienda?orden=vendidos`}
               className="shrink-0 text-sm font-semibold hover:underline"
-              style={{ color: BZ.aqua }}
+              style={{ color: "var(--tpl, #3FA9A5)" }}
             >
               Ver todos →
             </Link>
@@ -205,7 +205,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
       ) : null}
 
       {/* ── Teaser Quiénes somos ── */}
-      <section style={{ backgroundColor: BZ.arena }}>
+      <section style={{ backgroundColor: "var(--t-suave)" }}>
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2">
           {teaserFoto ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -217,10 +217,10 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
             />
           ) : null}
           <div>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ color: BZ.azul }}>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ color: "var(--t-texto)" }}>
               De la costa a tu casa 🌊
             </h2>
-            <p className="mt-3 text-gray-600">
+            <p className="mt-3 t-tenue">
               Somos un bazar de playa nacido en Monte Hermoso. Viajamos a las expos CAFIRA y
               PRESENTES en Buenos Aires a elegir cada pieza, para que tu casa tenga esa onda de
               mar todo el año.
@@ -228,7 +228,7 @@ export async function BazarHome({ tenant, info }: { tenant: Client; info: BazarS
             <Link
               href={`${base}/quienes-somos`}
               className="mt-5 inline-block rounded-full px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: BZ.azul }}
+              style={{ backgroundColor: "var(--t-texto)", color: "var(--t-fondo)" }}
             >
               Nuestra historia
             </Link>

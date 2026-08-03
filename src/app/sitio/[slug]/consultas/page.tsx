@@ -36,7 +36,7 @@ export default async function ConsultasPage({ params }: { params: Promise<{ slug
           >
             Consultanos lo que quieras
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm t-tenue">
             ¿Buscás algo puntual? ¿Querés saber si llega a tu ciudad? Escribinos y te
             respondemos a la brevedad.
           </p>
@@ -45,7 +45,7 @@ export default async function ConsultasPage({ params }: { params: Promise<{ slug
           <ConsultaBazarForm slug={info.slug} />
         </div>
         {info.whatsapp ? (
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-sm t-tenue">
             ¿Apurado? Escribinos directo por{" "}
             <a
               href={`https://wa.me/${info.whatsapp}`}

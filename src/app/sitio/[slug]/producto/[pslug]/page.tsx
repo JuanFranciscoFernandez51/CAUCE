@@ -92,7 +92,7 @@ export default async function ProductoPage({
             {producto.categoria}
           </Link>
           {" / "}
-          <span className="text-gray-700">{producto.nombre}</span>
+          <span className="t-tenue">{producto.nombre}</span>
         </nav>
 
         <div className="grid gap-10 md:grid-cols-2">
@@ -155,7 +155,7 @@ export default async function ProductoPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 block rounded-full border-2 py-3 text-center font-semibold transition-colors hover:bg-[#F6F1E8]"
-                style={{ borderColor: BZ.aquaClaro, color: BZ.azul }}
+                style={{ borderColor: "var(--t-borde)", color: "var(--t-texto)" }}
               >
                 💬 Consultanos por WhatsApp
               </a>

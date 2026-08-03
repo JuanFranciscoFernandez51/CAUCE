@@ -58,7 +58,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             {p.precioOferta != null && p.precioOferta < p.precio && !aPedido ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
+                style={{ backgroundColor: "var(--tpl, " + "var(--tpl, #3FA9A5)" + ")", color: "var(--tpl-sobre, #fff)" }}
               >
                 OFERTA
               </span>
@@ -87,7 +87,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             aria-label={`Agregar ${p.nombre} al carrito`}
             title={aPedido ? "Agregar — lo pedimos al proveedor" : "Agregar al carrito"}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-bold transition-transform hover:scale-105"
-            style={{ backgroundColor: "var(--tpl, " + BZ.aqua + ")", color: "var(--tpl-sobre, #fff)" }}
+            style={{ backgroundColor: "var(--tpl, " + "var(--tpl, #3FA9A5)" + ")", color: "var(--tpl-sobre, #fff)" }}
           >
             +
           </button>

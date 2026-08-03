@@ -26,7 +26,7 @@ export default async function FavoritosPage({ params }: { params: Promise<{ slug
     <ConceShell info={site.info}>
       <div className="mx-auto max-w-6xl px-4 py-10">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">❤️ Tus favoritos</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm t-tenue">
           Los vehículos que marcaste quedan guardados en este dispositivo.
         </p>
         <div className="mt-8">

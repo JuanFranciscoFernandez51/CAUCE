@@ -28,7 +28,7 @@ export default async function ContactoPage({ params }: { params: Promise<{ slug:
     <ConceShell info={info}>
       <div className="mx-auto max-w-6xl px-4 py-10">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Contactanos</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm t-tenue">
           Escribinos y te respondemos a la brevedad. También podés visitarnos en cualquiera de
           nuestras sucursales.
         </p>
@@ -38,7 +38,7 @@ export default async function ContactoPage({ params }: { params: Promise<{ slug:
             {info.sucursales.map((s, i) => (
               <div
                 key={i}
-                className="rounded-3xl bg-white p-6"
+                className="rounded-3xl t-card p-6"
                 style={{ border: `1px solid ${RC.borde}` }}
               >
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: RC.doradoTexto }}>
@@ -73,10 +73,10 @@ export default async function ContactoPage({ params }: { params: Promise<{ slug:
             ))}
             <div className="rounded-3xl p-6" style={{ backgroundColor: RC.doradoSuave }}>
               {info.horarios ? (
-                <p className="text-sm font-semibold text-gray-700">🕒 {info.horarios}</p>
+                <p className="text-sm font-semibold t-tenue">🕒 {info.horarios}</p>
               ) : null}
               {info.email ? (
-                <p className="mt-2 text-sm text-gray-700">
+                <p className="mt-2 text-sm t-tenue">
                   ✉️{" "}
                   <a href={`mailto:${info.email}`} className="font-semibold hover:underline">
                     {info.email}

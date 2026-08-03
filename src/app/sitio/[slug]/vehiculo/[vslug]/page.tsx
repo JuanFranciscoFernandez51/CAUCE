@@ -108,7 +108,7 @@ export default async function VehiculoPage({
       <VistaPing slug={tenant.slug} vehiculoId={v.id} />
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Migas */}
-        <nav className="mb-5 text-sm text-gray-500">
+        <nav className="mb-5 text-sm t-tenue">
           <Link href={base} className="hover:underline">Inicio</Link>
           {" / "}
           <Link href={`${base}/catalogo?tipo=${encodeURIComponent(v.tipo)}`} className="hover:underline">
@@ -143,7 +143,7 @@ export default async function VehiculoPage({
                 </span>
               ) : null}
               {v.estado === "reservado" ? (
-                <span className="rounded-full border border-gray-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-600">
+                <span className="rounded-full border border-gray-400 px-3 py-1 text-xs font-bold uppercase tracking-wide t-tenue">
                   Reservado
                 </span>
               ) : null}
@@ -151,9 +151,9 @@ export default async function VehiculoPage({
 
             <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
               {v.marca} <span style={{ color: RC.doradoTexto }}>{v.modelo}</span>
-              {v.version ? <span className="font-semibold text-gray-500"> {v.version}</span> : null}
+              {v.version ? <span className="font-semibold t-tenue"> {v.version}</span> : null}
             </h1>
-            <p className="mt-1.5 text-[15px] text-gray-500">
+            <p className="mt-1.5 text-[15px] t-tenue">
               {v.anio} · {es0km ? "0 km" : fmtKm(v.km)}
               {v.transmision ? ` · ${v.transmision}` : ""}
               {v.combustible ? ` · ${v.combustible}` : ""}
@@ -186,7 +186,7 @@ export default async function VehiculoPage({
                   href={info.mercadolibre}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border bg-white px-4 py-2.5 text-sm font-semibold hover:bg-gray-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border t-card px-4 py-2.5 text-sm font-semibold hover:bg-gray-50"
                   style={{ borderColor: RC.borde }}
                 >
                   🛒 Mercado Libre
@@ -195,7 +195,7 @@ export default async function VehiculoPage({
             </div>
 
             {/* Ficha técnica */}
-            <div className="mt-7 overflow-hidden rounded-3xl bg-white" style={{ border: `1px solid ${RC.borde}` }}>
+            <div className="mt-7 overflow-hidden rounded-3xl t-card" style={{ border: `1px solid ${RC.borde}` }}>
               <p className="px-5 pt-4 text-xs font-bold uppercase tracking-widest" style={{ color: RC.doradoTexto }}>
                 Ficha técnica
               </p>
@@ -204,7 +204,7 @@ export default async function VehiculoPage({
                   .filter((f) => f.valor)
                   .map((f) => (
                     <div key={f.label} className="flex justify-between border-b py-2 text-sm last:border-b-0" style={{ borderColor: "#F3F0E9" }}>
-                      <dt className="text-gray-500">{f.label}</dt>
+                      <dt className="t-tenue">{f.label}</dt>
                       <dd className="font-semibold">{f.valor}</dd>
                     </div>
                   ))}
@@ -216,7 +216,7 @@ export default async function VehiculoPage({
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: RC.doradoTexto }}>
                   Descripción
                 </p>
-                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed t-tenue">
                   {v.descripcion}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default async function VehiculoPage({
           <h2 className="text-center text-2xl font-extrabold tracking-tight">
             ¿Querés saber más sobre este vehículo?
           </h2>
-          <p className="mt-1 text-center text-sm text-gray-500">
+          <p className="mt-1 text-center text-sm t-tenue">
             Dejanos tus datos y te contactamos, o escribinos directo por WhatsApp.
           </p>
           <div className="mt-5">

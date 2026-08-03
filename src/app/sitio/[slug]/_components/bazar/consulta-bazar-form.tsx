@@ -60,13 +60,13 @@ export function ConsultaBazarForm({
     return (
       <div
         className="rounded-2xl p-8 text-center"
-        style={{ backgroundColor: BZ.arena, border: `1px solid ${BZ.aquaClaro}` }}
+        style={{ backgroundColor: "var(--t-suave)", border: `1px solid ${"var(--t-borde)"}` }}
       >
-        <div className="text-4xl">🐚✨</div>
-        <h3 className="mt-3 text-xl font-bold" style={{ color: BZ.azul }}>
+        <div className="text-4xl">✨</div>
+        <h3 className="mt-3 text-xl font-bold" style={{ color: "var(--t-texto)" }}>
           ¡Consulta enviada!
         </h3>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm t-tenue">
           Gracias {nombre.split(" ")[0]}. Te respondemos a la brevedad.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function ConsultaBazarForm({
           placeholder="Nombre y apellido"
           required
           className={campo}
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         />
       </div>
       <div>
@@ -99,7 +99,7 @@ export function ConsultaBazarForm({
           placeholder="Ej: 291 555 5555"
           required
           className={campo}
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         />
       </div>
       <div>
@@ -111,14 +111,14 @@ export function ConsultaBazarForm({
           placeholder="Contanos qué estás buscando…"
           required
           className={`${campo} min-h-24`}
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         />
       </div>
       <button
         type="submit"
         disabled={enviando}
         className="w-full rounded-full py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        style={{ backgroundColor: BZ.aqua }}
+        style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
       >
         {enviando ? "Enviando…" : "Enviar consulta"}
       </button>

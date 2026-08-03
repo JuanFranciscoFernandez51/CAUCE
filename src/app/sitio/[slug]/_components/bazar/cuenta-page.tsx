@@ -107,7 +107,7 @@ export function CuentaPage({ slug }: { slug: string }) {
 
   if (cargando) {
     return (
-      <div className="mx-auto max-w-md px-4 py-24 text-center text-sm text-gray-400">
+      <div className="mx-auto max-w-md px-4 py-24 text-center text-sm t-tenue">
         Cargando tu cuenta…
       </div>
     );
@@ -119,16 +119,16 @@ export function CuentaPage({ slug }: { slug: string }) {
       <div className="mx-auto max-w-2xl px-4 py-10">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
-              Hola, {me.cuenta.nombre.split(" ")[0]} 🐚
+            <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--t-texto)" }}>
+              Hola, {me.cuenta.nombre.split(" ")[0]} 
             </h1>
-            <p className="mt-1 text-sm text-gray-500">{me.cuenta.email}</p>
+            <p className="mt-1 text-sm t-tenue">{me.cuenta.email}</p>
           </div>
           <button
             type="button"
             onClick={salir}
-            className="rounded-full border px-4 py-2 text-sm text-gray-500 hover:text-gray-700"
-            style={{ borderColor: BZ.aquaClaro }}
+            className="rounded-full border px-4 py-2 text-sm t-tenue hover:t-tenue"
+            style={{ borderColor: "var(--t-borde)" }}
           >
             Cerrar sesión
           </button>
@@ -137,30 +137,30 @@ export function CuentaPage({ slug }: { slug: string }) {
         {!me.cuenta.usoDescuento ? (
           <div
             className="mt-6 rounded-2xl p-5 text-center"
-            style={{ backgroundColor: BZ.arena, border: `2px dashed ${BZ.aqua}` }}
+            style={{ backgroundColor: "var(--t-suave)", border: `2px dashed ${"var(--tpl, #3FA9A5)"}` }}
           >
-            <p className="text-lg font-bold" style={{ color: BZ.azul }}>
+            <p className="text-lg font-bold" style={{ color: "var(--t-texto)" }}>
               🎁 ¡Tenés 10% OFF en tu primera compra!
             </p>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm t-tenue">
               Se aplica solo en el carrito. No acumulable con otros cupones (siempre aplica el
               mayor).
             </p>
             <Link
               href={`${base}/tienda`}
               className="mt-3 inline-block rounded-full px-6 py-2.5 font-semibold text-white"
-              style={{ backgroundColor: BZ.aqua }}
+              style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
             >
               Usarlo ahora
             </Link>
           </div>
         ) : null}
 
-        <h2 className="mt-10 text-xl font-bold" style={{ color: BZ.azul }}>
+        <h2 className="mt-10 text-xl font-bold" style={{ color: "var(--t-texto)" }}>
           Mis pedidos
         </h2>
         {me.pedidos.length === 0 ? (
-          <p className="mt-3 rounded-2xl border border-dashed p-8 text-center text-sm text-gray-400">
+          <p className="mt-3 rounded-2xl border border-dashed p-8 text-center text-sm t-tenue">
             Todavía no hiciste ningún pedido.
           </p>
         ) : (
@@ -172,10 +172,10 @@ export function CuentaPage({ slug }: { slug: string }) {
                 style={{ borderColor: "#E8F2F1" }}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold" style={{ color: BZ.azul }}>
+                  <p className="font-bold" style={{ color: "var(--t-texto)" }}>
                     Pedido #{p.numero}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs t-tenue">
                     {new Date(p.fecha).toLocaleDateString("es-AR", {
                       timeZone: "America/Argentina/Buenos_Aires",
                     })}
@@ -205,24 +205,24 @@ export function CuentaPage({ slug }: { slug: string }) {
       {recienRegistrado ? (
         <div
           className="mb-6 rounded-2xl p-5 text-center"
-          style={{ backgroundColor: BZ.arena, border: `2px dashed ${BZ.aqua}` }}
+          style={{ backgroundColor: "var(--t-suave)", border: `2px dashed ${"var(--tpl, #3FA9A5)"}` }}
         >
-          <p className="font-bold" style={{ color: BZ.azul }}>
+          <p className="font-bold" style={{ color: "var(--t-texto)" }}>
             🎉 ¡Cuenta creada! Tenés 10% OFF en tu primera compra.
           </p>
         </div>
       ) : null}
 
-      <h1 className="text-center text-3xl font-extrabold tracking-tight" style={{ color: BZ.azul }}>
+      <h1 className="text-center text-3xl font-extrabold tracking-tight" style={{ color: "var(--t-texto)" }}>
         Mi cuenta
       </h1>
-      <p className="mt-2 text-center text-sm text-gray-500">
-        Creá tu cuenta y llevate <strong>10% OFF</strong> en tu primera compra. 🐚
+      <p className="mt-2 text-center text-sm t-tenue">
+        Creá tu cuenta y llevate <strong>10% OFF</strong> en tu primera compra. 
       </p>
 
       <div
         className="mt-6 flex rounded-full border p-1 text-sm font-semibold"
-        style={{ borderColor: BZ.aquaClaro }}
+        style={{ borderColor: "var(--t-borde)" }}
       >
         {(["login", "registro"] as const).map((t) => (
           <button
@@ -233,7 +233,7 @@ export function CuentaPage({ slug }: { slug: string }) {
               setError("");
             }}
             className="flex-1 rounded-full py-2 transition-colors"
-            style={tab === t ? { backgroundColor: BZ.aqua, color: "#fff" } : {}}
+            style={tab === t ? { backgroundColor: "var(--tpl, #3FA9A5)", color: "#fff" } : {}}
           >
             {t === "login" ? "Ingresar" : "Crear cuenta"}
           </button>
@@ -253,7 +253,7 @@ export function CuentaPage({ slug }: { slug: string }) {
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               placeholder="Nombre y apellido *"
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
             <input
               value={form.telefono}
@@ -261,7 +261,7 @@ export function CuentaPage({ slug }: { slug: string }) {
               placeholder="Teléfono / WhatsApp"
               inputMode="tel"
               className={campo}
-              style={{ borderColor: BZ.aquaClaro }}
+              style={{ borderColor: "var(--t-borde)" }}
             />
           </>
         ) : null}
@@ -272,7 +272,7 @@ export function CuentaPage({ slug }: { slug: string }) {
           type="email"
           required
           className={campo}
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         />
         <input
           value={form.password}
@@ -281,13 +281,13 @@ export function CuentaPage({ slug }: { slug: string }) {
           type="password"
           required
           className={campo}
-          style={{ borderColor: BZ.aquaClaro }}
+          style={{ borderColor: "var(--t-borde)" }}
         />
         <button
           type="submit"
           disabled={enviando}
           className="w-full rounded-full py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: BZ.aqua }}
+          style={{ backgroundColor: "var(--tpl, #3FA9A5)", color: "var(--tpl-sobre, #fff)" }}
         >
           {enviando ? "Un segundo…" : tab === "login" ? "Ingresar" : "Crear mi cuenta"}
         </button>
