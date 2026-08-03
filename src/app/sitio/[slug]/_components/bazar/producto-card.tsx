@@ -29,7 +29,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
               src={p.foto}
               alt={p.nombre}
               loading="lazy"
-              className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${aPedido ? "opacity-50 grayscale" : ""}`}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="emoji-tpl flex h-full w-full items-center justify-center text-4xl" aria-hidden />
@@ -48,11 +48,13 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
                 ¡Últimas unidades!
               </span>
             ) : null}
-            {aPedido ? (
-              <span className="rounded-full bg-gray-400 px-2 py-0.5 text-[11px] font-bold text-white">
-                A pedido
-              </span>
-            ) : null}
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-bold text-white ${
+                aPedido ? "bg-red-600" : "bg-emerald-600"
+              }`}
+            >
+              {aPedido ? "A pedido" : "En stock"}
+            </span>
             {p.precioOferta != null && p.precioOferta < p.precio && !aPedido ? (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"

@@ -20,6 +20,10 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
     envios?: { bahiaBlanca?: number; interior?: number; gratisDesde?: number; correos?: string[] };
     nosotros?: { numeros?: { valor: string; texto: string }[] };
     horarios?: string;
+    sucursales?: { direccion?: string }[];
+    telefonos?: { celular?: string; fijo?: string };
+    instagram?: string;
+    facebook?: string;
   };
   const envios = st.envios ?? {};
 
@@ -51,6 +55,41 @@ export async function RepuestosHome({ tenant, info }: { tenant: Client; info: Ba
 
   return (
     <BazarShell info={info}>
+      {/* Datos del local, discretos: que estén a mano sin robar protagonismo. */}
+      <div className="t-suave t-borde border-b">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 text-[12px]">
+          {st.sucursales?.[0]?.direccion ? <span className="t-tenue">📍 {st.sucursales[0].direccion}</span> : null}
+          {st.telefonos?.celular ? (
+            <a href={`tel:${st.telefonos.celular.replace(/\D/g, "")}`} className="t-tenue transition hover:text-[#F5B301]">
+              📱 {st.telefonos.celular}
+            </a>
+          ) : null}
+          {st.telefonos?.fijo ? (
+            <a href={`tel:${st.telefonos.fijo.replace(/\D/g, "")}`} className="t-tenue transition hover:text-[#F5B301]">
+              ☎ {st.telefonos.fijo}
+            </a>
+          ) : null}
+          {st.horarios ? <span className="t-tenue hidden lg:inline">🕘 {st.horarios}</span> : null}
+          <span className="ml-auto flex items-center gap-3">
+            {st.instagram ? (
+              <a href={`https://instagram.com/${st.instagram}`} target="_blank" rel="noreferrer" className="t-tenue transition hover:text-[#F5B301]">
+                Instagram
+              </a>
+            ) : null}
+            {st.facebook ? (
+              <a href={`https://facebook.com/${st.facebook}`} target="_blank" rel="noreferrer" className="t-tenue transition hover:text-[#F5B301]">
+                Facebook
+              </a>
+            ) : null}
+            {tenant.whatsapp ? (
+              <a href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="font-semibold text-[#25D366]">
+                WhatsApp
+              </a>
+            ) : null}
+          </span>
+        </div>
+      </div>
+
       {/* ── Hero: el buscador manda ── */}
       <section className="hero relative isolate overflow-hidden">
         {/* profundidad: dos luces cálidas y una trama fina, para que no sea un negro plano */}

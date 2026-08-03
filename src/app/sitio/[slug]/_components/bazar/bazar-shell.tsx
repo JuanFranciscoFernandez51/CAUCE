@@ -96,11 +96,13 @@ function Header({ info }: { info: BazarShellInfo }) {
         <Link href={base} className="flex shrink-0 items-center gap-2">
           {info.logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={info.logo}
-              alt={info.nombre}
-              className="h-11 w-auto max-w-[190px] object-contain dark:rounded-lg dark:bg-white/95 dark:px-2 dark:py-1"
-            />
+            <>
+              <img src={info.logo} alt={info.nombre} className={`h-11 w-auto max-w-[190px] object-contain ${info.logoOscuro ? "dark:hidden" : ""}`} />
+              {info.logoOscuro ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={info.logoOscuro} alt={info.nombre} className="hidden h-11 w-auto max-w-[190px] object-contain dark:block" />
+              ) : null}
+            </>
           ) : (
             <span className="text-2xl">{info.emoji}</span>
           )}
@@ -182,7 +184,7 @@ function Header({ info }: { info: BazarShellInfo }) {
       </div>
 
       {/* Categorías (desktop) */}
-      <div className="hidden border-t md:block" style={{ borderColor: "#EFF6F5" }}>
+      <div className="t-borde hidden border-t bg-white md:block dark:bg-black">
         <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-1.5">
           {info.categorias.map((c) => (
             <Link
@@ -471,7 +473,7 @@ function Footer({ info }: { info: BazarShellInfo }) {
           <div className="flex items-center gap-2">
             {info.logo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={info.logo} alt={info.nombre} className="h-10 w-auto max-w-[170px] object-contain dark:rounded-lg dark:bg-white/95 dark:px-2 dark:py-1" />
+              <img src={info.logoOscuro ?? info.logo} alt={info.nombre} className="h-10 w-auto max-w-[170px] object-contain" />
             ) : (
               <span className="text-2xl">{info.emoji}</span>
             )}

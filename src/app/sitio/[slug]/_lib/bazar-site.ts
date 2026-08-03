@@ -14,6 +14,7 @@ export type BazarShellInfo = {
   slug: string;
   nombre: string;
   logo: string | null;
+  logoOscuro: string | null; // versión con el trazo en blanco, para modo noche
   whatsapp: string | null;
   instagram: string | null;
   email: string | null;
@@ -86,6 +87,7 @@ export async function getBazarSite(slug: string): Promise<BazarSite | null> {
       slug: tenant.slug,
       nombre: branding.displayName,
       logo: branding.logo || null,
+      logoOscuro: ((tenant.branding as { logoOscuro?: string } | null)?.logoOscuro) || null,
       whatsapp: tenant.whatsapp?.replace(/\D/g, "") || null,
       instagram: settings.instagram ?? null,
       email: tenant.email ?? null,
