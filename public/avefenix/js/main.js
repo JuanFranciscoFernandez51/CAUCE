@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Usar fetch con keepalive: true. Es la forma moderna y más fiable que sendBeacon
                     // para asegurar que la petición se complete incluso si la pestaña se cierra.
                     // Firefox y Chrome soportan esto muy bien con JSON.
-                    fetch("https://formsubmit.co/ajax/bruno@avefenixleds.com.ar", {
+                    fetch("/api/public/sitio/avefenix/chat-cierre", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(data),
@@ -638,7 +638,7 @@ Usa esta información exacta para responder a los clientes:
                 chatHistorySent = false;
 
                 // Call Secure Cloudflare Proxy instead of Gemini directly
-                const response = await fetch('https://gemini-chat.jamirobruno.workers.dev', {
+                const response = await fetch('/api/public/sitio/avefenix/chat-web', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: chatHistory })
