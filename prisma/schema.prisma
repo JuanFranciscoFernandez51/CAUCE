@@ -1556,3 +1556,12 @@ model ConceCuota {
   @@index([clientId, estado])
   @@index([clientId, fechaVencimiento])
 }
+
+/// Configuración de Cauce (la nuestra, no la de los tenants): datos de la
+/// empresa, valores por defecto de los presupuestos e integraciones.
+/// Una fila por clave, para no migrar cada vez que sumamos un ajuste.
+model Ajuste {
+  clave     String   @id
+  valor     Json
+  updatedAt DateTime @updatedAt
+}

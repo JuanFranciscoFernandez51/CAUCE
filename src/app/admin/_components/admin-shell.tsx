@@ -18,6 +18,7 @@ const NAV = [
   { href: "/admin/marketing", label: "Marketing", icon: "📣" },
   { href: "/admin/plantillas", label: "Plantillas", icon: "🧩" },
   { href: "/admin/estilos", label: "Estilos", icon: "🎨" },
+  { href: "/admin/config", label: "Configuración", icon: "⚙️" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
