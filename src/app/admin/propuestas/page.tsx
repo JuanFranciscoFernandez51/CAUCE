@@ -1,6 +1,10 @@
 import { db } from "@/lib/db";
 import { Badge, Card, EmptyState } from "@/components/ui";
 import { fmtDate, PACK_LABELS } from "../_components/format";
+import { getPricing } from "@/lib/pricing";
+import { PROCESOS_CATALOGO } from "@/lib/procesos-catalogo";
+import { PresupuestoBuilder } from "../pricing/presupuesto-builder";
+import { PropuestasTabs } from "./propuestas-tabs";
 
 export const metadata = { title: "Propuestas" };
 export const dynamic = "force-dynamic";
@@ -16,17 +20,17 @@ const fmtUsd = (n: number) => `USD ${n.toLocaleString("es-AR")}`;
 
 /** Seguimiento comercial: qué propuesta se abrió, cuál quedó fría, cuál cerró. */
 export default async function PropuestasPage() {
-  const propuestas = await db.propuesta.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const [propuestas, pricing] = await Promise.all([
+    db.propuesta.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
+    getPricing(),
+  ]);
 
-  return (
+  const enviadas = (
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Propuestas</h1>
         <p className="text-sm text-muted-foreground">
-          Los links que mandaste y qué pasó con cada uno. Se generan desde Presupuestos.
+          Armá el presupuesto y mandá el link. Acá mismo ves qué pasó con cada uno.
         </p>
       </div>
 
@@ -72,5 +76,15 @@ export default async function PropuestasPage() {
         </ul>
       )}
     </div>
+  );
+
+  return (
+    <PropuestasTabs
+      armar={
+        <PresupuestoBuilder pricing={pricing} procesos={PROCESOS_CATALOGO} />
+      }
+      enviadas={enviadas}
+      cuantas={propuestas.length}
+    />
   );
 }
