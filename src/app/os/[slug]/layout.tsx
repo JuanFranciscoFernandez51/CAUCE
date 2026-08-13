@@ -177,6 +177,14 @@ export default async function OsLayout({
       { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
     );
   }
+  // Template piletas (Piletas Bahía Blanca): presupuestos e Instagram.
+  if (tpl === "piletas") {
+    opsItems.unshift(
+      { label: "Presupuestos", href: `${base}/presupuestos`, icon: "📄" },
+      { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
+    );
+  }
+
   // Template comida (Casa Milo): la carta y los pedidos del día.
   if (tpl === "comida") {
     opsItems.unshift(

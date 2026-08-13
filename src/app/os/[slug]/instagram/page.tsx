@@ -28,7 +28,8 @@ export default async function InstagramPage({
   const { slug } = await params;
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
-  if (!tenant || !esBazar(tenant)) notFound();
+  const tplIg = (tenant?.settings as { template?: string } | null)?.template;
+  if (!tenant || !(esBazar(tenant) || tplIg === "piletas")) notFound();
   const base = `/os/${tenant.slug}`;
 
   const conexion = igConexionDe(tenant);
@@ -83,8 +84,8 @@ export default async function InstagramPage({
 
   const publicaciones: PublicacionIg[] = pubsDb.map((p) => ({
     id: p.id,
-    productoNombre: p.producto.nombre,
-    foto: fotosDe(p.fotos)[0] ?? fotosDe(p.producto.fotos)[0] ?? null,
+    productoNombre: p.producto?.nombre ?? "Publicación",
+    foto: fotosDe(p.fotos)[0] ?? (p.producto ? fotosDe(p.producto.fotos)[0] : null) ?? null,
     caption: p.caption,
     estado: p.estado,
     error: p.error,

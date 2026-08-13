@@ -77,6 +77,7 @@ model Client {
 
   users                 User[]
   mktConfig             MktConfig?
+  presupuestosDoc       PresupuestoDoc[]
   leads                 Lead[]
   projects              Project[]
   procesos              Proceso[]
@@ -1284,19 +1285,19 @@ model BazarConsulta {
 
 /// Publicación de Instagram de un producto (ahora o programada; cron la publica).
 model BazarPublicacion {
-  id             String        @id @default(cuid())
+  id             String         @id @default(cuid())
   clientId       String
-  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  productoId     String
-  producto       BazarProducto @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  caption        String        @db.Text
-  fotos          Json          @default("[]")
+  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  productoId     String?
+  producto       BazarProducto? @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  caption        String         @db.Text
+  fotos          Json           @default("[]")
   programadaPara DateTime?
-  estado         String        @default("BORRADOR") // BORRADOR|PROGRAMADA|PUBLICADA|ERROR
+  estado         String         @default("BORRADOR") // BORRADOR|PROGRAMADA|PUBLICADA|ERROR
   publicadaEn    DateTime?
-  error          String?       @db.Text
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  error          String?        @db.Text
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([clientId, estado])
   @@index([estado, programadaPara])
@@ -1573,4 +1574,27 @@ model Ajuste {
   clave     String   @id
   valor     Json
   updatedAt DateTime @updatedAt
+}
+
+/// Presupuesto de servicio imprimible (Piletas BB y afines): cliente, datos
+/// del trabajo, renglones y condiciones. El PDF sale por impresión del navegador.
+model PresupuestoDoc {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  numero      Int
+  nombre      String // cliente
+  domicilio   String?
+  telefono    String?
+  datos       Json? // pares etiqueta/valor del trabajo (medidas, volumen, revestimiento…)
+  items       Json // [{detalle, cant, unitario}]
+  materiales  Float    @default(0)
+  condiciones String?  @db.Text
+  validezDias Int      @default(15)
+  estado      String   @default("BORRADOR") // BORRADOR|ENVIADO|ACEPTADO|RECHAZADO
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([clientId, numero])
+  @@index([clientId, estado])
 }

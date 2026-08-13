@@ -2,63 +2,52 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { guardOsApi } from "../_guard";
-import { registrarActividad } from "@/lib/actividad";
 
-const createSchema = z.object({
-  nombre: z.string().trim().min(1, "El nombre del cliente es obligatorio").max(200),
+const schema = z.object({
+  nombre: z.string().trim().min(1).max(200),
+  domicilio: z.string().trim().max(300).optional().default(""),
   telefono: z.string().trim().max(50).optional().default(""),
-  equipo: z.string().trim().min(1, "Contanos qué equipo es").max(200),
-  detalle: z.string().trim().min(1, "Contanos qué hay que cotizar").max(2000),
+  datos: z.array(z.object({ etiqueta: z.string().max(60), valor: z.string().max(120) })).default([]),
+  items: z
+    .array(z.object({ detalle: z.string().trim().min(1).max(400), cant: z.number().min(0), unitario: z.number().min(0) }))
+    .min(1),
+  materiales: z.number().min(0).default(0),
+  condiciones: z.string().trim().max(2000).optional().default(""),
 });
 
-/** Alta de presupuesto (sin ingresar el equipo). El cliente entra al CRM. */
+/** Alta de presupuesto: numera secuencial por negocio y devuelve el link del PDF. */
 export async function POST(req: Request, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
-  const g = await guardOsApi(slug, "taller");
+  const g = await guardOsApi(slug);
   if (g.error) return g.error;
-
-  const parsed = createSchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Datos inválidos" },
-      { status: 400 }
-    );
-  }
+  const body = await req.json().catch(() => null);
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Revisá los datos" }, { status: 400 });
   const d = parsed.data;
-  const now = new Date();
 
-  let contact = d.telefono
-    ? await db.contact.findFirst({ where: { clientId: g.tenant.id, phone: d.telefono } })
-    : await db.contact.findFirst({ where: { clientId: g.tenant.id, name: d.nombre } });
-  if (contact) {
-    contact = await db.contact.update({ where: { id: contact.id }, data: { lastTouchAt: now } });
-  } else {
-    contact = await db.contact.create({
-      data: {
-        clientId: g.tenant.id,
-        name: d.nombre,
-        phone: d.telefono || null,
-        source: "presupuesto",
-        stage: "interesado",
-        temperatura: "caliente",
-        lastTouchAt: now,
-      },
-    });
-  }
-
-  const max = await db.presupuestoTaller.aggregate({
-    where: { clientId: g.tenant.id },
-    _max: { numero: true },
+  const ultimo = await db.presupuestoDoc.findFirst({
+    where: { clientId: g.tenant!.id },
+    orderBy: { numero: "desc" },
+    select: { numero: true },
   });
-  const p = await db.presupuestoTaller.create({
+  const condiciones =
+    d.condiciones ||
+    ((g.tenant!.settings as { condicionesPresupuesto?: string } | null)?.condicionesPresupuesto ?? "");
+
+  const p = await db.presupuestoDoc.create({
     data: {
-      clientId: g.tenant.id,
-      numero: (max._max.numero ?? 0) + 1,
-      contactId: contact.id,
-      equipo: d.equipo,
-      detalle: d.detalle,
+      clientId: g.tenant!.id,
+      numero: (ultimo?.numero ?? 0) + 1,
+      nombre: d.nombre,
+      domicilio: d.domicilio || null,
+      telefono: d.telefono || null,
+      datos: d.datos,
+      items: d.items,
+      materiales: d.materiales,
+      condiciones: condiciones || null,
+      estado: "ENVIADO",
     },
+    select: { id: true, numero: true },
   });
-  void registrarActividad(g.tenant.id, "presupuesto_creado", `P-${String(p.numero).padStart(4, "0")} ${d.equipo}`);
-  return NextResponse.json({ ok: true, id: p.id, numero: p.numero }, { status: 201 });
+  return NextResponse.json(p, { status: 201 });
 }
