@@ -1,61 +1,31 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { CarritoProvider, useCarrito } from "../bazar/carrito-store";
 
 /**
  * Pedido de Casa Milo. No hay checkout: el pedido se arma acá y se cierra por
  * WhatsApp con el detalle y el total ya escritos, que es como trabajan.
  */
-export type ItemPedido = { id: string; nombre: string; precio: number; cant: number };
-
-type Ctx = {
-  items: ItemPedido[];
-  total: number;
-  unidades: number;
-  sumar: (p: { id: string; nombre: string; precio: number }) => void;
-  quitar: (id: string) => void;
-  vaciar: () => void;
-};
-
-const PedidoCtx = createContext<Ctx | null>(null);
-
-export function PedidoProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<ItemPedido[]>([]);
-
-  const valor = useMemo<Ctx>(() => {
-    const sumar = (p: { id: string; nombre: string; precio: number }) =>
-      setItems((prev) => {
-        const ya = prev.find((i) => i.id === p.id);
-        return ya
-          ? prev.map((i) => (i.id === p.id ? { ...i, cant: i.cant + 1 } : i))
-          : [...prev, { ...p, cant: 1 }];
-      });
-    const quitar = (id: string) =>
-      setItems((prev) => prev.flatMap((i) => (i.id === id ? (i.cant > 1 ? [{ ...i, cant: i.cant - 1 }] : []) : [i])));
-    return {
-      items,
-      total: items.reduce((a, i) => a + i.precio * i.cant, 0),
-      unidades: items.reduce((a, i) => a + i.cant, 0),
-      sumar,
-      quitar,
-      vaciar: () => setItems([]),
-    };
-  }, [items]);
-
-  return <PedidoCtx.Provider value={valor}>{children}</PedidoCtx.Provider>;
-}
-
-export function usePedido() {
-  const c = useContext(PedidoCtx);
-  if (!c) throw new Error("usePedido fuera del PedidoProvider");
-  return c;
+/** El pedido usa el carrito de la tienda: mismo checkout, mismo Despacho. */
+export function PedidoProvider({ slug, children }: { slug: string; children: ReactNode }) {
+  return <CarritoProvider slug={slug}>{children}</CarritoProvider>;
 }
 
 const plata = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
 
 /** Barra fija: aparece con el primer producto y cierra el pedido por WhatsApp. */
-export function BarraPedido({ whatsapp, minimoKg }: { whatsapp: string | null; minimoKg?: number }) {
-  const { items, total, unidades, vaciar } = usePedido();
+export function BarraPedido({
+  whatsapp,
+  minimoKg,
+  base,
+}: {
+  whatsapp: string | null;
+  minimoKg?: number;
+  base: string;
+}) {
+  const { items, subtotal: total, cantidadTotal: unidades, vaciar } = useCarrito();
   if (!unidades) return null;
 
   const detalle = items.map((i) => `• ${i.cant} × ${i.nombre} — ${plata(i.precio * i.cant)}`).join("\n");
@@ -89,12 +59,20 @@ export function BarraPedido({ whatsapp, minimoKg }: { whatsapp: string | null; m
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="px-[26px] py-[14px] text-[14px] font-bold uppercase tracking-wide transition hover:opacity-90"
-              style={{ backgroundColor: "#A9C6F5", color: "#3A1218" }}
+              className="px-5 py-[14px] text-[13px] font-semibold uppercase tracking-wide transition hover:opacity-80"
+              style={{ border: "1px solid rgba(251,243,222,.4)" }}
             >
-              Cerrar pedido por WhatsApp
+              Cerrar por WhatsApp
             </a>
           ) : null}
+          {/* Comprar en la web: datos, pago y el pedido cae en Despacho. */}
+          <Link
+            href={`${base}/carrito`}
+            className="px-[26px] py-[14px] text-[14px] font-bold uppercase tracking-wide transition hover:opacity-90"
+            style={{ backgroundColor: "#A9C6F5", color: "#3A1218" }}
+          >
+            Completar pedido
+          </Link>
         </div>
       </div>
     </div>
@@ -106,13 +84,15 @@ export function BotonSumar({
   producto,
   invertido,
 }: {
-  producto: { id: string; nombre: string; precio: number };
+  producto: { id: string; nombre: string; precio: number; foto?: string | null };
   invertido?: boolean;
 }) {
-  const { sumar } = usePedido();
+  const { agregar } = useCarrito();
   return (
     <button
-      onClick={() => sumar(producto)}
+      onClick={() =>
+        agregar({ productoId: producto.id, nombre: producto.nombre, precio: producto.precio, foto: producto.foto ?? null })
+      }
       className="px-[18px] py-3 text-[13px] font-semibold uppercase tracking-wide transition hover:opacity-90"
       style={
         invertido

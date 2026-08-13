@@ -102,12 +102,25 @@ export default async function OsLayout({
 
   const branding = tenantBranding(tenant);
   const opsOrder = OPS_ORDER.filter((m) => m !== "sitio" || esInmobiliaria(tenant.rubro));
+  // Si la marca define su fondo y su tinta, el panel usa la misma estética que
+  // su web: el dueño entra y reconoce su negocio, no una herramienta genérica.
+  const paleta = (tenant.branding ?? {}) as { fondo?: string; tinta?: string; display?: string };
   const themeVars = {
     "--primary": branding.primary,
     "--primary-foreground": "#ffffff",
     "--primary-soft": `color-mix(in srgb, ${branding.primary} 16%, transparent)`,
     "--accent": branding.accent,
     "--ring": branding.primary,
+    ...(paleta.fondo
+      ? {
+          "--background": paleta.fondo,
+          "--card": `color-mix(in srgb, ${paleta.fondo} 55%, #ffffff)`,
+          "--muted": `color-mix(in srgb, ${paleta.fondo} 70%, ${branding.primary} 6%)`,
+          "--muted-foreground": `color-mix(in srgb, ${paleta.tinta ?? "#333"} 62%, transparent)`,
+          "--border": `color-mix(in srgb, ${branding.primary} 18%, transparent)`,
+        }
+      : {}),
+    ...(paleta.tinta ? { "--foreground": paleta.tinta, "--card-foreground": paleta.tinta } : {}),
   } as React.CSSProperties;
 
   // El middleware ya exige sesión en /os; acá validamos pertenencia al tenant.

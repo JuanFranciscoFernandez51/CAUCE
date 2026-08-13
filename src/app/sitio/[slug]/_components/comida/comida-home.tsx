@@ -60,7 +60,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
   const foto = (f: unknown) => (Array.isArray(f) && typeof f[0] === "string" ? (f[0] as string) : null);
 
   return (
-    <PedidoProvider>
+    <PedidoProvider slug={tenant.slug}>
       <div style={{ backgroundColor: CREMA, color: TINTA, fontFamily: "var(--font-archivo)" }}>
         {/* 1.1 Barra de anuncio */}
         <div
@@ -307,7 +307,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           </div>
         </footer>
 
-        <BarraPedido whatsapp={wa} minimoKg={st.minimoKg} />
+        <BarraPedido whatsapp={wa} minimoKg={st.minimoKg} base={`/sitio/${tenant.slug}`} />
       </div>
     </PedidoProvider>
   );

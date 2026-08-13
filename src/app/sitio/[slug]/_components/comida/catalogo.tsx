@@ -105,7 +105,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                       </p>
                       <div className="mt-2 flex items-center justify-between gap-3">
                         <p className="text-[26px] font-bold">{plata(p.precio)}</p>
-                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio }} invertido />
+                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.foto }} invertido />
                       </div>
                     </div>
                   </article>
@@ -132,7 +132,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                         <p className="text-[22px] font-bold" style={{ color: TINTA }}>
                           {plata(p.precio)}
                         </p>
-                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio }} />
+                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.foto }} />
                       </div>
                     </div>
                   </article>
