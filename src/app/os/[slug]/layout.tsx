@@ -177,6 +177,17 @@ export default async function OsLayout({
       { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
     );
   }
+  // Template comida (Casa Milo): la carta y los pedidos del día.
+  if (tpl === "comida") {
+    opsItems.unshift(
+      { label: "Pedidos", href: `${base}/pedidos`, icon: "🧾" },
+      { label: "Carta", href: `${base}/productos`, icon: "🍽" },
+      { label: "Reparto", href: `${base}/despacho`, icon: "🛵" },
+      { label: "Consultas", href: `${base}/consultas`, icon: "💬" },
+      { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
+    );
+  }
+
   // Template repuestos (Fernández Repuestos): misma tienda, con proveedores y stock propio.
   if (tpl === "repuestos") {
     // Pedidos une la venta con el despacho: es el centro del negocio online.
