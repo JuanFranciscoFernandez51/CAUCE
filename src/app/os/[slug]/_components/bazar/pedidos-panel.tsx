@@ -236,7 +236,16 @@ export function PedidosPanel({ slug, pedidos }: { slug: string; pedidos: PedidoF
                         {p.pagoMp ? <span className="ml-1 text-[11px] text-muted-foreground">MP</span> : null}
                       </td>
                       <td className="px-3 py-2.5">
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap items-center gap-1">
+                          <a
+                            href={`/os/${slug}/pedidos/${p.id}/etiqueta`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Etiqueta para la bandeja"
+                            className="rounded-md border border-border px-2 py-1 text-xs font-medium transition hover:bg-muted"
+                          >
+                            Etiqueta
+                          </a>
                           {pasos.map((s) => (
                             <button
                               key={s.a}
