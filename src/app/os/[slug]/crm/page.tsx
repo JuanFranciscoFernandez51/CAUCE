@@ -4,6 +4,8 @@ import { getTenantBySlug, hasModule, MODULE_LABELS } from "@/lib/tenant";
 import { ButtonLink, Input } from "@/components/ui";
 import { ModuleDisabled } from "../_components/module-disabled";
 import { CrmBoard, type BoardContact } from "../_components/crm-board";
+import { TabsCrm } from "./tabs-crm";
+import ConsultasPage from "../consultas/page";
 
 export default async function CrmPage({
   params,
@@ -56,7 +58,7 @@ export default async function CrmPage({
     lastTouchAt: c.lastTouchAt ? c.lastTouchAt.toISOString() : null,
   }));
 
-  return (
+  const vistaClientes = (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -94,5 +96,20 @@ export default async function CrmPage({
 
       <CrmBoard slug={tenant.slug} contacts={boardContacts} />
     </div>
+  );
+
+  // Las consultas viven en dos modelos según el rubro; se cuentan las dos.
+  const [sinResponderBazar, sinResponderConce] = await Promise.all([
+    db.bazarConsulta.count({ where: { clientId: tenant.id, estado: "NUEVA" } }).catch(() => 0),
+    db.conceConsulta.count({ where: { clientId: tenant.id, estado: "NUEVA" } }).catch(() => 0),
+  ]);
+  const sinResponder = sinResponderBazar + sinResponderConce;
+
+  return (
+    <TabsCrm
+      clientes={vistaClientes}
+      consultas={<ConsultasPage params={Promise.resolve({ slug })} />}
+      sinResponder={sinResponder}
+    />
   );
 }
