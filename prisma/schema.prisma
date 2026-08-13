@@ -76,6 +76,7 @@ model Client {
   updatedAt    DateTime     @updatedAt
 
   users                 User[]
+  mktConfig             MktConfig?
   leads                 Lead[]
   projects              Project[]
   procesos              Proceso[]
@@ -1044,24 +1045,32 @@ model ProyectoTarea {
 
 /// Conexión con Meta (fila única id="default"). Tokens cifrados con crypto.ts.
 model MktConfig {
-  id               String    @id @default("default")
-  userId           String?
-  userName         String?
-  pageId           String?
-  pageName         String?
-  pageAccessToken  String?   @db.Text // cifrado AES-256-GCM
-  igUserId         String?
-  igUsername       String?
-  expiresAt        DateTime?
-  scope            String?
-  apiVersion       String    @default("v25.0")
-  lastTokenCheckAt DateTime?
-  adAccountId      String? // "act_XXXX"
-  businessId       String?
-  pixelId          String?
-  adsTokenScopes   Json?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                 String    @id @default("default")
+  /// Cuenta de Meta del cliente. Null = la cuenta de Cauce (la nuestra).
+  /// Cada tenant conecta su propia página, su IG y su cuenta publicitaria.
+  clientId           String?   @unique
+  client             Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId             String?
+  userName           String?
+  pageId             String?
+  pageName           String?
+  pageAccessToken    String?   @db.Text // cifrado AES-256-GCM
+  igUserId           String?
+  igUsername         String?
+  expiresAt          DateTime?
+  scope              String?
+  apiVersion         String    @default("v25.0")
+  lastTokenCheckAt   DateTime?
+  adAccountId        String? // "act_XXXX"
+  businessId         String?
+  pixelId            String?
+  adsTokenScopes     Json?
+  /// Token de System User: no expira, es el recomendado para automatizar.
+  adsSystemUserId    String?
+  adsSystemUserToken String?   @db.Text // cifrado, igual que el de la página
+  metaCatalogId      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 /// Publicación propia (feed/reel) — borrador, programada o publicada.
