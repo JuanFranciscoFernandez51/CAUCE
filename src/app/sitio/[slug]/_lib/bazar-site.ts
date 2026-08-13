@@ -32,6 +32,7 @@ export type BazarShellInfo = {
   descripcion: string; // la frase del pie
   promesas: string[]; // cinta superior
   popupDescuento: boolean; // el cartelito de bienvenida con descuento
+  paletaFija?: boolean; // la marca no tiene modo noche: manda su paleta
 };
 
 export type BazarSite = {
@@ -53,6 +54,7 @@ function caraDelTemplate(tenant: Client, primario?: string) {
       fondoSuave: "#FDF8E9", // crema
       descripcion: "Milanesas y pollo premium con envío a domicilio en CABA. Lo simple, cuando está bien hecho.",
       popupDescuento: false,
+      paletaFija: true,
       promesas: ["Envíos en CABA", "Empanado a mano", "Llega en 45 minutos", "Cortes seleccionados"],
     };
   if (tpl === "repuestos")
@@ -119,6 +121,7 @@ export async function getBazarSite(slug: string): Promise<BazarSite | null> {
       fondoSuave: cara.fondoSuave,
       descripcion: cara.descripcion,
       promesas: cara.promesas,
+      paletaFija: cara.paletaFija ?? false,
       popupDescuento: cara.popupDescuento,
     },
   };

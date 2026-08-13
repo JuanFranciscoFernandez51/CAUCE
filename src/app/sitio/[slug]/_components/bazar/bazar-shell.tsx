@@ -47,9 +47,23 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
     <div
       className="tienda flex min-h-screen flex-col"
       style={{
-        backgroundColor: "#ffffff",
+        backgroundColor: info.paletaFija ? "#FFFDF6" : "#ffffff",
         color: "var(--t-texto)",
-        fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
+        fontFamily: info.paletaFija
+          ? "var(--font-archivo), ui-sans-serif, system-ui, sans-serif"
+          : "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
+        // Cuando la marca tiene su paleta, manda de día y de noche.
+        ...(info.paletaFija
+          ? ({
+              "--t-fondo": "#FFFDF6",
+              "--t-card": "#FFFFFF",
+              "--t-suave": info.fondoSuave,
+              "--t-texto": info.colorTexto,
+              "--t-tenue": "#6B4A4F",
+              "--t-borde": "rgba(123,36,52,0.16)",
+              "--t-panel": "rgba(251,243,222,0.94)",
+            } as Record<string, string>)
+          : {}),
       }}
     >
       <Header info={info} />
@@ -140,11 +154,18 @@ function Header({ info }: { info: BazarShellInfo }) {
                 <img src={info.logoOscuro} alt={info.nombre} className="hidden h-11 w-auto max-w-[190px] object-contain dark:block" />
               ) : null}
             </>
+          ) : info.paletaFija ? (
+            <span
+              className="text-[26px] font-black"
+              style={{ fontFamily: "var(--font-bodoni)", color: info.colorTexto, letterSpacing: "-0.02em" }}
+            >
+              {info.nombre}
+            </span>
           ) : (
             <span className="text-2xl">{info.emoji}</span>
           )}
           {/* Con logo propio el nombre al lado sobra: ya lo dice la marca. */}
-          {info.logo ? null : (
+          {info.logo || info.paletaFija ? null : (
             <span className="hidden text-lg font-bold tracking-tight sm:block" style={{ color: "var(--t-texto)" }}>
               {info.nombre}
             </span>
