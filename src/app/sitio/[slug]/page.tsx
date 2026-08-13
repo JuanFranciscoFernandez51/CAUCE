@@ -73,9 +73,7 @@ export default async function SitioHome({
 
   // Template COMIDA (Casa Milo): la carta y el pedido adelante.
   if (tpl === "comida") {
-    const site = await getBazarSite(slug);
-    if (!site) notFound();
-    return <ComidaHome tenant={site.tenant} info={site.info} />;
+    return <ComidaHome tenant={tenant} />;
   }
 
   // Template REPUESTOS (Fernández Repuestos): buscador por moto adelante.

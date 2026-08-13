@@ -383,3 +383,9 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .tienda .cinta-marquesina { animation: none; }
 }
+
+/* Barra de pedido de Casa Milo: entra desde abajo. */
+@keyframes subir {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}

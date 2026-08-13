@@ -12,32 +12,19 @@ type P = { name: string; cat: string; precio: number; desc: string; destacado?: 
 
 // Carta pensada para delivery: por unidad y por cantidad, que es como se pide.
 const CARTA: P[] = [
-  // ── Milanesas de carne ──
-  { name: "Milanesa de nalga · 4 unidades", cat: "Milanesas de carne", precio: 14900, desc: "Nalga seleccionada, cortada fina y empanada a mano. Bandeja de 4.", destacado: true },
-  { name: "Milanesa de nalga · 8 unidades", cat: "Milanesas de carne", precio: 27900, desc: "La bandeja familiar: 8 milanesas de nalga listas para freír u horno.", destacado: true },
-  { name: "Milanesa de nalga · 12 unidades", cat: "Milanesas de carne", precio: 39900, desc: "Para tener en el freezer. 12 milanesas de nalga.", },
-  { name: "Milanesa de bola de lomo · 4 unidades", cat: "Milanesas de carne", precio: 13900, desc: "Corte magro y tierno, ideal para el horno." },
-  { name: "Milanesa de peceto · 4 unidades", cat: "Milanesas de carne", precio: 16900, desc: "El corte más fino y parejo. Bandeja de 4." },
-  // ── Pollo ──
-  { name: "Milanesa de pollo · 4 unidades", cat: "Pollo", precio: 12900, desc: "Pechuga entera empanada a mano, sin agregados.", destacado: true },
-  { name: "Milanesa de pollo · 8 unidades", cat: "Pollo", precio: 23900, desc: "Bandeja familiar de milanesas de pechuga." },
-  { name: "Pechuga entera · 1 kg", cat: "Pollo", precio: 11900, desc: "Pechuga fresca sin piel ni hueso, lista para cocinar." },
-  { name: "Pechuga fileteada · 1 kg", cat: "Pollo", precio: 12900, desc: "Fileteada fina, del grosor que se pide para plancha.", destacado: true },
-  { name: "Suprema rellena jamón y queso · 2 unidades", cat: "Pollo", precio: 15900, desc: "Rellena a mano, empanada y lista para el horno." },
-  // ── Napolitanas y rellenas ──
-  { name: "Milanesa napolitana · 4 unidades", cat: "Napolitanas y rellenas", precio: 19900, desc: "Con salsa, mozzarella y jamón. Van al horno y listo." },
-  { name: "Milanesa rellena jamón y queso · 4 unidades", cat: "Napolitanas y rellenas", precio: 21900, desc: "Rellena a mano con jamón cocido y mozzarella." },
-  { name: "Milanesa a la suiza · 4 unidades", cat: "Napolitanas y rellenas", precio: 22900, desc: "Con queso suizo y jamón natural." },
-  // ── Guarniciones ──
-  { name: "Puré de papas casero · 500 g", cat: "Guarniciones", precio: 5900, desc: "Papa, manteca y leche. Nada más." },
-  { name: "Papas bastón · 1 kg", cat: "Guarniciones", precio: 5400, desc: "Corte bastón, listas para freír u horno." },
-  { name: "Ensalada mixta · 500 g", cat: "Guarniciones", precio: 4900, desc: "Lechuga, tomate y zanahoria, lavada y lista." },
-  { name: "Puré de calabaza · 500 g", cat: "Guarniciones", precio: 5900, desc: "Calabaza asada, suave y sin agregados." },
-  // ── Combos ──
-  { name: "Combo Milo · 8 milanesas + puré + papas", cat: "Combos", precio: 36900, desc: "La cena resuelta para cuatro: 8 milanesas a elección, puré y papas.", destacado: true },
-  { name: "Combo Pollo · 8 milanesas de pollo + ensalada", cat: "Combos", precio: 29900, desc: "Ocho milanesas de pechuga con ensalada mixta." },
-  { name: "Combo Napo · 4 napolitanas + papas", cat: "Combos", precio: 25900, desc: "Cuatro napolitanas con papas bastón." },
+  { name: "Milanesa de ternera clásica", cat: "Ternera", precio: 12900, desc: "Nalga tierna, corte medio. Pack de 1 kg, aprox. 6 unidades.", destacado: true },
+  { name: "Milanesa de ternera fina", cat: "Ternera", precio: 13500, desc: "Bola de lomo cortada fina, para sándwich. Pack de 1 kg." },
+  { name: "Napolitana lista al horno", cat: "Ternera", precio: 14900, desc: "Con salsa, jamón y muzzarella. 4 unidades, van directo al horno.", destacado: true },
+  { name: "Suprema rebozada", cat: "Pollo", precio: 10900, desc: "Pechuga entera, rebozado crocante. Pack de 1 kg." },
+  { name: "Milanesa de pollo fina", cat: "Pollo", precio: 10400, desc: "Fina y rendidora, la que más sale. Pack de 1 kg, aprox. 8 unidades.", destacado: true },
+  { name: "Suprema natural", cat: "Pollo", precio: 9800, desc: "Sin rebozar, limpia y lista para cocinar. Pack de 1 kg." },
+  { name: "Puré de papas casero", cat: "Guarniciones", precio: 4200, desc: "Papa, manteca y leche. Nada más. Envase de 500 g." },
+  { name: "Papas bastón", cat: "Guarniciones", precio: 5400, desc: "Corte grueso, para horno o freidora de aire. Pack de 1 kg." },
+  { name: "Ensalada rusa", cat: "Guarniciones", precio: 4800, desc: "Fresca, hecha el mismo día del envío. Envase de 500 g." },
+  { name: "Combo Casa", cat: "Combos", precio: 28500, desc: "1 kg de ternera, 1 kg de pollo y un puré de 500 g. Para 4 personas · Ahorrás $2.400", destacado: true },
+  { name: "Combo Semana", cat: "Combos", precio: 46900, desc: "4 kg surtidos entre ternera, pollo y napolitanas. Elegís el mix por WhatsApp. Freezer lleno · Envío sin cargo", destacado: true },
 ];
+
 
 async function main() {
   const existente = await db.client.findUnique({ where: { slug: SLUG } });
@@ -67,6 +54,8 @@ async function main() {
       settings: {
         template: "comida",
         eslogan: "Lo simple, cuando está bien hecho.",
+        anuncio: "Entrega en el día en CABA · Pedido mínimo 2 kg · Envío sin cargo desde $30.000",
+        minimoKg: 2,
         claim: "Milanesas & pollo premium",
         instagram: "casamilo.ba",
         horarios: "Todos los días de 10 a 15 y de 19 a 23:30",
@@ -76,7 +65,9 @@ async function main() {
           retiroLocal: false,
           caba: 2500,
           gratisDesde: 30000,
-          demora: "Entre 45 y 70 minutos",
+          demora: "En el día",
+          corte: "Los pedidos confirmados antes de las 17 hs se entregan ese mismo día.",
+          barrios: ["Palermo", "Belgrano", "Caballito", "Recoleta", "Villa Urquiza", "Almagro", "San Telmo", "y todos los demás"],
         },
         nosotros: {
           historia:

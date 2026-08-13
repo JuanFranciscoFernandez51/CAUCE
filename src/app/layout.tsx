@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono, Bodoni_Moda, Archivo } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/theme";
 import { GoogleAnalytics, MetaPixel } from "@/components/analytics";
@@ -17,6 +17,20 @@ const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const bodoni = Bodoni_Moda({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  variable: "--font-bodoni",
+  display: "swap",
+});
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-archivo",
+  display: "swap",
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -53,7 +67,7 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} ${bodoni.variable} ${archivo.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>{children}</Providers>
