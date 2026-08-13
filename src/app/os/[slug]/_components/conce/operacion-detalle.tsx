@@ -9,6 +9,7 @@ import {
   numeroOperacion,
   OPERACION_ESTADO_LABEL,
   permutasDe,
+  pagosDe,
   rutaOperacion,
 } from "@/lib/conce";
 import { OperacionForm } from "./operacion-form";
@@ -50,6 +51,7 @@ export async function OperacionDetalle({
     ? (op.documentacion as { item: string; ok: boolean }[])
     : [];
   const permutas = permutasDe(op.permutas);
+  const pagos = pagosDe(op.pagos);
 
   const permutados = permutas.some((p) => p.vehiculoId)
     ? await db.conceVehiculo.findMany({
@@ -176,6 +178,7 @@ export async function OperacionDetalle({
           domicilio: op.domicilio ?? "",
           telefono: op.telefono ?? "",
           email: op.email ?? "",
+          contactId: op.contactId ?? "",
           vehiculoId: op.vehiculoId ?? "",
           vehiculoTexto:
             op.vehiculoTexto ??
@@ -185,6 +188,7 @@ export async function OperacionDetalle({
           vehAnio: op.vehAnio ?? op.vehiculo?.anio ?? null,
           vehKm: op.vehKm ?? null,
           permutas,
+          pagos,
           dominio: op.dominio ?? op.vehiculo?.dominio ?? "",
           chasis: op.chasis ?? "",
           motorNro: op.motorNro ?? "",

@@ -25,7 +25,8 @@ export default async function OsHomePage({
   if (!tenant) notFound();
 
   // Template bazar (tienda online): dashboard propio con ventas y tops.
-  if ((tenant.settings as { template?: string } | null)?.template === "bazar") {
+  const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "bazar" || tpl === "repuestos" || tpl === "comida") {
     return <BazarDashboard tenant={tenant} />;
   }
 

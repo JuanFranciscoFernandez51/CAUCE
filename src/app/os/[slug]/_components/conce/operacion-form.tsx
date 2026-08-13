@@ -1,11 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, ErrorState, Field, Input, Select, Textarea } from "@/components/ui";
-import { DOCS_DEFAULT, PERMUTA_VACIA, rutaOperacion, type Permuta } from "@/lib/conce";
+import {
+  DOCS_DEFAULT,
+  PAGO_METODOS,
+  PAGO_VACIO,
+  PERMUTA_VACIA,
+  pagadoOtrasMonedas,
+  rutaOperacion,
+  totalPagado,
+  type Pago,
+  type Permuta,
+} from "@/lib/conce";
+import { Buscador, type OpcionBuscador } from "./buscador";
 
 export type VehiculoOpcion = { id: string; etiqueta: string; dominio: string | null };
+
+/** Lo que devuelve /conce/clientes. */
+type ClienteApi = {
+  id: string;
+  nombre: string;
+  telefono: string;
+  email: string;
+  dni: string;
+  domicilio: string;
+};
+
+/** Lo que devuelve /conce/buscar-vehiculos. */
+type VehiculoApi = {
+  id: string;
+  etiqueta: string;
+  marca: string;
+  modelo: string;
+  anio: number;
+  km: number;
+  dominio: string;
+  motor: string;
+  precio: number | null;
+  moneda: string;
+  estado: string;
+};
+
+const fmtMonto = (n: number, moneda: string) =>
+  `${moneda === "USD" ? "US$" : "$"} ${Math.round(n).toLocaleString("es-AR")}`;
 
 export type OperacionFormData = {
   id?: string;
@@ -16,6 +55,8 @@ export type OperacionFormData = {
   domicilio: string;
   telefono: string;
   email: string;
+  /** Cliente del CRM elegido del buscador ("" = cliente nuevo, se crea al guardar). */
+  contactId: string;
   vehiculoId: string;
   vehiculoTexto: string;
   vehMarca: string;
@@ -23,6 +64,8 @@ export type OperacionFormData = {
   vehAnio: number | null;
   vehKm: number | null;
   permutas: Permuta[];
+  /** Pagos combinables del boleto (efectivo, transferencia, dólares, cheque…). */
+  pagos: Pago[];
   dominio: string;
   chasis: string;
   motorNro: string;
@@ -63,6 +106,117 @@ export function OperacionForm({
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
 
+  // Chip del cliente elegido del CRM (si vino uno ya vinculado, lo mostramos).
+  const [cliente, setCliente] = useState<OpcionBuscador | null>(
+    inicial.contactId ? { id: inicial.contactId, etiqueta: inicial.nombre } : null
+  );
+  // Chip del vehículo elegido del stock.
+  const [vehiculo, setVehiculo] = useState<OpcionBuscador | null>(() => {
+    const v = vehiculos.find((x) => x.id === inicial.vehiculoId);
+    return v ? { id: v.id, etiqueta: v.etiqueta } : null;
+  });
+  // Chips de las permutas que salieron del stock, por índice.
+  const [permutaChips, setPermutaChips] = useState<Record<number, OpcionBuscador>>({});
+
+  // Guardamos la fila completa que devolvió la API para poder autocompletar.
+  const cacheClientes = useRef(new Map<string, ClienteApi>());
+  const cacheVehiculos = useRef(new Map<string, VehiculoApi>());
+
+  const buscarClientes = useCallback(
+    async (q: string): Promise<OpcionBuscador[]> => {
+      const res = await fetch(`/api/os/${slug}/conce/clientes?q=${encodeURIComponent(q)}`);
+      const data = (await res.json()) as { contactos?: ClienteApi[] };
+      const filas = data.contactos ?? [];
+      filas.forEach((c) => cacheClientes.current.set(c.id, c));
+      return filas.map((c) => ({
+        id: c.id,
+        etiqueta: c.nombre,
+        detalle: [c.telefono, c.dni ? `DNI ${c.dni}` : "", c.email].filter(Boolean).join(" · "),
+      }));
+    },
+    [slug]
+  );
+
+  /** En boletos ofrecemos el stock disponible; en mandatos y permutas, todo. */
+  const buscarVehiculos = useCallback(
+    async (q: string, soloStock: boolean): Promise<OpcionBuscador[]> => {
+      const res = await fetch(
+        `/api/os/${slug}/conce/buscar-vehiculos?q=${encodeURIComponent(q)}${soloStock ? "&stock=1" : ""}`
+      );
+      const data = (await res.json()) as { vehiculos?: VehiculoApi[] };
+      const filas = data.vehiculos ?? [];
+      filas.forEach((v) => cacheVehiculos.current.set(v.id, v));
+      return filas.map((v) => ({
+        id: v.id,
+        etiqueta: v.etiqueta,
+        detalle: [
+          v.km ? `${v.km.toLocaleString("es-AR")} km` : "",
+          v.precio ? fmtMonto(v.precio, v.moneda) : "",
+          v.estado,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      }));
+    },
+    [slug]
+  );
+
+  /** Elegir un cliente del CRM completa los datos que estén vacíos. */
+  function elegirCliente(op: OpcionBuscador) {
+    const c = cacheClientes.current.get(op.id);
+    setCliente(op);
+    setForm((f) => ({
+      ...f,
+      contactId: op.id,
+      nombre: c?.nombre || f.nombre,
+      telefono: c?.telefono || f.telefono,
+      email: c?.email || f.email,
+      dni: c?.dni || f.dni,
+      domicilio: c?.domicilio || f.domicilio,
+    }));
+  }
+
+  /** Elegir un vehículo del stock completa marca, modelo, año, km, dominio… */
+  function elegirVehiculo(op: OpcionBuscador) {
+    const v = cacheVehiculos.current.get(op.id);
+    setVehiculo(op);
+    setForm((f) => ({
+      ...f,
+      vehiculoId: op.id,
+      vehiculoTexto: op.etiqueta,
+      vehMarca: v?.marca ?? f.vehMarca,
+      vehModelo: v?.modelo ?? f.vehModelo,
+      vehAnio: v?.anio ?? f.vehAnio,
+      vehKm: v?.km ?? f.vehKm,
+      dominio: v?.dominio || f.dominio,
+      motorNro: v?.motor || f.motorNro,
+      precio: v?.precio ?? f.precio,
+      moneda: v?.moneda ?? f.moneda,
+    }));
+  }
+
+  /** Una permuta también puede salir del stock: completa sus datos. */
+  function elegirPermuta(i: number, op: OpcionBuscador) {
+    const v = cacheVehiculos.current.get(op.id);
+    setPermutaChips((c) => ({ ...c, [i]: op }));
+    cambiarPermuta(i, {
+      marca: v?.marca ?? op.etiqueta,
+      modelo: v?.modelo ?? "",
+      anio: v?.anio ?? new Date().getFullYear(),
+      km: v?.km ?? 0,
+      dominio: v?.dominio ?? "",
+      valorTomado: v?.precio ?? 0,
+      // Ya existe en el stock: se vincula y el alta automática no lo duplica.
+      vehiculoId: op.id,
+    });
+  }
+
+  const pagado = totalPagado(form.pagos, form.moneda);
+  const otrasMonedas = pagadoOtrasMonedas(form.pagos, form.moneda);
+  const permutado = form.permutas.reduce((a, p) => a + (Number(p.valorTomado) || 0), 0);
+  const entregado = pagado + (Number(form.sena) || 0) + permutado;
+  const saldo = (form.precio ?? 0) - entregado;
+
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -77,6 +231,7 @@ export function OperacionForm({
         domicilio: form.domicilio.trim(),
         telefono: form.telefono.trim(),
         email: form.email.trim(),
+        contactId: form.contactId || null,
         ...(esNuevo ? { vehiculoId: form.vehiculoId || undefined } : { vehiculoId: form.vehiculoId || null }),
         vehiculoTexto:
           form.vehiculoTexto.trim() ||
@@ -97,6 +252,17 @@ export function OperacionForm({
                 valorTomado: Number(p.valorTomado) || 0,
                 dominio: (p.dominio ?? "").trim(),
                 vehiculoId: p.vehiculoId ?? null,
+              })),
+        pagos: esMandato
+          ? []
+          : form.pagos
+              .filter((p) => Number(p.monto) > 0)
+              .map((p) => ({
+                metodo: p.metodo,
+                monto: Number(p.monto) || 0,
+                moneda: p.moneda || "ARS",
+                fecha: (p.fecha ?? "").trim(),
+                detalle: (p.detalle ?? "").trim(),
               })),
         dominio: form.dominio.trim(),
         chasis: form.chasis.trim(),
@@ -141,6 +307,13 @@ export function OperacionForm({
     }));
   }
 
+  function cambiarPago(i: number, cambios: Partial<Pago>) {
+    setForm((f) => ({
+      ...f,
+      pagos: f.pagos.map((p, idx) => (idx === i ? { ...p, ...cambios } : p)),
+    }));
+  }
+
   function toggleDoc(i: number) {
     setForm({
       ...form,
@@ -156,6 +329,26 @@ export function OperacionForm({
         <h2 className="text-sm font-semibold">
           {esMandato ? "👤 Titular que consigna" : "👤 Comprador"}
         </h2>
+        <Field
+          label="Buscar en los clientes del sistema"
+          help={
+            cliente
+              ? "Sus datos se completaron solos. Lo que corrijas acá se guarda también en su ficha."
+              : "Escribí nombre, teléfono o DNI. Si es cliente nuevo, dejalo vacío y cargá los datos a mano."
+          }
+        >
+          <Buscador
+            placeholder="Ej: Pérez, 291..., 30123456"
+            elegido={cliente}
+            buscar={buscarClientes}
+            onElegir={elegirCliente}
+            onSoltar={() => {
+              setCliente(null);
+              setForm((f) => ({ ...f, contactId: "" }));
+            }}
+            vacio="Ningún cliente con eso — cargalo a mano abajo y se crea solo."
+          />
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Nombre y apellido *">
             <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
@@ -186,23 +379,29 @@ export function OperacionForm({
             mandato como <strong>firmado</strong>, el vehículo entra solo al stock sin publicar.
           </p>
         ) : null}
+        <Field
+          label="Buscar en el stock"
+          help={
+            vehiculo
+              ? "Los datos de la unidad se completaron solos. Podés corregirlos abajo."
+              : esMandato
+                ? "Si el auto YA está cargado, buscalo acá. Si no, dejalo vacío y cargalo abajo."
+                : "El boleto reserva el vehículo elegido. Buscá por marca, modelo o dominio."
+          }
+        >
+          <Buscador
+            placeholder="Ej: Peugeot, 208, AB123CD"
+            elegido={vehiculo}
+            buscar={(q) => buscarVehiculos(q, !esMandato)}
+            onElegir={elegirVehiculo}
+            onSoltar={() => {
+              setVehiculo(null);
+              setForm((f) => ({ ...f, vehiculoId: "" }));
+            }}
+            vacio="Sin resultados — cargá la unidad a mano abajo."
+          />
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field
-            label="Del stock"
-            help={esMandato ? "Si el auto YA está cargado, elegilo acá." : "El boleto reserva el vehículo elegido."}
-          >
-            <Select
-              value={form.vehiculoId}
-              onChange={(e) => setForm({ ...form, vehiculoId: e.target.value })}
-            >
-              <option value="">— Fuera del stock (cargar los datos abajo) —</option>
-              {vehiculos.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.etiqueta}
-                </option>
-              ))}
-            </Select>
-          </Field>
           <Field label="Marca">
             <Input
               value={form.vehMarca}
@@ -284,7 +483,28 @@ export function OperacionForm({
           ) : (
             <div className="space-y-3">
               {form.permutas.map((p, i) => (
-                <div key={i} className="grid gap-3 rounded-md border p-3 sm:grid-cols-3 lg:grid-cols-6">
+                <div key={i} className="space-y-3 rounded-md border p-3">
+                  <Field
+                    label={`Permuta ${i + 1} — buscar un vehículo ya cargado`}
+                    help="Si la unidad ya está en el sistema, elegila y se completa sola. Si es nueva, cargala a mano."
+                  >
+                    <Buscador
+                      placeholder="Ej: Fiat, Cronos, AB123CD"
+                      elegido={permutaChips[i] ?? null}
+                      buscar={(q) => buscarVehiculos(q, false)}
+                      onElegir={(op) => elegirPermuta(i, op)}
+                      onSoltar={() => {
+                        setPermutaChips((c) => {
+                          const next = { ...c };
+                          delete next[i];
+                          return next;
+                        });
+                        cambiarPermuta(i, { vehiculoId: null });
+                      }}
+                      vacio="Sin resultados — cargala a mano."
+                    />
+                  </Field>
+                  <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
                   <Field label="Marca">
                     <Input value={p.marca} onChange={(e) => cambiarPermuta(i, { marca: e.target.value })} />
                   </Field>
@@ -324,8 +544,10 @@ export function OperacionForm({
                       />
                       <button
                         type="button"
-                        title={p.vehiculoId ? "Ya entró al stock" : "Quitar permuta"}
-                        disabled={Boolean(p.vehiculoId)}
+                        title={
+                          p.vehiculoId && !permutaChips[i] ? "Ya entró al stock" : "Quitar permuta"
+                        }
+                        disabled={Boolean(p.vehiculoId) && !permutaChips[i]}
                         onClick={() =>
                           setForm({ ...form, permutas: form.permutas.filter((_, idx) => idx !== i) })
                         }
@@ -337,13 +559,137 @@ export function OperacionForm({
                   </Field>
                   {p.vehiculoId ? (
                     <p className="text-xs text-success sm:col-span-3 lg:col-span-6">
-                      ✔ Ya está en el stock (sin publicar).
+                      {permutaChips[i]
+                        ? "✔ Es una unidad que ya está en el stock: no se vuelve a crear."
+                        : "✔ Ya está en el stock (sin publicar)."}
                     </p>
                   ) : null}
+                  </div>
+                </div>
+              ))}
+              <p className="text-right text-sm text-muted-foreground">
+                Total tomado en permutas:{" "}
+                <strong className="text-foreground">{fmtMonto(permutado, form.moneda)}</strong>
+              </p>
+            </div>
+          )}
+        </Card>
+      ) : null}
+
+      {!esMandato ? (
+        <Card className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold">💳 Pagos recibidos</h2>
+              <p className="text-xs text-muted-foreground">
+                Cargá todos los pagos que entraron, cada uno con su forma, su moneda y su fecha.
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  pagos: [...form.pagos, { ...PAGO_VACIO, moneda: form.moneda, fecha: form.fecha }],
+                })
+              }
+            >
+              + Agregar pago
+            </Button>
+          </div>
+
+          {form.pagos.length === 0 ? (
+            <p className="rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
+              Todavía no cargaste ningún pago.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {form.pagos.map((p, i) => (
+                <div key={i} className="grid gap-3 rounded-md border p-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <Field label="Forma de pago">
+                    <Select value={p.metodo} onChange={(e) => cambiarPago(i, { metodo: e.target.value })}>
+                      {PAGO_METODOS.map((m) => (
+                        <option key={m.valor} value={m.valor}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Monto">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={p.monto || ""}
+                      onChange={(e) => cambiarPago(i, { monto: Number(e.target.value) || 0 })}
+                    />
+                  </Field>
+                  <Field label="Moneda">
+                    <Select
+                      value={p.moneda || "ARS"}
+                      onChange={(e) => cambiarPago(i, { moneda: e.target.value })}
+                    >
+                      <option value="ARS">Pesos ($)</option>
+                      <option value="USD">Dólares (US$)</option>
+                    </Select>
+                  </Field>
+                  <Field label="Fecha">
+                    <Input
+                      type="date"
+                      value={p.fecha ?? ""}
+                      onChange={(e) => cambiarPago(i, { fecha: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Detalle">
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        value={p.detalle ?? ""}
+                        placeholder="Ej: Visa 3 cuotas"
+                        onChange={(e) => cambiarPago(i, { detalle: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        title="Quitar pago"
+                        onClick={() =>
+                          setForm({ ...form, pagos: form.pagos.filter((_, idx) => idx !== i) })
+                        }
+                        className="shrink-0 text-muted-foreground/60 hover:text-destructive"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </Field>
                 </div>
               ))}
             </div>
           )}
+
+          <div className="grid gap-2 rounded-md bg-muted/50 p-3 text-sm sm:grid-cols-3">
+            <p>
+              Pagos: <strong>{fmtMonto(pagado, form.moneda)}</strong>
+              {Object.entries(otrasMonedas).map(([m, v]) => (
+                <span key={m} className="block text-xs text-muted-foreground">
+                  + {fmtMonto(v, m)} en {m}
+                </span>
+              ))}
+            </p>
+            <p>
+              Entregado (pagos + seña + permutas):{" "}
+              <strong>{fmtMonto(entregado, form.moneda)}</strong>
+            </p>
+            <p>
+              Saldo:{" "}
+              <strong className={saldo > 0 ? "text-destructive" : "text-success"}>
+                {fmtMonto(saldo, form.moneda)}
+              </strong>
+              {saldo > 0 ? (
+                <span className="block text-xs text-muted-foreground">
+                  Marcá la forma de pago “Financiado” para que se arme la financiación sola.
+                </span>
+              ) : null}
+            </p>
+          </div>
         </Card>
       ) : null}
 

@@ -18,7 +18,7 @@ export async function BazarDashboard({ tenant }: { tenant: Client }) {
   const inicioHoy = dayRange(hoy).start;
   const inicio7 = dayRange(addDays(hoy, -6)).start;
 
-  const [pedidos30, porEstado, topVendidos, topVisitados, stockCritico, consultas, consultasNuevas] =
+  const [pedidos30, porEstado, topVendidos, topVisitados, stockCritico, consultas, consultasNuevas, zonas] =
     await Promise.all([
       db.bazarPedido.findMany({
         where: { clientId: tenant.id, createdAt: { gte: inicio30 }, estado: { in: ESTADOS_PAGOS } },
@@ -53,6 +53,13 @@ export async function BazarDashboard({ tenant }: { tenant: Client }) {
         take: 5,
       }),
       db.bazarConsulta.count({ where: { clientId: tenant.id, estado: "NUEVA" } }),
+      // De dónde llegan los pedidos: en un negocio con reparto, la zona manda.
+      db.bazarPedido.groupBy({
+        by: ["ciudad"],
+        where: { clientId: tenant.id, ciudad: { not: null } },
+        _count: { _all: true },
+        _sum: { total: true },
+      }),
     ]);
 
   // Ventas por día argentino de los últimos 30 días (para KPIs y gráfico).
@@ -306,6 +313,39 @@ export async function BazarDashboard({ tenant }: { tenant: Client }) {
           )}
         </Card>
       </div>
+
+      {/* Zonas: dónde está la demanda */}
+      {zonas.length ? (
+        <section className="rounded-xl border border-border bg-card p-4">
+          <h2 className="text-sm font-semibold">De dónde llegan los pedidos</h2>
+          <p className="text-xs text-muted-foreground">Zonas ordenadas por facturación.</p>
+          <div className="mt-3 space-y-2">
+            {[...zonas]
+              .sort((a, b) => (b._sum.total ?? 0) - (a._sum.total ?? 0))
+              .slice(0, 8)
+              .map((z) => {
+                const tope = Math.max(...zonas.map((x) => x._sum.total ?? 0), 1);
+                return (
+                  <div key={z.ciudad} className="flex items-center gap-3">
+                    <span className="w-36 truncate text-sm">{z.ciudad}</span>
+                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                      <span
+                        className="block h-full rounded-full bg-primary"
+                        style={{ width: `${Math.round(((z._sum.total ?? 0) / tope) * 100)}%` }}
+                      />
+                    </span>
+                    <span className="w-24 text-right text-sm font-semibold tabular-nums">
+                      $ {(z._sum.total ?? 0).toLocaleString("es-AR")}
+                    </span>
+                    <span className="w-16 text-right text-xs text-muted-foreground">
+                      {z._count._all} {z._count._all === 1 ? "pedido" : "pedidos"}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
