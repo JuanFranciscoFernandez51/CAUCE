@@ -69,6 +69,27 @@ function ShellInterno({ info, children }: { info: BazarShellInfo; children: Reac
           💬
         </a>
       ) : null}
+
+      {/* Instagram: para el que quiere ver el producto antes de pedir. */}
+      {info.instagram ? (
+        <a
+          href={`https://www.instagram.com/${info.instagram}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Seguinos en Instagram: @${info.instagram}`}
+          title={`@${info.instagram}`}
+          className={`fixed left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 ${
+            wa ? "bottom-5" : "bottom-5"
+          }`}
+          style={{ background: "linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)" }}
+        >
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden>
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
+      ) : null}
     </div>
   );
 }

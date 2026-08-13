@@ -13,6 +13,7 @@ import { DoohSite } from "./_components/dooh-site";
 import { getBazarSite } from "./_lib/bazar-site";
 import { BazarHome } from "./_components/bazar/bazar-home";
 import { RepuestosHome } from "./_components/repuestos/repuestos-home";
+import { ComidaHome } from "./_components/comida/comida-home";
 import { getConceSite } from "./_lib/conce-site";
 import { ConceHome } from "./_components/conce/conce-home";
 
@@ -68,6 +69,13 @@ export default async function SitioHome({
     const site = await getBazarSite(slug);
     if (!site) notFound();
     return <BazarHome tenant={site.tenant} info={site.info} />;
+  }
+
+  // Template COMIDA (Casa Milo): la carta y el pedido adelante.
+  if (tpl === "comida") {
+    const site = await getBazarSite(slug);
+    if (!site) notFound();
+    return <ComidaHome tenant={site.tenant} info={site.info} />;
   }
 
   // Template REPUESTOS (Fernández Repuestos): buscador por moto adelante.

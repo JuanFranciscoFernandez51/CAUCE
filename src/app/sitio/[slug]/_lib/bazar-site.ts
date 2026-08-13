@@ -42,6 +42,19 @@ export type BazarSite = {
 /** Cada template pone su cara sobre la misma tienda. */
 function caraDelTemplate(tenant: Client, primario?: string) {
   const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "comida")
+    return {
+      emoji: "🍽",
+      color: primario || "#7B2233", // bordó de la marca
+      colorSuave: "#EFE7D6",
+      sobreColor: "#FFF8E7",
+      buscarPlaceholder: "Buscá milanesas, pollo, guarniciones…",
+      colorTexto: "#7B2233",
+      fondoSuave: "#FDF8E9", // crema
+      descripcion: "Milanesas y pollo premium con envío a domicilio en CABA. Lo simple, cuando está bien hecho.",
+      popupDescuento: false,
+      promesas: ["Envíos en CABA", "Empanado a mano", "Llega en 45 minutos", "Cortes seleccionados"],
+    };
   if (tpl === "repuestos")
     return {
       emoji: "🏍",
