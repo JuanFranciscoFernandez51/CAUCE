@@ -39,7 +39,16 @@ export default async function CarritoRoute({
       <CarritoPage
         slug={site.tenant.slug}
         whatsapp={site.info.whatsapp}
-        envioCosto={settings.envioCosto ?? 0}
+        envioCosto={
+          settings.envioCosto ??
+          ((site.tenant.settings as { envios?: { caba?: number; bahiaBlanca?: number; interior?: number } } | null)?.envios
+            ?.caba ??
+            (site.tenant.settings as { envios?: { bahiaBlanca?: number } } | null)?.envios?.bahiaBlanca ??
+            0)
+        }
+        envioGratisDesde={
+          (site.tenant.settings as { envios?: { gratisDesde?: number } } | null)?.envios?.gratisDesde ?? 0
+        }
         retornoPago={sp.pago ?? null}
         retornoPedido={sp.pedido ?? null}
       />

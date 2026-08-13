@@ -106,7 +106,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
         <section className="mx-auto grid max-w-[1180px] items-center gap-11 px-7 pb-10 pt-9 md:grid-cols-[1.35fr_0.65fr]">
           <div>
             <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
-              Milanesas premium BS-AS
+              Milanesas & pollo premium · BS-AS
             </p>
             <h1
               className="mt-4 text-[42px] font-black sm:text-[58px]"
@@ -135,7 +135,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 WhatsApp
               </a>
               <span className="text-[14px]" style={{ color: "#6B4A4F" }}>
-                Entrega en el día en CABA
+                Entrega en el día en CABA · <strong>envío sin cargo desde $30.000</strong>
               </span>
             </div>
           </div>

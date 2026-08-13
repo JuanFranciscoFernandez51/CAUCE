@@ -114,7 +114,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     cuentaConDescuento: Boolean(cuenta && !cuenta.usoDescuento),
   });
 
-  const envio = d.retiroEnLocal ? 0 : Math.max(0, bazarSettings(tenant).envioCosto ?? 0);
+  // Cada negocio configura el envío a su manera: un costo plano, o por zona
+  // con bonificación a partir de cierto monto. Se contemplan las dos.
+  const envios = (tenant.settings as { envios?: { caba?: number; bahiaBlanca?: number; interior?: number; gratisDesde?: number } } | null)?.envios;
+  const costoBase =
+    bazarSettings(tenant).envioCosto ?? envios?.caba ?? envios?.bahiaBlanca ?? envios?.interior ?? 0;
+  const bonificado = !!envios?.gratisDesde && subtotal - descuento.monto >= envios.gratisDesde;
+  const envio = d.retiroEnLocal || bonificado ? 0 : Math.max(0, costoBase);
   const total = subtotal - descuento.monto + envio;
 
   // ── Pedido (numero secuencial por tenant) ──

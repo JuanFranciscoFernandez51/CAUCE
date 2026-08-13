@@ -23,12 +23,15 @@ export function CarritoPage({
   slug,
   whatsapp,
   envioCosto,
+  envioGratisDesde = 0,
   retornoPago,
   retornoPedido,
 }: {
   slug: string;
   whatsapp: string | null;
   envioCosto: number;
+  /** Desde este monto el envío no se cobra. 0 = no aplica. */
+  envioGratisDesde?: number;
   retornoPago: string | null; // "ok" | "pendiente" | "error" (vuelta de MP)
   retornoPedido: string | null;
 }) {
@@ -78,13 +81,17 @@ export function CarritoPage({
   }, [retornoPago]);
 
   const cuentaConDescuento = Boolean(cuenta && !cuenta.usoDescuento);
-  const envio = entrega === "envio" ? envioCosto : 0;
   const descuento = calcularDescuento({
     subtotal,
     cupon: cuponAplicado,
     cuentaConDescuento,
   });
-  const total = subtotal - descuento.monto + envio;
+  // Desde cierto monto el envío no se cobra: se calcula sobre lo que paga.
+  const aPagar = subtotal - descuento.monto;
+  const bonificado = envioGratisDesde > 0 && aPagar >= envioGratisDesde;
+  const envio = entrega === "envio" && !bonificado ? envioCosto : 0;
+  const faltaParaGratis = envioGratisDesde > 0 ? Math.max(0, envioGratisDesde - aPagar) : 0;
+  const total = aPagar + envio;
 
   const cuponInvalido =
     cuponAplicado !== "" && cuponAplicado.toUpperCase() !== CUPON_POPUP;
@@ -360,7 +367,7 @@ export function CarritoPage({
                 onChange={() => setEntrega("envio")}
               />
               🚚 Envío a domicilio —{" "}
-              <strong>{envioCosto > 0 ? fmtPrecio(envioCosto) : "a coordinar"}</strong>
+              <strong>{bonificado ? "sin cargo" : envioCosto > 0 ? fmtPrecio(envioCosto) : "a coordinar"}</strong>
             </label>
           </div>
 
