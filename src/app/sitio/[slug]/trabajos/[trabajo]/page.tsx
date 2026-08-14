@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTenantBySlug, hasModule } from "@/lib/tenant";
 import { JessHeader, JessFooter, jessDatos, JESS_TINTA, JESS_CREMA, JESS_TOPO, JESS_TERRA } from "../../_components/eventos/jess-chrome";
+import { BookFotos } from "../../_components/eventos/book-fotos";
 
 export const dynamic = "force-dynamic";
 
@@ -57,14 +58,7 @@ export default async function TrabajoPage({ params }: { params: Promise<{ slug: 
       {/* Book de fotos */}
       {t.fotos.length ? (
         <section className="mx-auto max-w-[1200px] px-6 pb-16">
-          <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 [&>div]:mb-5">
-            {t.fotos.map((url) => (
-              <div key={url} className="break-inside-avoid overflow-hidden bg-white p-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={t.titulo} className="w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
-              </div>
-            ))}
-          </div>
+          <BookFotos fotos={t.fotos} alt={t.titulo} />
         </section>
       ) : null}
 
