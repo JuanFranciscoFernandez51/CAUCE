@@ -28,8 +28,9 @@ const plata = (n: number) => `$ ${Math.round(n).toLocaleString("es-AR")}`;
 
 /** El armador de Jess: modal como el suyo, con la plantilla y el mobiliario real. */
 export function CotizacionesPanel({
-  slug, cotizaciones, contactos, tipos, mobiliario, plantilla,
+  slug, cotizaciones, contactos, tipos, mobiliario, plantilla, prefill,
 }: {
+  prefill?: { evento: string; cliente: string; telefono: string; tipo: string; fechaEvento: string; lugar: string } | null;
   slug: string;
   cotizaciones: CotRow[];
   contactos: Contacto[];
@@ -38,10 +39,14 @@ export function CotizacionesPanel({
   plantilla: { precio: number; moneda: string; nota: string };
 }) {
   const router = useRouter();
-  const [abierto, setAbierto] = useState(false);
+  const [abierto, setAbierto] = useState(!!prefill);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState("");
-  const [f, setF] = useState({ evento: "", tipo: "", fechaEvento: "", cliente: "", telefono: "", lugar: "", precioUsd: 0, nota: "" });
+  const [f, setF] = useState({
+    evento: prefill?.evento ?? "", tipo: prefill?.tipo ?? "", fechaEvento: prefill?.fechaEvento ?? "",
+    cliente: prefill?.cliente ?? "", telefono: prefill?.telefono ?? "", lugar: prefill?.lugar ?? "",
+    precioUsd: 0, nota: "",
+  });
   // Cantidad por ítem de mobiliario (0 = no va). Tildar pone 1; el stepper suma.
   const [cant, setCant] = useState<Record<string, number>>({});
 

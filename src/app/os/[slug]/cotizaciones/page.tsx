@@ -7,8 +7,15 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Cotizaciones" };
 
 /** Cotizaciones al estilo del panel de Jess: generá PDF y marcá el estado. */
-export default async function CotizacionesPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CotizacionesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ nueva?: string; evento?: string; cliente?: string; telefono?: string; tipo?: string; fechaEvento?: string; lugar?: string }>;
+}) {
   const { slug } = await params;
+  const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
 
@@ -56,6 +63,7 @@ export default async function CotizacionesPage({ params }: { params: Promise<{ s
         </p>
       </div>
       <CotizacionesPanel
+      prefill={sp.nueva ? { evento: sp.evento ?? "", cliente: sp.cliente ?? "", telefono: sp.telefono ?? "", tipo: sp.tipo ?? "", fechaEvento: sp.fechaEvento ?? "", lugar: sp.lugar ?? "" } : null}
         slug={slug}
         cotizaciones={filas}
         contactos={contactos}

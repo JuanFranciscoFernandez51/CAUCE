@@ -35,9 +35,9 @@ export function EventosPanel({
   slug: string; eventos: EventoRow[]; tipos: string[]; abrirInicial: string | null; nuevoInicial: boolean;
 }) {
   const router = useRouter();
-  const [sel, setSel] = useState<EventoRow | null>(
-    nuevoInicial ? VACIO : eventos.find((e) => e.id === abrirInicial) ?? null
-  );
+  // El modal queda solo para crear; abrir un evento va a su ficha completa.
+  const [sel, setSel] = useState<EventoRow | null>(nuevoInicial ? VACIO : null);
+  void abrirInicial;
   const [filtro, setFiltro] = useState<string>("todos");
   const [q, setQ] = useState("");
   const [ocupado, setOcupado] = useState(false);
@@ -128,7 +128,7 @@ export function EventosPanel({
               return (
                 <button
                   key={e.id}
-                  onClick={() => setSel(e)}
+                  onClick={() => router.push(`/os/${slug}/eventos-org/${e.id}`)}
                   className="border-l-4 bg-white p-5 text-left shadow-sm transition hover:shadow-md"
                   style={{ borderLeftColor: est?.color ?? "#9E9387" }}
                 >

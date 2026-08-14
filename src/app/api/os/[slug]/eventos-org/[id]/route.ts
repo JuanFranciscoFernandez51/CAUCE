@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { guardOsApi } from "../../_guard";
 
 const hito = z.object({ titulo: z.string().trim().min(1).max(200), fecha: z.string(), hecho: z.boolean() });
+const pago = z.object({ fecha: z.string(), concepto: z.string().trim().max(200), monto: z.number().min(0) });
 const patchSchema = z.object({
   nombre: z.string().trim().min(1).max(200).optional(),
   tipo: z.string().trim().max(40).optional(),
@@ -15,6 +16,7 @@ const patchSchema = z.object({
   contacto: z.string().trim().max(200).nullable().optional(),
   telefono: z.string().trim().max(50).nullable().optional(),
   hitos: z.array(hito).optional(),
+  pagos: z.array(pago).optional(),
   mobiliario: z.array(z.object({ id: z.string(), nombre: z.string().max(300), cant: z.number().min(1), precio: z.number().min(0) })).optional(),
   notas: z.string().trim().max(4000).nullable().optional(),
 });
@@ -42,6 +44,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
       ...(d.contacto !== undefined ? { contacto: d.contacto } : {}),
       ...(d.telefono !== undefined ? { telefono: d.telefono } : {}),
       ...(d.hitos !== undefined ? { hitos: d.hitos } : {}),
+      // cobrado siempre sale de la suma de pagos cuando se mandan pagos
+      ...(d.pagos !== undefined ? { pagos: d.pagos, cobrado: d.pagos.reduce((a, x) => a + x.monto, 0) } : {}),
       ...(d.mobiliario !== undefined ? { mobiliario: d.mobiliario } : {}),
       ...(d.notas !== undefined ? { notas: d.notas } : {}),
     },

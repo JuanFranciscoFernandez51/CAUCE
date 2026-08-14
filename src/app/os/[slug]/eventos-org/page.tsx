@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
 import { EventosPanel, type EventoRow } from "./eventos-panel";
@@ -18,6 +18,8 @@ export default async function EventosOrgPage({
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
+  // Los links viejos ?abrir=id ahora van a la ficha completa.
+  if (sp.abrir) redirect(`/os/${slug}/eventos-org/${sp.abrir}`);
 
   const tipos = ((tenant.settings as { tiposEvento?: string[] } | null)?.tiposEvento) ?? ["Boda", "Cumpleaños", "Corporativo", "Otros"];
   const eventos = await db.eventoOrg.findMany({
