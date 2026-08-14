@@ -83,6 +83,8 @@ export function DespachoBoard({
   const [resaltado] = useState(
     filtroInicial && filtroInicial !== "CANCELADO" ? filtroInicial : null
   );
+  // Columna sobre la que se está arrastrando una tarjeta (feedback visual).
+  const [dragSobre, setDragSobre] = useState<PedidoEstado | null>(null);
 
   async function patch(p: PedidoBoard, data: Record<string, unknown>) {
     setBusyId(p.id);
@@ -103,6 +105,16 @@ export function DespachoBoard({
     } finally {
       setBusyId(null);
     }
+  }
+
+  /** Soltar una tarjeta en otra columna = mismo PATCH que el botón de paso. */
+  function soltarEn(estado: PedidoEstado, e: React.DragEvent) {
+    e.preventDefault();
+    setDragSobre(null);
+    const id = e.dataTransfer.getData("text/plain");
+    const p = pedidos.find((x) => x.id === id);
+    if (!p || p.estado === estado) return;
+    patch(p, { estado });
   }
 
   const cancelados = pedidos.filter((p) => p.estado === "CANCELADO");
@@ -156,7 +168,19 @@ export function DespachoBoard({
           return (
             <div
               key={col.estado}
-              className={`rounded-lg border border-t-4 bg-card ${col.tono} ${resaltado === col.estado ? "ring-2 ring-primary" : ""}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setDragSobre(col.estado);
+              }}
+              onDragLeave={(e) => {
+                // Solo apagar el resaltado al salir de la columna, no al pasar por sus hijos.
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragSobre(null);
+              }}
+              onDrop={(e) => soltarEn(col.estado, e)}
+              className={`rounded-lg border border-t-4 bg-card ${col.tono} ${
+                resaltado === col.estado ? "ring-2 ring-primary" : ""
+              } ${dragSobre === col.estado ? "ring-2 ring-primary bg-primary-soft" : ""}`}
             >
               <div className="flex items-center justify-between border-b px-3 py-2">
                 <h2 className="text-sm font-semibold">{col.titulo}</h2>
@@ -173,6 +197,7 @@ export function DespachoBoard({
                       slug={slug}
                       busy={busyId === p.id}
                       abierto={abierto === p.id}
+                      arrastrable
                       onToggle={() => setAbierto(abierto === p.id ? null : p.id)}
                       onPatch={(data) => patch(p, data)}
                     />
@@ -192,6 +217,7 @@ function TarjetaPedido({
   slug,
   busy,
   abierto,
+  arrastrable,
   onToggle,
   onPatch,
 }: {
@@ -199,14 +225,34 @@ function TarjetaPedido({
   slug: string;
   busy: boolean;
   abierto: boolean;
+  arrastrable?: boolean;
   onToggle: () => void;
   onPatch: (data: Record<string, unknown>) => void;
 }) {
   const siguiente = SIGUIENTE[p.estado as PedidoEstado];
   const wa = `https://wa.me/${p.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(mensajeWa(p))}`;
+  const api = `/api/os/${slug}/bazar/pedidos/${p.id}`;
 
   return (
-    <div className={`rounded-md border bg-background p-2.5 text-sm ${busy ? "opacity-60" : ""}`}>
+    <div
+      draggable={arrastrable}
+      onDragStart={
+        arrastrable
+          ? (e) => {
+              // Seleccionar texto dentro de un input no debe arrastrar la tarjeta.
+              if (e.target instanceof HTMLElement && e.target.closest("input,select,textarea")) {
+                e.preventDefault();
+                return;
+              }
+              e.dataTransfer.setData("text/plain", p.id);
+              e.dataTransfer.effectAllowed = "move";
+            }
+          : undefined
+      }
+      className={`rounded-md border bg-background p-2.5 text-sm ${busy ? "opacity-60" : ""} ${
+        arrastrable ? "cursor-grab active:cursor-grabbing" : ""
+      }`}
+    >
       <button type="button" onClick={onToggle} className="w-full text-left">
         <div className="flex items-center justify-between gap-2">
           <span className="font-semibold">#{p.numero}</span>
@@ -254,32 +300,34 @@ function TarjetaPedido({
             {p.envio > 0 ? ` · envío ${fmtArs(p.envio)}` : ""}
           </div>
 
-          {/* Datos de envío/contacto */}
+          {/* Datos de envío/contacto (teléfono, dirección y notas editables inline) */}
           <div className="rounded bg-muted/50 p-2 text-xs">
-            <p>📞 {p.telefono}</p>
+            <p>
+              📞{" "}
+              <InlineEdit endpoint={api} field="telefono" value={p.telefono} placeholder="agregar teléfono…" />
+            </p>
             {p.email ? <p>✉️ {p.email}</p> : null}
             {!p.retiroEnLocal ? (
               <p>
-                📍 {p.direccion}
+                📍{" "}
+                <InlineEdit endpoint={api} field="direccion" value={p.direccion} placeholder="agregar dirección…" />
                 {p.ciudad ? `, ${p.ciudad}` : ""}
                 {p.cp ? ` (CP ${p.cp})` : ""}
               </p>
             ) : (
               <p>🏖️ Retira por el local</p>
             )}
-            {p.notas ? <p className="mt-1 italic">“{p.notas}”</p> : null}
+            <p className="mt-1 italic">
+              📝{" "}
+              <InlineEdit endpoint={api} field="notas" value={p.notas} placeholder="agregar nota…" />
+            </p>
           </div>
 
           {/* Seguimiento inline (para envíos) */}
           {!p.retiroEnLocal ? (
             <div className="flex items-center gap-1 text-xs">
               <span className="text-muted-foreground">Seguimiento:</span>
-              <InlineEdit
-                endpoint={`/api/os/${slug}/bazar/pedidos/${p.id}`}
-                field="seguimiento"
-                value={p.seguimiento}
-                placeholder="agregar nro…"
-              />
+              <InlineEdit endpoint={api} field="seguimiento" value={p.seguimiento} placeholder="agregar nro…" />
             </div>
           ) : null}
 
@@ -319,6 +367,14 @@ function TarjetaPedido({
               className="rounded-md bg-[#25D366] px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-90"
             >
               💬 WhatsApp
+            </a>
+            <a
+              href={`/os/${slug}/pedidos/${p.id}/ticket`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-muted"
+            >
+              🧾 Ticket
             </a>
             {p.estado !== "ENTREGADO" && p.estado !== "CANCELADO" ? (
               <button

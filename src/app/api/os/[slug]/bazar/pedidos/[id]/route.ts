@@ -6,13 +6,18 @@ import { marcarPedidoPagado } from "@/lib/bazar-server";
 import { PEDIDO_ESTADOS } from "@/lib/bazar";
 
 /**
- * PATCH de un pedido desde Despacho: mover de estado (kanban 1-click) o
- * editar el seguimiento inline. Pasar a PAGADO dispara TODOS los efectos
+ * PATCH de un pedido desde Despacho: mover de estado (kanban 1-click o drag)
+ * o editar inline seguimiento, teléfono, dirección y notas.
+ * Pasar a PAGADO dispara TODOS los efectos
  * (stock, vendidos, cupón, ingreso en Finanzas) vía marcarPedidoPagado.
  */
 const schema = z.object({
   estado: z.enum(PEDIDO_ESTADOS).optional(),
   seguimiento: z.string().trim().max(120).nullable().optional(),
+  // Edición rápida desde la tarjeta del tablero de reparto.
+  telefono: z.string().trim().min(1, "El teléfono no puede quedar vacío").max(40).optional(),
+  direccion: z.string().trim().max(200).nullable().optional(),
+  notas: z.string().trim().max(500).nullable().optional(),
   /** Si se marca pagado a mano: a qué cuenta entra la plata. */
   medio: z.enum(["mp", "efectivo"]).optional(),
 });
@@ -52,6 +57,9 @@ export async function PATCH(
     data: {
       ...(d.estado ? { estado: d.estado } : {}),
       ...(d.seguimiento !== undefined ? { seguimiento: d.seguimiento || null } : {}),
+      ...(d.telefono ? { telefono: d.telefono } : {}),
+      ...(d.direccion !== undefined ? { direccion: d.direccion || null } : {}),
+      ...(d.notas !== undefined ? { notas: d.notas || null } : {}),
     },
   });
 
