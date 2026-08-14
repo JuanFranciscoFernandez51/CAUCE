@@ -38,7 +38,7 @@ export default async function ConocenosPage({ params }: { params: Promise<{ slug
     <div className="min-h-screen" style={{ backgroundColor: JESS_CREMA, color: JESS_TINTA, fontFamily: "var(--font-montserrat)" }}>
       <JessHeader logo={logo} ig={ig} base={base} activa="conocenos" />
 
-      <section className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20">
+      <section className="mx-auto max-w-[1200px] px-6 py-10 sm:py-20">
         <div className="grid items-start gap-12 md:grid-cols-[0.9fr_1.1fr]">
           <Reveal className="md:sticky md:top-28">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -50,7 +50,7 @@ export default async function ConocenosPage({ params }: { params: Promise<{ slug
 
           <Reveal delay={120}>
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: JESS_TOPO }}>CONÓCENOS</p>
-            <h1 className="mt-4 text-[48px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            <h1 className="mt-4 text-[34px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
               Soy Jess ✨
             </h1>
             <div className="mt-8 space-y-5 text-[15px] leading-[1.9]" style={{ color: "#4d463f" }}>

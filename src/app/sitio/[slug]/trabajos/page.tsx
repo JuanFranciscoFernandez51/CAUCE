@@ -40,10 +40,10 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
     <div className="min-h-screen" style={{ backgroundColor: JESS_CREMA, color: JESS_TINTA, fontFamily: "var(--font-montserrat)" }}>
       <JessHeader logo={logo} ig={ig} base={base} activa="trabajos" />
 
-      <section className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20">
+      <section className="mx-auto max-w-[1200px] px-6 py-10 sm:py-20">
         <Reveal className="text-center">
           <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: JESS_TOPO }}>NUESTROS TRABAJOS</p>
-          <h1 className="mt-4 text-[48px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
+          <h1 className="mt-4 text-[34px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
             Eventos que cuentan historias
           </h1>
           <p className="mt-4 text-[26px]" style={{ fontFamily: "var(--font-pinyon)", color: JESS_TERRA }}>

@@ -63,12 +63,23 @@ export function JessHeader({ logo, ig, base, activa }: { logo: string | null; ig
           href={`https://www.instagram.com/${ig}/`}
           target="_blank"
           rel="noreferrer"
-          className="border px-5 py-2.5 text-[11px] font-medium tracking-[0.18em] transition hover:opacity-80"
+          className="hidden border px-5 py-2.5 text-[11px] font-medium tracking-[0.18em] transition hover:opacity-80 sm:block"
           style={{ borderColor: "rgba(237,232,222,.4)" }}
         >
           @{ig.toUpperCase()}
         </a>
       </div>
+      {/* Nav mobile: siempre a mano, scrolleable */}
+      <nav
+        className="flex items-center gap-6 overflow-x-auto px-6 pb-3 text-[10px] font-semibold tracking-[0.2em] md:hidden"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <Link href={base} className={`shrink-0 ${item(activa === "inicio")}`}>INICIO</Link>
+        <Link href={`${base}/conocenos`} className={`shrink-0 ${item(activa === "conocenos")}`}>CONÓCENOS</Link>
+        <Link href={`${base}/trabajos`} className={`shrink-0 ${item(activa === "trabajos")}`}>TRABAJOS</Link>
+        <a href={`${base}#contacto`} className="jess-link shrink-0">CONTACTO</a>
+        <a href={`https://www.instagram.com/${ig}/`} target="_blank" rel="noreferrer" className="jess-link shrink-0">@{ig.toUpperCase()}</a>
+      </nav>
     </header>
   );
 }

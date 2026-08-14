@@ -38,15 +38,15 @@ export function JessHome({ tenant }: { tenant: Client }) {
           className="absolute inset-0"
           style={{ background: "linear-gradient(180deg, rgba(237,232,222,.96) 0%, rgba(237,232,222,.82) 45%, rgba(237,232,222,.35) 100%)" }}
         />
-        <div className="relative mx-auto max-w-[1200px] px-6 pb-44 pt-20 text-center sm:pb-56 sm:pt-28">
+        <div className="relative mx-auto max-w-[1200px] px-6 pb-28 pt-12 text-center sm:pb-56 sm:pt-28">
           <Reveal>
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>
               EVENT PLANNER · BAHÍA BLANCA
             </p>
-            <h1 className="mx-auto mt-6 max-w-[900px] text-[52px] leading-[1.05] sm:text-[76px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            <h1 className="mx-auto mt-5 max-w-[900px] text-[40px] leading-[1.05] sm:text-[76px]" style={{ fontFamily: "var(--font-italiana)" }}>
               Sofisticación en cada detalle
             </h1>
-            <p className="mt-4 text-[30px] sm:text-[38px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA }}>
+            <p className="mt-3 text-[24px] sm:text-[38px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA }}>
               elegancia en cada momento
             </p>
           </Reveal>
@@ -58,14 +58,14 @@ export function JessHome({ tenant }: { tenant: Client }) {
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <a
                 href="#contacto"
-                className="px-9 py-4 text-[12px] font-semibold tracking-[0.2em] transition duration-200 hover:opacity-90 active:scale-[0.98]"
+                className="px-6 py-3.5 text-[11px] font-semibold tracking-[0.2em] transition duration-200 hover:opacity-90 active:scale-[0.98] sm:px-9 sm:py-4 sm:text-[12px]"
                 style={{ backgroundColor: TINTA, color: CREMA }}
               >
                 PEDIR UNA REUNIÓN
               </a>
               <a
                 href={`${base}/conocenos`}
-                className="border px-9 py-4 text-[12px] font-semibold tracking-[0.2em] transition duration-200 hover:opacity-70 active:scale-[0.98]"
+                className="border px-6 py-3.5 text-[11px] font-semibold tracking-[0.2em] transition duration-200 hover:opacity-70 active:scale-[0.98] sm:px-9 sm:py-4 sm:text-[12px]"
                 style={{ borderColor: TINTA }}
               >
                 CONOCÉ A JESS
@@ -86,26 +86,26 @@ export function JessHome({ tenant }: { tenant: Client }) {
 
       {/* Servicios: los 6 de su plantilla */}
       <section id="servicios" style={{ backgroundColor: "#F6F2EA" }}>
-        <div className="mx-auto max-w-[1200px] px-6 py-16">
+        <div className="mx-auto max-w-[1200px] px-6 py-10 sm:py-16">
           <Reveal className="text-center">
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>NUESTRO SERVICIO</p>
-            <h2 className="mt-3 text-[38px] sm:text-[46px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            <h2 className="mt-3 text-[30px] sm:text-[46px]" style={{ fontFamily: "var(--font-italiana)" }}>
               Qué incluye trabajar con Jess
             </h2>
           </Reveal>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:grid-cols-3">
             {servicios.map((s, i) => (
               <Reveal key={s.nombre} delay={i * 90}>
                 {/* el hover vive en un div interno para no pelearse con la transición del reveal */}
-                <div className="group relative h-full overflow-hidden bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(26,24,22,0.10)]">
+                <div className="group relative h-full overflow-hidden bg-white p-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(26,24,22,0.10)] sm:p-7">
                   <p
-                    className="text-[26px] text-[#9E9387] transition-colors duration-300 group-hover:text-[#B85850]"
+                    className="text-[20px] text-[#9E9387] transition-colors duration-300 group-hover:text-[#B85850] sm:text-[26px]"
                     style={{ fontFamily: "var(--font-italiana)" }}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </p>
-                  <p className="mt-2 text-[17px] font-semibold leading-snug">{s.nombre}</p>
-                  <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed" style={{ color: "#6d645b" }}>
+                  <p className="mt-1.5 text-[13px] font-semibold leading-snug sm:mt-2 sm:text-[17px]">{s.nombre}</p>
+                  <ul className="mt-2 space-y-1 text-[11.5px] leading-relaxed sm:mt-3 sm:space-y-1.5 sm:text-[13px]" style={{ color: "#6d645b" }}>
                     {s.items.slice(0, 4).map((it) => (
                       <li key={it} className="flex gap-2">
                         <span style={{ color: TERRA }}>·</span>
@@ -127,10 +127,10 @@ export function JessHome({ tenant }: { tenant: Client }) {
 
       {/* Cómo trabajamos */}
       <section id="eventos" style={{ backgroundColor: TINTA, color: CREMA }}>
-        <div className="mx-auto max-w-[1200px] px-6 py-16 text-center">
+        <div className="mx-auto max-w-[1200px] px-6 py-10 text-center sm:py-16">
           <Reveal>
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>EL PROCESO</p>
-            <h2 className="mt-3 text-[36px] sm:text-[44px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            <h2 className="mt-3 text-[28px] sm:text-[44px]" style={{ fontFamily: "var(--font-italiana)" }}>
               De la idea al brindis
             </h2>
           </Reveal>
@@ -155,11 +155,11 @@ export function JessHome({ tenant }: { tenant: Client }) {
       </section>
 
       {/* Contacto */}
-      <section id="contacto" className="mx-auto max-w-[1200px] px-6 py-16">
+      <section id="contacto" className="mx-auto max-w-[1200px] px-6 py-10 sm:py-16">
         <div className="grid gap-12 md:grid-cols-[1fr_1.1fr]">
           <Reveal>
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>CONTACTO</p>
-            <h2 className="mt-4 max-w-[380px] text-[40px] leading-[1.1] sm:text-[48px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            <h2 className="mt-4 max-w-[380px] text-[30px] leading-[1.1] sm:text-[48px]" style={{ fontFamily: "var(--font-italiana)" }}>
               Contanos qué estás soñando
             </h2>
             <p className="mt-5 max-w-[400px] text-[14px] leading-[1.8]" style={{ color: "#6d645b" }}>
