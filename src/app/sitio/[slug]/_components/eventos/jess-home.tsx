@@ -95,20 +95,30 @@ export function JessHome({ tenant }: { tenant: Client }) {
           </Reveal>
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {servicios.map((s, i) => (
-              <Reveal key={s.nombre} delay={i * 90} className="bg-white p-7">
-                <p className="text-[26px]" style={{ fontFamily: "var(--font-italiana)", color: TOPO }}>
-                  {String(i + 1).padStart(2, "0")}
-                </p>
-                <p className="mt-2 text-[17px] font-semibold leading-snug">{s.nombre}</p>
-                <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed" style={{ color: "#6d645b" }}>
-                  {s.items.slice(0, 4).map((it) => (
-                    <li key={it} className="flex gap-2">
-                      <span style={{ color: TERRA }}>·</span>
-                      {it}
-                    </li>
-                  ))}
-                  {s.items.length > 4 ? <li className="text-[12px] italic opacity-70">y más…</li> : null}
-                </ul>
+              <Reveal key={s.nombre} delay={i * 90}>
+                {/* el hover vive en un div interno para no pelearse con la transición del reveal */}
+                <div className="group relative h-full overflow-hidden bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(26,24,22,0.10)]">
+                  <p
+                    className="text-[26px] text-[#9E9387] transition-colors duration-300 group-hover:text-[#B85850]"
+                    style={{ fontFamily: "var(--font-italiana)" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </p>
+                  <p className="mt-2 text-[17px] font-semibold leading-snug">{s.nombre}</p>
+                  <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed" style={{ color: "#6d645b" }}>
+                    {s.items.slice(0, 4).map((it) => (
+                      <li key={it} className="flex gap-2">
+                        <span style={{ color: TERRA }}>·</span>
+                        {it}
+                      </li>
+                    ))}
+                    {s.items.length > 4 ? <li className="text-[12px] italic opacity-70">y más…</li> : null}
+                  </ul>
+                  <span
+                    className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100"
+                    style={{ backgroundColor: TERRA }}
+                  />
+                </div>
               </Reveal>
             ))}
           </div>
