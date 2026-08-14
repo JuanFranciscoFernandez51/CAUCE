@@ -66,8 +66,18 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
                 alt={t.titulo}
                 className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
               />
+              {/* En el celu no hay hover: el titulo va fijo sobre la portada */}
               <span
-                className="absolute inset-0 flex flex-col items-center justify-end pb-10 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-4 pt-10 text-center sm:hidden"
+                style={{ background: "linear-gradient(180deg, rgba(26,24,22,0) 0%, rgba(26,24,22,.72) 100%)", color: JESS_CREMA }}
+              >
+                <span className="text-[9px] font-semibold tracking-[0.3em]">{t.tipo.toUpperCase()}</span>
+                <span className="mt-1 px-4 text-[22px] leading-tight" style={{ fontFamily: "var(--font-italiana)" }}>
+                  {t.titulo}
+                </span>
+              </span>
+              <span
+                className="absolute inset-0 hidden flex-col items-center justify-end pb-10 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:flex"
                 style={{ background: "linear-gradient(180deg, rgba(26,24,22,0) 30%, rgba(26,24,22,.72) 100%)", color: JESS_CREMA }}
               >
                 <span className="text-[10px] font-semibold tracking-[0.4em]">{t.tipo.toUpperCase()}</span>

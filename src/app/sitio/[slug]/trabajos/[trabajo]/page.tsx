@@ -73,7 +73,7 @@ export default async function TrabajoPage({ params }: { params: Promise<{ slug: 
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={o.portada} alt={o.titulo} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]" />
                   <span
-                    className="absolute inset-0 flex items-end justify-center pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    className="absolute inset-0 flex items-end justify-center pb-5 opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100"
                     style={{ background: "linear-gradient(180deg, rgba(26,24,22,0) 40%, rgba(26,24,22,.7) 100%)", color: JESS_CREMA }}
                   >
                     <span className="text-[20px]" style={{ fontFamily: "var(--font-italiana)" }}>{o.titulo}</span>

@@ -63,7 +63,7 @@ export function JessHeader({ logo, ig, base, activa }: { logo: string | null; ig
           href={`https://www.instagram.com/${ig}/`}
           target="_blank"
           rel="noreferrer"
-          className="hidden border px-5 py-2.5 text-[11px] font-medium tracking-[0.18em] transition hover:opacity-80 sm:block"
+          className="border px-3 py-2 text-[9px] font-medium tracking-[0.14em] transition hover:opacity-80 sm:px-5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.18em]"
           style={{ borderColor: "rgba(237,232,222,.4)" }}
         >
           @{ig.toUpperCase()}
@@ -78,7 +78,6 @@ export function JessHeader({ logo, ig, base, activa }: { logo: string | null; ig
         <Link href={`${base}/conocenos`} className={`shrink-0 ${item(activa === "conocenos")}`}>CONÓCENOS</Link>
         <Link href={`${base}/trabajos`} className={`shrink-0 ${item(activa === "trabajos")}`}>TRABAJOS</Link>
         <a href={`${base}#contacto`} className="jess-link shrink-0">CONTACTO</a>
-        <a href={`https://www.instagram.com/${ig}/`} target="_blank" rel="noreferrer" className="jess-link shrink-0">@{ig.toUpperCase()}</a>
       </nav>
     </header>
   );
