@@ -20,7 +20,7 @@ const TINTA = "#3A1218";
 
 const PASOS = [
   { n: "01", t: "Armás tu pedido", d: "Sumás lo que quieras del catálogo. El mínimo es 2 kg." },
-  { n: "02", t: "Lo cerramos por WhatsApp", d: "Te confirmamos dirección, franja horaria y forma de pago." },
+  { n: "02", t: "Lo pagás por la web o por WhatsApp", d: "Pagás online con MercadoPago, o lo cerramos por WhatsApp y pagás al recibir." },
   { n: "03", t: "Llega el mismo día", d: "Con frío hasta tu puerta, en cualquier barrio de CABA." },
 ];
 
