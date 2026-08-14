@@ -1,5 +1,9 @@
 import type { Client } from "@prisma/client";
 import { FormConsulta } from "../piletas/form-consulta";
+import { JessHeader, JessFooter, jessDatos } from "./jess-chrome";
+
+// La foto del abrazo (la que eligió Fran para el fondo), recortada abajo del texto.
+const FOTO_HERO = "https://res.cloudinary.com/dgtlyzyra/image/upload/c_crop,g_south,h_0.62/v1786728002/jessdesign/hero-abrazo.png";
 
 /**
  * Landing de Jess Design, con la estética de su panel: crema #EDE8DE,
@@ -12,80 +16,62 @@ const TOPO = "#9E9387";
 const TERRA = "#B85850";
 
 export function JessHome({ tenant }: { tenant: Client }) {
-  const logo = ((tenant.branding as { logo?: string } | null)?.logo) ?? null;
-  const st = (tenant.settings ?? {}) as {
-    instagram?: string;
-    plantillaCotizacion?: { servicios?: { nombre: string; items: string[] }[] };
-    tiposEvento?: string[];
-  };
-  const ig = st.instagram ?? "jessdesign.bb";
+  const { logo, st, ig, wa, base } = jessDatos(tenant);
   const servicios = st.plantillaCotizacion?.servicios ?? [];
   const tipos = st.tiposEvento ?? [];
-  const wa = tenant.whatsapp?.replace(/\D/g, "");
 
   return (
     <div style={{ backgroundColor: CREMA, color: TINTA, fontFamily: "var(--font-montserrat)" }}>
-      {/* Header negro con monograma */}
-      <header className="sticky top-0 z-40" style={{ backgroundColor: TINTA, color: CREMA }}>
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-6 py-4">
-          <a href="#top" className="flex items-center gap-3">
-            {logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} alt="Jess Design" className="h-11 w-auto" />
-            ) : null}
-            <span>
-              <span className="block text-[15px] font-semibold tracking-[0.34em]">JESS</span>
-              <span className="block text-[9px] tracking-[0.5em] opacity-70">DESIGN</span>
-            </span>
-          </a>
-          <nav className="hidden items-center gap-8 text-[11px] font-medium tracking-[0.22em] md:flex">
-            <a href="#servicios" className="transition hover:opacity-60">SERVICIOS</a>
-            <a href="#eventos" className="transition hover:opacity-60">EVENTOS</a>
-            <a href="#contacto" className="transition hover:opacity-60">CONTACTO</a>
-          </nav>
-          <a
-            href={`https://www.instagram.com/${ig}/`}
-            target="_blank"
-            rel="noreferrer"
-            className="border px-5 py-2.5 text-[11px] font-medium tracking-[0.18em] transition hover:opacity-80"
-            style={{ borderColor: "rgba(237,232,222,.4)" }}
-          >
-            @{ig.toUpperCase()}
-          </a>
-        </div>
-      </header>
+      <JessHeader logo={logo} ig={ig} base={base} activa="inicio" />
 
-      {/* Hero */}
-      <section id="top" className="mx-auto max-w-[1200px] px-6 pb-16 pt-20 text-center sm:pt-28">
-        <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>
-          EVENT PLANNER · BAHÍA BLANCA
-        </p>
-        <h1 className="mx-auto mt-6 max-w-[900px] text-[52px] leading-[1.05] sm:text-[76px]" style={{ fontFamily: "var(--font-italiana)" }}>
-          Sofisticación en cada detalle
-        </h1>
-        <p className="mt-4 text-[30px] sm:text-[38px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA }}>
-          elegancia en cada momento
-        </p>
-        <p className="mx-auto mt-6 max-w-[560px] text-[15px] leading-[1.8]" style={{ color: "#6d645b" }}>
-          Diseño, planificación y coordinación integral de eventos. Vos vivís el momento;
-          del resto nos ocupamos nosotras.
-        </p>
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="#contacto"
-            className="px-9 py-4 text-[12px] font-semibold tracking-[0.2em] transition hover:opacity-90"
-            style={{ backgroundColor: TINTA, color: CREMA }}
-          >
-            PEDIR UNA REUNIÓN
-          </a>
-        </div>
-        {tipos.length ? (
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[11px] tracking-[0.28em]" style={{ color: TOPO }}>
-            {tipos.map((t) => (
-              <span key={t}>{t.toUpperCase()}</span>
-            ))}
+      {/* Hero sobre la foto del abrazo, con velo crema para que el texto respire */}
+      <section
+        id="top"
+        className="relative bg-cover bg-bottom"
+        style={{ backgroundImage: `url(${FOTO_HERO})` }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, rgba(237,232,222,.96) 0%, rgba(237,232,222,.82) 45%, rgba(237,232,222,.35) 100%)" }}
+        />
+        <div className="relative mx-auto max-w-[1200px] px-6 pb-44 pt-20 text-center sm:pb-56 sm:pt-28">
+          <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: TOPO }}>
+            EVENT PLANNER · BAHÍA BLANCA
+          </p>
+          <h1 className="mx-auto mt-6 max-w-[900px] text-[52px] leading-[1.05] sm:text-[76px]" style={{ fontFamily: "var(--font-italiana)" }}>
+            Sofisticación en cada detalle
+          </h1>
+          <p className="mt-4 text-[30px] sm:text-[38px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA }}>
+            elegancia en cada momento
+          </p>
+          <p className="mx-auto mt-6 max-w-[560px] text-[15px] leading-[1.8]" style={{ color: "#4d463f" }}>
+            Diseño, planificación y coordinación integral de eventos. Vos vivís el momento;
+            del resto nos ocupamos nosotras.
+          </p>
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href="#contacto"
+              className="px-9 py-4 text-[12px] font-semibold tracking-[0.2em] transition hover:opacity-90"
+              style={{ backgroundColor: TINTA, color: CREMA }}
+            >
+              PEDIR UNA REUNIÓN
+            </a>
+            <a
+              href={`${base}/conocenos`}
+              className="border px-9 py-4 text-[12px] font-semibold tracking-[0.2em] transition hover:opacity-70"
+              style={{ borderColor: TINTA }}
+            >
+              CONOCÉ A JESS
+            </a>
           </div>
-        ) : null}
+          {tipos.length ? (
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[11px] font-semibold tracking-[0.28em]" style={{ color: "#5d564e" }}>
+              {tipos.map((t) => (
+                <span key={t}>{t.toUpperCase()}</span>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </section>
 
       {/* Servicios: los 6 de su plantilla */}
@@ -167,22 +153,7 @@ export function JessHome({ tenant }: { tenant: Client }) {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ backgroundColor: TINTA, color: CREMA }}>
-        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-6 py-10">
-          <span className="flex items-center gap-4">
-            {logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} alt="" className="h-14 w-auto" />
-            ) : null}
-            <p className="text-[22px] tracking-[0.3em]" style={{ fontFamily: "var(--font-italiana)" }}>JESS DESIGN</p>
-          </span>
-          <p className="text-[20px]" style={{ fontFamily: "var(--font-pinyon)", color: TOPO }}>
-            Sofisticación en cada detalle
-          </p>
-          <p className="text-[12px] opacity-60">© 2026 Jess Design · @{ig}</p>
-        </div>
-      </footer>
+      <JessFooter logo={logo} ig={ig} />
     </div>
   );
 }
