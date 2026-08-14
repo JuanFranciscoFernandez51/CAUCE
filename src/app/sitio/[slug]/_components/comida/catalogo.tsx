@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BotonSumar } from "./pedido-store";
+import { BotonSumar, ENVIO_GRATIS } from "./pedido-store";
 import { Reveal } from "../conce/reveal";
 
 /** Catálogo de Casa Milo: filtros por categoría, grupos y card con "Sumar". */
@@ -16,14 +16,62 @@ export type Prod = {
   precio: number;
   descripcion: string;
   categoria: string;
-  foto: string | null;
+  fotos: string[];
 };
 
 const plata = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
 
+/** Badge de envío gratis para packs que ya superan el umbral. Pulso en el puntito, no en el texto. */
+function BadgeEnvio({ claro }: { claro?: boolean }) {
+  return (
+    <span
+      className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold uppercase"
+      style={
+        claro
+          ? { backgroundColor: CREMA, color: BORDO, letterSpacing: "0.08em" }
+          : { backgroundColor: BORDO, color: CREMA, letterSpacing: "0.08em" }
+      }
+    >
+      <span
+        className="h-1.5 w-1.5 animate-pulse rounded-full motion-reduce:animate-none"
+        style={{ backgroundColor: claro ? BORDO : CELESTE }}
+      />
+      Envío gratis
+    </span>
+  );
+}
+
+/** Foto de card: zoom en hover y, si hay segunda foto, swap con crossfade. */
+function FotoCard({ fotos, alt }: { fotos: string[]; alt: string }) {
+  if (!fotos[0]) return null;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={fotos[0]}
+        alt={alt}
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
+      />
+      {fotos[1] ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={fotos[1]}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
+        />
+      ) : null}
+    </>
+  );
+}
+
 export function Catalogo({ productos }: { productos: Prod[] }) {
   const categorias = useMemo(() => [...new Set(productos.map((p) => p.categoria))], [productos]);
   const [filtro, setFiltro] = useState("Todo");
+  // El reveal escalonado corre solo en la carga inicial: apenas se filtra se
+  // apaga para que el cambio de categoría sea instantáneo, sin re-fades.
+  const [revelar, setRevelar] = useState(true);
 
   const grupos = categorias.filter((c) => filtro === "Todo" || c === filtro);
   const esCombo = (c: string) => /combo/i.test(c);
@@ -56,7 +104,10 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
           return (
             <button
               key={c}
-              onClick={() => setFiltro(c)}
+              onClick={() => {
+                setRevelar(false);
+                setFiltro(c);
+              }}
               className="px-[22px] py-[11px] text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none"
               style={{
                 letterSpacing: "0.04em",
@@ -87,22 +138,15 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
             <div
               className={`mt-[26px] grid gap-[26px] ${combo ? "md:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`}
             >
-              {items.map((p) =>
-                combo ? (
+              {items.map((p, i) => {
+                const card = combo ? (
                   <article
-                    key={p.id}
-                    className="group grid transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none md:grid-cols-[1fr_1.1fr]"
+                    className="group grid h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none md:grid-cols-[1fr_1.1fr]"
                     style={{ backgroundColor: BORDO, color: CREMA, minHeight: 230 }}
                   >
-                    <div className="overflow-hidden" style={{ backgroundColor: "#5F1B28" }}>
-                      {p.foto ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.foto}
-                          alt={p.nombre}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
-                        />
-                      ) : null}
+                    <div className="relative overflow-hidden" style={{ backgroundColor: "#5F1B28" }}>
+                      <FotoCard fotos={p.fotos} alt={p.nombre} />
+                      {p.precio >= ENVIO_GRATIS ? <BadgeEnvio claro /> : null}
                     </div>
                     <div className="flex flex-col gap-2 p-6">
                       <p className="text-[12px] font-semibold uppercase" style={{ color: CELESTE, letterSpacing: "0.2em" }}>
@@ -116,25 +160,18 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                       </p>
                       <div className="mt-2 flex items-center justify-between gap-3">
                         <p className="text-[26px] font-bold">{plata(p.precio)}</p>
-                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.foto }} invertido />
+                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.fotos[0] ?? null }} invertido />
                       </div>
                     </div>
                   </article>
                 ) : (
                   <article
-                    key={p.id}
-                    className="group flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
+                    className="group flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
                     style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(123,36,52,0.14)" }}
                   >
-                    <div className="aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
-                      {p.foto ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.foto}
-                          alt={p.nombre}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
-                        />
-                      ) : null}
+                    <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
+                      <FotoCard fotos={p.fotos} alt={p.nombre} />
+                      {p.precio >= ENVIO_GRATIS ? <BadgeEnvio /> : null}
                     </div>
                     <div className="flex flex-1 flex-col gap-2.5 p-5">
                       <p className="text-[24px] font-bold" style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1.1 }}>
@@ -147,12 +184,22 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                         <p className="text-[22px] font-bold" style={{ color: TINTA }}>
                           {plata(p.precio)}
                         </p>
-                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.foto }} />
+                        <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.fotos[0] ?? null }} />
                       </div>
                     </div>
                   </article>
-                )
-              )}
+                );
+                // Reveal escalonado solo en la carga inicial; al filtrar, render directo.
+                return revelar ? (
+                  <Reveal key={p.id} delay={Math.min(i, 4) * 80} className="h-full">
+                    {card}
+                  </Reveal>
+                ) : (
+                  <div key={p.id} className="h-full">
+                    {card}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );

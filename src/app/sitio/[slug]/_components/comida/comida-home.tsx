@@ -58,7 +58,8 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
     select: { id: true, nombre: true, precio: true, descripcion: true, categoria: true, fotos: true },
   });
 
-  const foto = (f: unknown) => (Array.isArray(f) && typeof f[0] === "string" ? (f[0] as string) : null);
+  const fotosDe = (f: unknown) => (Array.isArray(f) ? f.filter((x): x is string => typeof x === "string") : []);
+  const foto = (f: unknown) => fotosDe(f)[0] ?? null;
 
   // Promesas reales para la cinta: si hay anuncio cargado se parte por "·".
   const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $30.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
@@ -81,8 +82,10 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           .milo-cinta:hover .milo-cinta-tira { animation-play-state: paused; }
           .milo-link { background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1.5px; padding-bottom: 3px; transition: background-size 0.2s ease; }
           .milo-link:hover { background-size: 100% 1.5px; }
+          @keyframes milo-pop { 0% { transform: scale(1); } 40% { transform: scale(1.07); } 100% { transform: scale(1); } }
+          .milo-pop { animation: milo-pop 0.3s ease-out; }
           @media (prefers-reduced-motion: reduce) {
-            .milo-kenburns, .milo-cinta-tira { animation: none; }
+            .milo-kenburns, .milo-cinta-tira, .milo-pop { animation: none; }
             .milo-link { transition: none; }
           }
         `}</style>
@@ -211,7 +214,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
             precio: p.precio,
             descripcion: p.descripcion ?? "",
             categoria: p.categoria,
-            foto: foto(p.fotos),
+            fotos: fotosDe(p.fotos),
           }))}
         />
 
