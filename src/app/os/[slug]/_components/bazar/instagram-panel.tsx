@@ -13,6 +13,7 @@ export type ProductoIg = {
 };
 
 export type PublicacionIg = {
+  fotos: string[];
   id: string;
   productoNombre: string;
   foto: string | null;
@@ -62,6 +63,10 @@ export function InstagramPanel({
   const [error, setError] = useState("");
   const [modal, setModal] = useState<ProductoIg | null>(null);
   const [caption, setCaption] = useState("");
+  const [editando, setEditando] = useState<PublicacionIg | null>(null);
+  const [captionEdit, setCaptionEdit] = useState("");
+  const [fotoIdx, setFotoIdx] = useState(0);
+  const [guardandoEdit, setGuardandoEdit] = useState(false);
   const [fecha, setFecha] = useState("");
   const [hora, setHora] = useState("11:00");
   const [enviando, setEnviando] = useState(false);
@@ -233,7 +238,14 @@ export function InstagramPanel({
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={p.foto} alt="" className="h-8 w-8 rounded border object-cover" />
                       ) : null}
-                      <span className="min-w-0 flex-1 truncate font-medium">{p.productoNombre}</span>
+                      <button
+                        type="button"
+                        onClick={() => { setEditando(p); setCaptionEdit(p.caption); setFotoIdx(0); }}
+                        className="min-w-0 flex-1 truncate text-left font-medium hover:underline"
+                        title="Ver y editar la publicación"
+                      >
+                        {p.productoNombre}
+                      </button>
                       <Badge variant={badge.variant}>{badge.label}</Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -380,6 +392,95 @@ export function InstagramPanel({
           </div>
         </div>
       ) : null}
+
+      {/* ── Editor: se entra a cada publicación, se ve la placa y se edita el texto ── */}
+      {editando ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEditando(null)}>
+          <div
+            className="w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid sm:grid-cols-[1fr_1fr]">
+              <div className="relative bg-black/5" style={{ minHeight: 320 }}>
+                {editando.fotos.length ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={editando.fotos[fotoIdx]} alt="" className="h-full w-full object-contain" />
+                    {editando.fotos.length > 1 ? (
+                      <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-2">
+                        <button type="button" onClick={() => setFotoIdx((fotoIdx - 1 + editando.fotos.length) % editando.fotos.length)} className="rounded-full bg-black/60 px-2.5 py-1 text-sm text-white">‹</button>
+                        <span className="rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">{fotoIdx + 1} / {editando.fotos.length}</span>
+                        <button type="button" onClick={() => setFotoIdx((fotoIdx + 1) % editando.fotos.length)} className="rounded-full bg-black/60 px-2.5 py-1 text-sm text-white">›</button>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Sin imagen</div>
+                )}
+              </div>
+              <div className="flex flex-col gap-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">{editando.productoNombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {editando.programadaPara
+                        ? `Sale el ${new Date(editando.programadaPara).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" })}`
+                        : "Sin fecha"}
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => setEditando(null)} className="text-muted-foreground hover:text-foreground">✕</button>
+                </div>
+                <textarea
+                  value={captionEdit}
+                  onChange={(e) => setCaptionEdit(e.target.value)}
+                  rows={9}
+                  className="flex-1 rounded-lg border border-border bg-background p-2.5 text-sm outline-none focus:border-primary"
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">{captionEdit.length} caracteres</span>
+                  <button
+                    type="button"
+                    disabled={guardandoEdit}
+                    onClick={async () => {
+                      setGuardandoEdit(true);
+                      const r = await fetch(`/api/os/${slug}/bazar/publicaciones/${editando.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ caption: captionEdit }),
+                      });
+                      setGuardandoEdit(false);
+                      if (r.ok) { setEditando(null); router.refresh(); }
+                    }}
+                    className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-50"
+                  >
+                    {guardandoEdit ? "Guardando…" : "Guardar texto"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ── Galería: todas las fotos subidas, en carrusel ── */}
+      {(() => {
+        const todas = [...new Set(publicaciones.flatMap((p) => p.fotos))];
+        if (!todas.length) return null;
+        return (
+          <section className="rounded-xl border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold">Fotos subidas</h2>
+            <p className="text-xs text-muted-foreground">{todas.length} imágenes en la biblioteca. Se van sumando con cada publicación.</p>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+              {todas.map((f) => (
+                <a key={f} href={f} target="_blank" rel="noreferrer" className="shrink-0" title="Ver en grande">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f} alt="" className="h-28 w-28 rounded-lg border border-border object-cover transition hover:opacity-80" />
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 }

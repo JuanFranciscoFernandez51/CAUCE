@@ -85,6 +85,7 @@ export default async function InstagramPage({
   const publicaciones: PublicacionIg[] = pubsDb.map((p) => ({
     id: p.id,
     productoNombre: p.producto?.nombre ?? "Publicación",
+    fotos: fotosDe(p.fotos),
     foto: fotosDe(p.fotos)[0] ?? (p.producto ? fotosDe(p.producto.fotos)[0] : null) ?? null,
     caption: p.caption,
     estado: p.estado,
