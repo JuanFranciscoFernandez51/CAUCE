@@ -33,7 +33,7 @@ const DIFERENCIALES = [
 
 const FAQ = [
   { p: "¿Llega congelado?", r: "Sale con frío y llega listo para guardar en el freezer o cocinar en el momento." },
-  { p: "¿Cómo pago?", r: "Al recibir, en efectivo, o por transferencia cuando confirmamos el pedido." },
+  { p: "¿Cómo pago?", r: "Por MercadoPago desde la web (tarjeta o dinero en cuenta), por transferencia, o en efectivo al recibir." },
   { p: "¿Puedo elegir el mix del combo?", r: "Sí. Cuando cerramos por WhatsApp nos decís cómo lo querés armar." },
 ];
 
