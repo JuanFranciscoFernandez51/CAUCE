@@ -104,6 +104,7 @@ model Client {
   ordenesTrabajo        OrdenTrabajo[]
   ventas                Venta[]
   eventos               Evento[]
+  eventosOrg            EventoOrg[]
   actividad             Actividad[]
   presupuestosTaller    PresupuestoTaller[]
   accounts              Account[]
@@ -1597,4 +1598,29 @@ model PresupuestoDoc {
 
   @@unique([clientId, numero])
   @@index([clientId, estado])
+}
+
+/// Evento de una organizadora (Jess Design): estado del embudo
+/// (cotizado→confirmado→producción→cerrado), plata y sus hitos con fecha.
+/// Distinto de Evento, que es el de inscripciones con cronómetro.
+model EventoOrg {
+  id          String    @id @default(cuid())
+  clientId    String
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nombre      String // "Boda Sofía & Juan"
+  tipo        String    @default("otros")
+  fecha       DateTime?
+  lugar       String?
+  estado      String    @default("cotizado") // cotizado|confirmado|produccion|cerrado
+  presupuesto Float     @default(0)
+  cobrado     Float     @default(0)
+  contacto    String?
+  telefono    String?
+  hitos       Json      @default("[]") // [{titulo, fecha, hecho}]
+  notas       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([clientId, estado])
+  @@index([clientId, fecha])
 }

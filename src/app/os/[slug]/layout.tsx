@@ -179,6 +179,15 @@ export default async function OsLayout({
       { label: "Instagram", href: `${base}/instagram`, icon: "📷" }
     );
   }
+  // Template eventos (Jess Design): el embudo de eventos y las cotizaciones.
+  if (tpl === "eventos") {
+    opsItems.unshift(
+      { label: "Eventos", href: `${base}/eventos-org`, icon: "✦" },
+      { label: "Cotizaciones", href: `${base}/presupuestos`, icon: "📄" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🤝" }
+    );
+  }
+
   // Template piletas (Piletas Bahía Blanca): presupuestos e Instagram.
   if (tpl === "piletas") {
     opsItems.unshift(

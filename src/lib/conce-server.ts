@@ -18,7 +18,7 @@ export function esConcesionaria(tenant: Client): boolean {
 /** Templates con carpeta de proveedores (compras, CBU, listas de precios). */
 export function tieneProveedores(tenant: Client): boolean {
   const tpl = (tenant.settings as { template?: string } | null)?.template;
-  return tpl === "concesionaria" || tpl === "repuestos";
+  return tpl === "concesionaria" || tpl === "repuestos" || tpl === "eventos";
 }
 
 export type ConceSucursal = { direccion: string; maps?: string; whatsapp?: string };

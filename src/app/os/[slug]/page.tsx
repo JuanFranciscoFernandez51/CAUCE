@@ -14,6 +14,7 @@ import { fmtTime } from "./_lib/dates";
 import { APPT_STATUS } from "./_lib/labels";
 import { BazarDashboard } from "./_components/bazar/dashboard";
 import { ConceDashboard } from "./_components/conce/dashboard";
+import { JessDashboard } from "./_components/eventos/jess-dashboard";
 
 export default async function OsHomePage({
   params,
@@ -26,6 +27,9 @@ export default async function OsHomePage({
 
   // Template bazar (tienda online): dashboard propio con ventas y tops.
   const tpl = (tenant.settings as { template?: string } | null)?.template;
+  if (tpl === "eventos") {
+    return <JessDashboard tenant={tenant} />;
+  }
   if (tpl === "bazar" || tpl === "repuestos" || tpl === "comida") {
     return <BazarDashboard tenant={tenant} />;
   }

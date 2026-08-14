@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono, Bodoni_Moda, Archivo, Cormorant_Garamond, Jost } from "next/font/google";
+import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono, Bodoni_Moda, Archivo, Cormorant_Garamond, Jost, Italiana, Montserrat, Pinyon_Script } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/theme";
 import { GoogleAnalytics, MetaPixel } from "@/components/analytics";
@@ -47,6 +47,10 @@ const jost = Jost({
   display: "swap",
 });
 
+const italiana = Italiana({ subsets: ["latin"], weight: "400", variable: "--font-italiana", display: "swap" });
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-montserrat", display: "swap" });
+const pinyon = Pinyon_Script({ subsets: ["latin"], weight: "400", variable: "--font-pinyon", display: "swap" });
+
 const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   subsets: ["latin"],
@@ -81,7 +85,7 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} ${bodoni.variable} ${archivo.variable} ${cormorant.variable} ${jost.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} ${bodoni.variable} ${archivo.variable} ${cormorant.variable} ${jost.variable} ${italiana.variable} ${montserrat.variable} ${pinyon.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>{children}</Providers>
