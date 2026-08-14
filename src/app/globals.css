@@ -389,3 +389,20 @@ h3 {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Jess Design (eventos, perfil elegante): ken burns sutil + subrayado que crece */
+@keyframes jess-kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.045); }
+}
+.jess-kenburns { animation: jess-kenburns 18s ease-in-out infinite alternate; }
+.jess-link {
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1px;
+  padding-bottom: 4px;
+  transition: background-size 0.3s ease;
+}
+.jess-link:hover, .jess-link-activa { background-size: 100% 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .jess-kenburns { animation: none; }
+  .jess-link { transition: none; }
+}

@@ -39,7 +39,7 @@ export function jessDatos(tenant: Client) {
 }
 
 export function JessHeader({ logo, ig, base, activa }: { logo: string | null; ig: string; base: string; activa?: "inicio" | "conocenos" | "trabajos" }) {
-  const item = (on: boolean) => `transition hover:opacity-60 ${on ? "underline underline-offset-8" : ""}`;
+  const item = (on: boolean) => `jess-link ${on ? "jess-link-activa" : ""}`;
   return (
     <header className="sticky top-0 z-40" style={{ backgroundColor: JESS_TINTA, color: JESS_CREMA }}>
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-6 py-4">
@@ -57,7 +57,7 @@ export function JessHeader({ logo, ig, base, activa }: { logo: string | null; ig
           <Link href={base} className={item(activa === "inicio")}>INICIO</Link>
           <Link href={`${base}/conocenos`} className={item(activa === "conocenos")}>CONÓCENOS</Link>
           <Link href={`${base}/trabajos`} className={item(activa === "trabajos")}>NUESTROS TRABAJOS</Link>
-          <a href={`${base}#contacto`} className="transition hover:opacity-60">CONTACTO</a>
+          <a href={`${base}#contacto`} className="jess-link">CONTACTO</a>
         </nav>
         <a
           href={`https://www.instagram.com/${ig}/`}

@@ -11,7 +11,21 @@ description: Al armar o retocar cualquier web pública de un tenant de Cauce —
 
 Regla práctica: los efectos usan `currentColor`, variables del tenant (`var(--tpl)`, `var(--t-hero)`, etc.) o negro/blanco con opacidad. Nunca hardcodees un color nuevo para una animación.
 
-## Checklist antes de entregar (repasalo entero)
+## La dosis: adaptate al estilo y no te pases de la raya
+
+El checklist de abajo es un **menú, no una lista de requisitos**. Antes de tocar nada, decidí el perfil de la marca y elegí la dosis. La vara: **el movimiento se siente, no se ve** — si al scrollear notás la animación antes que el contenido, bajale. Máximo 4-6 efectos distintos por página, todos con la misma familia de easing y duraciones.
+
+| Perfil | Ejemplos | Qué sí | Qué no |
+|---|---|---|---|
+| **Elegante / formal** (eventos, deco premium, estudios) | Jess Design | Reveals lentos (600-800ms), ken burns MUY sutil (1→1.04 en 16s+), zoom de foto en hover, subrayado que crece. Poco y silencioso. | Marquees, badges con pulso, contadores, bounces, colores de acento en animaciones. Nada "llamativo". |
+| **Comercial / cercano** (tiendas, delivery, servicios) | La Estación, Casa Milo, Piletas | Todo lo elegante + cinta de promesas, fotos que rotan en cards, cards que se levantan, contador si hay métrica real. | Más de una animación ambiente por viewport; heros con más de un movimiento a la vez. |
+| **Impacto / dark** (LED, motos, tech, portfolio agresivo) | Ave Fénix, Vespa/Aprilia | Todo lo anterior + gradiente radial animado, badges en vivo con pulso, título gigante con palabra en acento, video de fondo. | Aún acá: una sola animación ambiente por viewport, y el acento en UNA palabra, no en cinco. |
+
+Dos reglas de cierre:
+- **Coherencia interna**: elegí UNA escala de duraciones (ej. 200ms hovers / 400ms overlays / 700ms reveals) y usala en toda la página. Efectos con timings mezclados se sienten rotos aunque cada uno esté bien.
+- **La prueba del cliente**: si el dueño del negocio viera la página, ¿diría "qué elegante/qué viva" o "qué mareo"? Ante la duda, sacá el efecto — una web sobria se corrige fácil, una web circo espanta.
+
+## Checklist antes de entregar (repasalo entero, aplicá según la dosis)
 
 1. **Todo elemento clickeable tiene hover con movimiento.** Nada responde solo con `cursor: pointer`. Imagen adentro de card: zoom suave con recorte. Botón: leve lift o cambio de opacidad. Link de texto: subrayado que crece.
    ```jsx

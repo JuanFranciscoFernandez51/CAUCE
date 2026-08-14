@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTenantBySlug, hasModule } from "@/lib/tenant";
+import { Reveal } from "../_components/conce/reveal";
 import { JessHeader, JessFooter, jessDatos, JESS_TINTA, JESS_CREMA, JESS_TOPO, JESS_TERRA } from "../_components/eventos/jess-chrome";
 
 export const dynamic = "force-dynamic";
@@ -39,15 +40,15 @@ export default async function ConocenosPage({ params }: { params: Promise<{ slug
 
       <section className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20">
         <div className="grid items-start gap-12 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="md:sticky md:top-28">
+          <Reveal className="md:sticky md:top-28">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={FOTO_JESS} alt="Jess" className="w-full object-cover" />
             <p className="mt-4 text-center text-[24px]" style={{ fontFamily: "var(--font-pinyon)", color: JESS_TOPO }}>
               elegancia en cada momento
             </p>
-          </div>
+          </Reveal>
 
-          <div>
+          <Reveal delay={120}>
             <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: JESS_TOPO }}>CONÓCENOS</p>
             <h1 className="mt-4 text-[48px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
               Soy Jess ✨
@@ -86,7 +87,7 @@ export default async function ConocenosPage({ params }: { params: Promise<{ slug
                 </a>
               ) : null}
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 

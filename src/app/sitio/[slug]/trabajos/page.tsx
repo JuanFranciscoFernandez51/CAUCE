@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule } from "@/lib/tenant";
+import { Reveal } from "../_components/conce/reveal";
 import { JessHeader, JessFooter, jessDatos, JESS_TINTA, JESS_CREMA, JESS_TOPO, JESS_TERRA, type JessTrabajo } from "../_components/eventos/jess-chrome";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
       <JessHeader logo={logo} ig={ig} base={base} activa="trabajos" />
 
       <section className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20">
-        <div className="text-center">
+        <Reveal className="text-center">
           <p className="text-[11px] font-semibold tracking-[0.4em]" style={{ color: JESS_TOPO }}>NUESTROS TRABAJOS</p>
           <h1 className="mt-4 text-[48px] leading-[1.05] sm:text-[64px]" style={{ fontFamily: "var(--font-italiana)" }}>
             Eventos que cuentan historias
@@ -48,13 +49,13 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
           <p className="mt-4 text-[26px]" style={{ fontFamily: "var(--font-pinyon)", color: JESS_TERRA }}>
             con identidad propia
           </p>
-        </div>
+        </Reveal>
 
         {/* Portadas estilo portfolio: en hover la foto respira y aparece de qué es */}
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {trabajos.map((t) => (
+          {trabajos.map((t, i) => (
+            <Reveal key={t.id} delay={i * 90}>
             <Link
-              key={t.id}
               href={`${base}/trabajos/${t.id}`}
               className="group relative block overflow-hidden bg-white"
               style={{ aspectRatio: "4 / 5" }}
@@ -78,6 +79,7 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
                 </span>
               </span>
             </Link>
+            </Reveal>
           ))}
         </div>
 
