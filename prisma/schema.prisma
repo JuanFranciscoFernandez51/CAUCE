@@ -1618,6 +1618,7 @@ model EventoOrg {
   contacto    String?
   telefono    String?
   hitos       Json      @default("[]") // [{titulo, fecha, hecho}]
+  mobiliario  Json      @default("[]") // [{id, nombre, cant, precio}] — presupuesto de mobiliario del evento
   notas       String?   @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

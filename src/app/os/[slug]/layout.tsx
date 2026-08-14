@@ -12,6 +12,8 @@ import {
 } from "@/lib/tenant";
 import { isOsOwner, resolveOsRole } from "./_components/os-role";
 import { OsSidebar, type NavEntry } from "./_components/os-sidebar";
+import { db } from "@/lib/db";
+import { JessTopbar } from "./_components/eventos/jess-topbar";
 import { InstallPrompt } from "./_components/install-prompt";
 
 /** ¿URL absoluta de Cloudinary? (sirve como apple-touch-icon). */
@@ -271,6 +273,26 @@ export default async function OsLayout({
     ...(tpl !== "eventos" ? [{ label: "Asistente IA", href: `${base}/asistente`, icon: "✨" }] : []),
   ];
 
+  // La banda "lo próximo" del marco de Jess: primera tarea pendiente o hito por vencer.
+  let proximoJess: { texto: string; href: string } | null = null;
+  let eventosActivos = 0;
+  if (tpl === "eventos") {
+    const [tareasPend, evs] = await Promise.all([
+      db.tarea.count({ where: { clientId: tenant.id, estado: { not: "hecho" } } }).catch(() => 0),
+      db.eventoOrg.findMany({ where: { clientId: tenant.id, estado: { not: "cerrado" } }, select: { nombre: true, fecha: true } }).catch(() => []),
+    ]);
+    eventosActivos = evs.length;
+    const proxEv = evs
+      .filter((e: { fecha: Date | null }) => e.fecha && e.fecha >= new Date())
+      .sort((a: { fecha: Date | null }, b: { fecha: Date | null }) => a.fecha!.getTime() - b.fecha!.getTime())[0];
+    if (tareasPend || proxEv) {
+      proximoJess = {
+        texto: `${tareasPend} cosa${tareasPend === 1 ? "" : "s"} hoy${proxEv ? ` · Próximo: ${proxEv.nombre}` : ""}`,
+        href: tareasPend ? `${base}/pendientes` : `${base}/eventos-org`,
+      };
+    }
+  }
+
   // Una empresa de diseño no quiere emojis en su barra: el tema "elegante"
   // deja las etiquetas solas, en mayúsculas espaciadas.
   const navElegante = ((tenant.branding as { estilo?: { navTema?: string } } | null)?.estilo?.navTema) === "elegante";
@@ -296,17 +318,36 @@ export default async function OsLayout({
     <div
       style={themeVars}
       className={`flex min-h-screen bg-background text-foreground flex-col ${
-        estilo.nav === "arriba" ? "" : "lg:flex-row"
+        estilo.nav === "arriba" || tpl === "eventos" ? "" : "lg:flex-row"
       } ${estiloCls}`}
     >
-      <OsSidebar
-        displayName={branding.displayName}
-        logo={branding.logo || null}
-        initial={branding.displayName.charAt(0).toUpperCase()}
-        nav={navFinal}
-        posicion={estilo.nav}
-        grupos={estilo.grupos}
-      />
+      {tpl === "eventos" ? (
+        <JessTopbar
+          logo={branding.logo || null}
+          base={base}
+          proximo={proximoJess}
+          tabs={[
+            { label: "Dashboard", href: base },
+            { label: "Pendientes", href: `${base}/pendientes` },
+            { label: "Cotizaciones", href: `${base}/cotizaciones` },
+            { label: "Eventos", href: `${base}/eventos-org`, badge: eventosActivos },
+            { label: "Clientes", href: `${base}/crm` },
+            { label: "Proveedores", href: `${base}/proveedores` },
+            { label: "Calendario", href: `${base}/calendario` },
+            { label: "Finanzas", href: `${base}/caja` },
+            { label: "Configuración", href: `${base}/config` },
+          ]}
+        />
+      ) : (
+        <OsSidebar
+          displayName={branding.displayName}
+          logo={branding.logo || null}
+          initial={branding.displayName.charAt(0).toUpperCase()}
+          nav={navFinal}
+          posicion={estilo.nav}
+          grupos={estilo.grupos}
+        />
+      )}
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
         <InstallPrompt appName={branding.displayName} />

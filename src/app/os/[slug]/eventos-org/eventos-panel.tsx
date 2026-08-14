@@ -38,6 +38,8 @@ export function EventosPanel({
   const [sel, setSel] = useState<EventoRow | null>(
     nuevoInicial ? VACIO : eventos.find((e) => e.id === abrirInicial) ?? null
   );
+  const [filtro, setFiltro] = useState<string>("todos");
+  const [q, setQ] = useState("");
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState("");
   const [hitoNuevo, setHitoNuevo] = useState({ titulo: "", fecha: "" });
@@ -78,53 +80,106 @@ export function EventosPanel({
         </button>
       </div>
 
-      {eventos.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
-          Sin eventos todavía.
-        </p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-left text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2.5">Evento</th>
-                <th className="px-3 py-2.5">Fecha</th>
-                <th className="px-3 py-2.5">Estado</th>
-                <th className="px-3 py-2.5 text-right">Presupuesto</th>
-                <th className="px-3 py-2.5 text-right">Saldo</th>
-                <th className="px-3 py-2.5">Hitos</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {eventos.map((e) => {
-                const saldo = e.presupuesto - e.cobrado;
-                const est = ESTADOS.find((x) => x.key === e.estado);
-                const pend = e.hitos.filter((h) => !h.hecho).length;
-                return (
-                  <tr key={e.id} onClick={() => setSel(e)} className="cursor-pointer transition hover:bg-muted/40">
-                    <td className="px-3 py-3">
-                      <p className="font-semibold">{e.nombre}</p>
-                      <p className="text-xs text-muted-foreground">{e.tipo}{e.lugar ? ` · ${e.lugar}` : ""}</p>
-                    </td>
-                    <td className="px-3 py-3 text-xs">{e.fecha ? new Date(e.fecha + "T12:00").toLocaleDateString("es-AR") : "—"}</td>
-                    <td className="px-3 py-3">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-xs">
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: est?.color }} />
-                        {est?.label}
+      {/* Filtros y buscador, como el diseño de ellos */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          placeholder="Buscar por nombre, cliente o lugar…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="h-10 w-full max-w-sm border border-border bg-white px-3 text-sm outline-none focus:border-primary"
+        />
+        {["todos", ...ESTADOS.map((e) => e.key)].map((k) => {
+          const on = filtro === k;
+          const lbl = k === "todos" ? "Todos" : ESTADOS.find((e) => e.key === k)!.label;
+          return (
+            <button
+              key={k}
+              onClick={() => setFiltro(k)}
+              className="rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition"
+              style={on ? { backgroundColor: "#9E9387", borderColor: "#9E9387", color: "#fff" } : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+            >
+              {lbl}
+            </button>
+          );
+        })}
+      </div>
+
+      {(() => {
+        const txt = q.trim().toLowerCase();
+        const lista = eventos.filter((e) => {
+          if (filtro !== "todos" && e.estado !== filtro) return false;
+          if (!txt) return true;
+          return [e.nombre, e.contacto ?? "", e.lugar ?? ""].some((v) => v.toLowerCase().includes(txt));
+        });
+        if (!lista.length)
+          return (
+            <p className="border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+              Sin eventos acá.
+            </p>
+          );
+        const hoy = new Date();
+        return (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lista.map((e) => {
+              const est = ESTADOS.find((x) => x.key === e.estado);
+              const saldo = e.presupuesto - e.cobrado;
+              const dias = e.fecha ? Math.ceil((new Date(e.fecha + "T12:00").getTime() - hoy.getTime()) / 86400000) : null;
+              const primerHito = e.hitos.find((h) => !h.hecho);
+              return (
+                <button
+                  key={e.id}
+                  onClick={() => setSel(e)}
+                  className="border-l-4 bg-white p-5 text-left shadow-sm transition hover:shadow-md"
+                  style={{ borderLeftColor: est?.color ?? "#9E9387" }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: est?.color }}>
+                      {e.tipo}
+                    </p>
+                    {dias !== null ? (
+                      <span className="rounded-full border border-border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                        {dias >= 0 ? `En ${dias} d` : `Hace ${-dias} d`}
                       </span>
-                    </td>
-                    <td className="px-3 py-3 text-right font-medium tabular-nums">{plata(e.presupuesto)}</td>
-                    <td className="px-3 py-3 text-right tabular-nums" style={saldo > 0 ? { color: "#B85850", fontWeight: 600 } : undefined}>
-                      {saldo > 0 ? plata(saldo) : "✓"}
-                    </td>
-                    <td className="px-3 py-3 text-xs text-muted-foreground">{pend ? `${pend} pendiente${pend > 1 ? "s" : ""}` : "al día"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-[24px] leading-tight" style={{ fontFamily: "var(--font-italiana)" }}>{e.nombre}</p>
+                  {e.contacto ? <p className="text-sm text-muted-foreground">{e.contacto}</p> : null}
+                  {primerHito ? (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "#B85850" }} /> {primerHito.titulo}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3">
+                    <span>
+                      <span className="block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Fecha</span>
+                      <span className="text-sm font-semibold">
+                        {e.fecha ? new Date(e.fecha + "T12:00").toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" }).toUpperCase() : "—"}
+                      </span>
+                    </span>
+                    <span className="text-right">
+                      <span className="block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Presupuesto</span>
+                      <span className="text-sm font-bold tabular-nums">{plata(e.presupuesto)}</span>
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: est?.color }}>{est?.label}</span>
+                    <span className="flex gap-2">
+                      {saldo > 0 ? <span className="text-[10px] font-semibold" style={{ color: "#B85850" }}>saldo {plata(saldo)}</span> : null}
+                      <a
+                        href={`eventos-org/${e.id}/mobiliario`}
+                        onClick={(ev) => ev.stopPropagation()}
+                        className="border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] transition hover:bg-muted"
+                      >
+                        Mobiliario
+                      </a>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Editor */}
       {sel ? (

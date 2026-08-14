@@ -15,6 +15,7 @@ const patchSchema = z.object({
   contacto: z.string().trim().max(200).nullable().optional(),
   telefono: z.string().trim().max(50).nullable().optional(),
   hitos: z.array(hito).optional(),
+  mobiliario: z.array(z.object({ id: z.string(), nombre: z.string().max(300), cant: z.number().min(1), precio: z.number().min(0) })).optional(),
   notas: z.string().trim().max(4000).nullable().optional(),
 });
 
@@ -41,6 +42,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
       ...(d.contacto !== undefined ? { contacto: d.contacto } : {}),
       ...(d.telefono !== undefined ? { telefono: d.telefono } : {}),
       ...(d.hitos !== undefined ? { hitos: d.hitos } : {}),
+      ...(d.mobiliario !== undefined ? { mobiliario: d.mobiliario } : {}),
       ...(d.notas !== undefined ? { notas: d.notas } : {}),
     },
   });
