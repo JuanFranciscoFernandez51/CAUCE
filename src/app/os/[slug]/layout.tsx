@@ -240,7 +240,7 @@ export default async function OsLayout({
       { label: "Clientes", href: `${base}/clientes`, icon: "🧑" }
     );
   }
-  if (tpl !== "eventos") opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
+  if (tpl !== "eventos" && tpl !== "comida") opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [
@@ -262,8 +262,8 @@ export default async function OsLayout({
           },
         ]
       : []),
-    ...(owner && tpl !== "eventos" ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
-    ...(owner && tpl !== "eventos" ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
+    ...(owner && tpl !== "eventos" && tpl !== "comida" ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
+    ...(owner && tpl !== "eventos" && tpl !== "comida" ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
     ...(owner
       ? [
           { label: "Configuración de la página", href: `${base}/config`, icon: "⚙️" },
@@ -331,7 +331,7 @@ export default async function OsLayout({
             { label: "Dashboard", href: base },
             { label: "Cotizaciones", href: `${base}/cotizaciones` },
             { label: "Eventos", href: `${base}/eventos-org`, badge: eventosActivos },
-            { label: "Clientes", href: `${base}/crm` },
+            { label: "Clientes", href: `${base}/clientes` },
             { label: "Proveedores", href: `${base}/proveedores` },
             { label: "Calendario", href: `${base}/calendario` },
             { label: "Finanzas", href: `${base}/caja` },

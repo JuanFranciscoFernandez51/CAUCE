@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { CREMA, TINTA } from "./milo";
 import { PedidoProvider, BarraPedido } from "./pedido-store";
 import { Catalogo } from "./catalogo";
-import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini } from "./milo-chrome";
+import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini, WhatsAppFlotante } from "./milo-chrome";
 
 /** Pestaña Catálogo de Casa Milo: el catálogo completo con SU estética. */
 export async function CatalogoMilo({ tenant }: { tenant: Client }) {
@@ -44,6 +44,7 @@ export async function CatalogoMilo({ tenant }: { tenant: Client }) {
           }))}
         />
         <MiloFooterMini base={base} wa={wa} />
+        <WhatsAppFlotante wa={wa} />
         <BarraPedido whatsapp={wa} minimoKg={st.minimoKg} base={base} />
       </div>
     </PedidoProvider>

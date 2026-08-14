@@ -1,125 +1,115 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { esDooh, getTenantBySlug } from "@/lib/tenant";
-import { esConcesionaria } from "@/lib/conce-server";
-import { Badge } from "@/components/ui";
-import { ClientesTable, type ClienteRow } from "../_components/conce/clientes-table";
-import { ListaClientesDooh } from "./lista-dooh";
+import { getTenantBySlug } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Clientes" };
 
-type SP = { q?: string };
+const plata = (n: number) => `$ ${Math.round(n).toLocaleString("es-AR")}`;
 
-/**
- * Carpeta de clientes del tenant. Buscador + edición inline y ficha individual.
- * Cada template arma sus columnas: la concesionaria muestra mandatos/boletos y
- * vehículos; el circuito de pantallas (DOOH) muestra pantallas y abono mensual.
- */
+/** Base de clientes: la lista completa, con su historial a un click. */
 export default async function ClientesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<SP>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { slug } = await params;
-  const sp = await searchParams;
+  const { q } = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
-  const q = (sp.q ?? "").trim();
 
-  // Circuito de pantallas LED: su propia carpeta de clientes (anunciantes).
-  if (esDooh(tenant)) return <ListaClientesDooh tenant={tenant} q={q} />;
-
-  if (!esConcesionaria(tenant)) notFound();
-  const base = `/os/${tenant.slug}`;
-
-  const where: Prisma.ContactWhereInput = {
-    clientId: tenant.id,
-    ...(q
-      ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { phone: { contains: q, mode: "insensitive" as const } },
-            { email: { contains: q, mode: "insensitive" as const } },
-          ],
-        }
-      : {}),
-  };
-
-  const [contactos, total] = await Promise.all([
+  const [contactos, eventos] = await Promise.all([
     db.contact.findMany({
-      where,
-      orderBy: [{ lastTouchAt: "desc" }, { createdAt: "desc" }],
-      take: 300,
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        email: true,
-        lastTouchAt: true,
-        conceOperaciones: { select: { tipo: true, vehiculoId: true } },
+      where: {
+        clientId: tenant.id,
+        ...(q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }] } : {}),
       },
+      orderBy: { name: "asc" },
+      take: 400,
+      select: { id: true, name: true, phone: true, email: true },
     }),
-    db.contact.count({ where: { clientId: tenant.id } }),
+    db.eventoOrg.findMany({ where: { clientId: tenant.id }, select: { contacto: true, presupuesto: true, cobrado: true } }),
   ]);
 
-  const filas: ClienteRow[] = contactos.map((c) => ({
-    id: c.id,
-    nombre: c.name,
-    telefono: c.phone,
-    email: c.email,
-    mandatos: c.conceOperaciones.filter((o) => o.tipo === "MANDATO").length,
-    boletos: c.conceOperaciones.filter((o) => o.tipo === "BOLETO").length,
-    vehiculos: new Set(c.conceOperaciones.map((o) => o.vehiculoId).filter(Boolean)).size,
-    ultimoContacto: c.lastTouchAt
-      ? c.lastTouchAt.toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
-      : null,
-  }));
+  // Historial resumido por nombre: cuántos eventos y cuánto facturó cada cliente.
+  const resumen = new Map<string, { eventos: number; total: number }>();
+  for (const e of eventos) {
+    const k = (e.contacto ?? "").trim().toLowerCase();
+    if (!k) continue;
+    const r = resumen.get(k) ?? { eventos: 0, total: 0 };
+    r.eventos += 1;
+    r.total += e.presupuesto;
+    resumen.set(k, r);
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Clientes</h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Todos los clientes del negocio. Editá teléfono y email acá mismo, o entrá a la ficha
-            para ver sus vehículos, sus mandatos/boletos y sus documentos escaneados.
+          <h1 className="text-[40px] leading-none" style={{ fontFamily: "var(--font-italiana)" }}>Clientes</h1>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {contactos.length} en la base · entrá a cada uno para ver su historial
           </p>
         </div>
-        <Link
-          href={`${base}/crm`}
-          className="inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium hover:bg-muted"
-        >
-          📇 Ver en el CRM
-        </Link>
+        <form className="flex gap-2">
+          <input
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Buscar por nombre o teléfono…"
+            className="h-10 w-64 rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-primary"
+          />
+          <button className="rounded-lg border border-border px-4 text-[11px] font-semibold uppercase tracking-[0.14em] transition hover:bg-muted">
+            Buscar
+          </button>
+        </form>
       </div>
 
-      <form method="get" className="flex flex-wrap items-center gap-2">
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Buscar por nombre, teléfono o email…"
-          className="h-9 w-full max-w-sm rounded-md border bg-card px-3 text-sm outline-none focus:border-primary"
-        />
-        <button type="submit" className="h-9 rounded-md border px-3 text-sm font-medium hover:bg-muted">
-          Buscar
-        </button>
-        {q ? (
-          <Link href={`${base}/clientes`} className="text-sm text-muted-foreground hover:underline">
-            Limpiar
-          </Link>
-        ) : null}
-        <span className="ml-auto">
-          <Badge variant="default">
-            {filas.length} en pantalla · {total} en total
-          </Badge>
-        </span>
-      </form>
-
-      <ClientesTable slug={tenant.slug} clientes={filas} />
+      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <th className="px-4 py-3">Cliente</th>
+              <th className="px-4 py-3">Teléfono</th>
+              <th className="hidden px-4 py-3 sm:table-cell">Email</th>
+              <th className="px-4 py-3 text-right">Eventos</th>
+              <th className="px-4 py-3 text-right">Facturado</th>
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {contactos.map((c) => {
+              const r = resumen.get(c.name.trim().toLowerCase());
+              return (
+                <tr key={c.id} className="border-b border-border/60 last:border-0">
+                  <td className="px-4 py-3 font-medium">
+                    <Link href={`/os/${slug}/clientes/${c.id}`} className="transition hover:opacity-60">
+                      {c.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 tabular-nums text-muted-foreground">{c.phone ?? "—"}</td>
+                  <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">{c.email ?? "—"}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{r?.eventos ?? 0}</td>
+                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{r ? plata(r.total) : "—"}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/os/${slug}/clientes/${c.id}`}
+                      className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition hover:bg-muted"
+                    >
+                      Ver ficha
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+            {!contactos.length ? (
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">Sin clientes {q ? "para esa búsqueda" : "todavía"}.</td></tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

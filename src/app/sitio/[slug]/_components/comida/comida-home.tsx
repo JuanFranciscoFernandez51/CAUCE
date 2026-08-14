@@ -2,7 +2,7 @@ import type { Client } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PedidoProvider, BarraPedido } from "./pedido-store";
 import { Destacados } from "./catalogo";
-import { MiloEstilos, MiloCinta, MiloHeader } from "./milo-chrome";
+import { MiloEstilos, MiloCinta, MiloHeader, WhatsAppFlotante } from "./milo-chrome";
 import { Reveal } from "../conce/reveal";
 
 /**
@@ -101,15 +101,6 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 style={{ backgroundColor: BORDO, color: CREMA }}
               >
                 Ver catálogo
-              </a>
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noreferrer"
-                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
-                style={{ backgroundColor: CELESTE, color: TINTA, fontWeight: 700 }}
-              >
-                WhatsApp
               </a>
               <span className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold" style={{ backgroundColor: "rgba(176,206,254,0.35)", color: TINTA }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BORDO }} />
@@ -302,6 +293,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           </div>
         </footer>
 
+        <WhatsAppFlotante wa={wa} />
         <BarraPedido whatsapp={wa} minimoKg={st.minimoKg} base={`/sitio/${tenant.slug}`} />
       </div>
     </PedidoProvider>

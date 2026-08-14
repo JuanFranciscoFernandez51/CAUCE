@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BORDO, CREMA, TINTA, TENUE } from "./milo";
 import { PedidoProvider } from "./pedido-store";
 import { CarritoPage } from "../bazar/carrito-page";
-import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini, MediosDePago } from "./milo-chrome";
+import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini, MediosDePago, WhatsAppFlotante } from "./milo-chrome";
 
 /** Carrito de Casa Milo: el checkout compartido, vestido con la estética de la casa. */
 export function CarritoMilo({
@@ -80,6 +80,7 @@ export function CarritoMilo({
             .
           </p>
         </div>
+        <WhatsAppFlotante wa={wa} />
         <MiloFooterMini base={base} wa={wa} />
       </div>
     </PedidoProvider>

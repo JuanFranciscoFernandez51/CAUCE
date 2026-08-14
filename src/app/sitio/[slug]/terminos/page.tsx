@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getTenantBySlug, hasModule } from "@/lib/tenant";
 import { BORDO, CREMA, TINTA, TENUE } from "../_components/comida/milo";
 import { PedidoProvider } from "../_components/comida/pedido-store";
-import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini, MediosDePago } from "../_components/comida/milo-chrome";
+import { MiloEstilos, MiloCinta, MiloHeader, MiloFooterMini, MediosDePago, WhatsAppFlotante } from "../_components/comida/milo-chrome";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Términos y condiciones — Casa Milo", robots: { index: false } };
@@ -109,6 +109,7 @@ export default async function TerminosPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
 
+        <WhatsAppFlotante wa={wa} />
         <MiloFooterMini base={base} wa={wa} />
       </div>
     </PedidoProvider>
