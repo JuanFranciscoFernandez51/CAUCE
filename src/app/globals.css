@@ -443,3 +443,14 @@ h3 {
 }
 .os-jess :is(input[type="checkbox"], input[type="radio"]) { accent-color: #b85850; }
 .os-jess input[type="date"], .os-jess input[type="number"] { background-color: #fff; }
+
+/* Jess: la línea del proceso se dibuja sola al entrar en pantalla */
+.jess-proceso-linea {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+.is-visible .jess-proceso-linea { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .jess-proceso-linea { transition: none; transform: none; }
+}

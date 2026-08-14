@@ -102,7 +102,7 @@ export function EventoPublico({ slug, negocio }: { slug: string; negocio: string
       ) : null}
 
       <p className="pt-4 text-center text-xs text-muted-foreground">
-        ⚡ Powered by <a href="https://cauce.app" className="font-medium hover:text-foreground">Cauce</a>
+        ⚡ Powered by <a href="https://cauceapp.com.ar" className="font-medium hover:text-foreground">Cauce</a>
       </p>
     </div>
   );

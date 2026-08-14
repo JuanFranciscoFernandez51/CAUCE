@@ -134,19 +134,23 @@ export function JessHome({ tenant }: { tenant: Client }) {
               De la idea al brindis
             </h2>
           </Reveal>
-          <div className="mx-auto mt-10 grid max-w-[900px] gap-8 sm:grid-cols-3">
+          <Reveal className="relative mx-auto mt-10 max-w-[900px]">
+          {/* La línea que recorre el proceso, se dibuja al entrar (como en el home de Cauce) */}
+          <div className="jess-proceso-linea absolute left-[16%] right-[16%] top-[24px] hidden h-px sm:block" style={{ backgroundColor: TERRA, opacity: 0.55 }} />
+          <div className="relative grid gap-8 sm:grid-cols-3">
             {[
               { n: "01", t: "Nos conocemos", d: "Una reunión para entender el evento que imaginás, el estilo y el presupuesto." },
               { n: "02", t: "Diseñamos y planificamos", d: "Propuesta, cronograma, proveedores y ambientación. Todo por escrito y con seguimiento." },
               { n: "03", t: "Vos disfrutás", d: "El día del evento coordinamos todo: montaje, tiempos, proveedores e imprevistos." },
             ].map((p, i) => (
               <Reveal key={p.n} delay={i * 120}>
-                <p className="text-[34px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA }}>{p.n}</p>
+                <p className="relative inline-block px-3 text-[34px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA, backgroundColor: TINTA }}>{p.n}</p>
                 <p className="mt-1 text-[16px] font-semibold">{p.t}</p>
                 <p className="mt-2 text-[13px] leading-relaxed opacity-75">{p.d}</p>
               </Reveal>
             ))}
           </div>
+          </Reveal>
         </div>
       </section>
 

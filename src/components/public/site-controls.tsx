@@ -15,7 +15,7 @@ export function useLang(): Lang {
 }
 
 const boton =
-  "flex h-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10";
+  "flex h-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:hover:bg-white/10";
 
 /** Sol / luna en trazo simple, del color del texto (sin emoji). */
 export function ThemeButton() {
