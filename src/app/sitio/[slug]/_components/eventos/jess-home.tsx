@@ -27,8 +27,8 @@ export function JessHome({ tenant }: { tenant: Client }) {
       {/* Hero sobre la foto del abrazo, con velo crema para que el texto respire */}
       <section
         id="top"
-        className="relative bg-cover bg-bottom"
-        style={{ backgroundImage: `url(${FOTO_HERO})` }}
+        className="relative bg-cover"
+        style={{ backgroundImage: `url(${FOTO_HERO})`, backgroundPosition: "center 62%" }}
       >
         <div
           className="absolute inset-0"
