@@ -47,9 +47,11 @@ export default async function TrabajoPage({ params }: { params: Promise<{ slug: 
         <p className="text-[24px]" style={{ fontFamily: "var(--font-pinyon)", color: JESS_TERRA }}>
           la historia
         </p>
-        <p className="mx-auto mt-4 max-w-[640px] text-[15px] leading-[1.9]" style={{ color: "#4d463f" }}>
-          {t.descripcion}
-        </p>
+        <div className="mx-auto mt-4 max-w-[640px] space-y-4 text-left text-[15px] leading-[1.9] sm:text-center" style={{ color: "#4d463f" }}>
+          {t.descripcion.split("\n\n").map((par) => (
+            <p key={par.slice(0, 30)}>{par}</p>
+          ))}
+        </div>
       </section>
 
       {/* Book de fotos */}
