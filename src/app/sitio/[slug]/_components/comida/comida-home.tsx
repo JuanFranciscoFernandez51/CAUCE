@@ -79,55 +79,48 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
 
         <MiloHeader base={base} wa={wa} nav={NAV} />
 
-        {/* 1.3 Hero */}
-        <section className="mx-auto grid max-w-[1180px] items-center gap-11 px-7 pb-10 pt-9 md:grid-cols-[1.35fr_0.65fr]">
-          <Reveal>
-            <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
-              Milanesas & pollo premium · BS-AS
-            </p>
-            <h1
-              className="mt-4 text-[42px] font-black sm:text-[58px]"
-              style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 0.94, letterSpacing: "-0.025em" }}
-            >
-              Lo simple, cuando está bien hecho.
-            </h1>
-            <p className="mt-5 max-w-[460px] text-[17px] leading-[1.45]" style={{ color: "#4A2A30" }}>
-              Corte seleccionado, rebozado propio. Pedís y te llega el mismo día a tu casa.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              <a
-                href="#catalogo"
-                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
-                style={{ backgroundColor: BORDO, color: CREMA }}
+        {/* 1.3 Hero: la foto de pollo de fondo con velo crema, como en Jess */}
+        <section className="relative overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://res.cloudinary.com/dgtlyzyra/image/upload/v1786742647/casamilo/hero-pollo.jpg"
+            alt=""
+            className="milo-kenburns absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: "center 60%" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(100deg, rgba(254,250,239,.97) 0%, rgba(254,250,239,.88) 46%, rgba(254,250,239,.30) 100%)" }}
+          />
+          <div className="relative mx-auto max-w-[1180px] px-7 pb-24 pt-14 sm:pb-32 sm:pt-20">
+            <Reveal>
+              <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
+                Milanesas & pollo premium · BS-AS
+              </p>
+              <h1
+                className="mt-4 max-w-[640px] text-[42px] font-black sm:text-[58px]"
+                style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 0.94, letterSpacing: "-0.025em" }}
               >
-                Ver catálogo
-              </a>
-              <span className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold" style={{ backgroundColor: "rgba(176,206,254,0.35)", color: TINTA }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BORDO }} />
-                Entrega en el día en CABA · envío sin cargo desde $60.000
-              </span>
-            </div>
-          </Reveal>
-
-          {/* Marco bordó desplazado: es parte de la identidad. La foto respira con ken burns. */}
-          <Reveal delay={120} className="w-full max-w-[320px] justify-self-end">
-            <div style={{ background: CELESTE, padding: "0 0 14px 14px" }}>
-            <div style={{ background: BORDO, padding: "18px 18px 0 0", transform: "translate(-14px,-14px)" }}>
-              <div className="aspect-square w-full overflow-hidden" style={{ transform: "translate(18px,18px)" }}>
-                {foto(productos[0]?.fotos) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={foto(productos[0]?.fotos)!}
-                    alt="Milanesa de Casa Milo"
-                    className="milo-kenburns h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full" style={{ backgroundColor: "#EADFC4" }} />
-                )}
+                Lo simple, cuando está bien hecho.
+              </h1>
+              <p className="mt-5 max-w-[460px] text-[17px] leading-[1.45]" style={{ color: "#4A2A30" }}>
+                Corte seleccionado, rebozado propio. Pedís y te llega el mismo día a tu casa.
+              </p>
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <a
+                  href="#catalogo"
+                  className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
+                  style={{ backgroundColor: BORDO, color: CREMA }}
+                >
+                  Ver catálogo
+                </a>
+                <span className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold" style={{ backgroundColor: "rgba(176,206,254,0.5)", color: TINTA }}>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BORDO }} />
+                  Entrega en el día en CABA · envío sin cargo desde $60.000
+                </span>
               </div>
-            </div>
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
         </section>
 
         {/* 1.4 Franja de diferenciales */}
