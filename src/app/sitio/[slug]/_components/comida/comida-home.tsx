@@ -184,8 +184,8 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           <div className="mt-10 grid gap-7 md:grid-cols-3">
             {PASOS.map((p, i) => (
               <Reveal key={p.n} delay={i * 90}>
-                <div className="group transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl motion-reduce:transform-none" style={{ borderTop: `3px solid ${BORDO}`, padding: "20px 14px 16px" }}>
-                <p className="text-[44px] font-black text-[#A9C6F5] transition-colors duration-300 group-hover:text-[#7B2434]" style={{ fontFamily: "var(--font-bodoni)" }}>
+                <div className="milo-paso" style={{ borderTop: `3px solid ${BORDO}`, padding: "20px 14px 16px" }}>
+                <p className="milo-paso-num text-[44px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE }}>
                   {p.n}
                 </p>
                 <p className="mt-1 text-[21px] font-bold" style={{ color: BORDO }}>

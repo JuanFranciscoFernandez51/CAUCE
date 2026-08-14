@@ -451,6 +451,12 @@ h3 {
   transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
 }
 .is-visible .jess-proceso-linea { transform: scaleX(1); }
+.jess-paso { transition: transform 0.3s ease; }
+.jess-paso:hover { transform: translateY(-5px); }
+.jess-paso .jess-paso-num { display: inline-block; transition: transform 0.3s ease, color 0.3s ease; }
+.jess-paso:hover .jess-paso-num { transform: scale(1.18); color: #EDE8DE !important; }
 @media (prefers-reduced-motion: reduce) {
   .jess-proceso-linea { transition: none; transform: none; }
+  .jess-paso, .jess-paso .jess-paso-num { transition: none; }
+  .jess-paso:hover { transform: none; }
 }

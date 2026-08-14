@@ -22,10 +22,15 @@ export function MiloEstilos() {
       .milo-link:hover { background-size: 100% 1.5px; }
       @keyframes milo-pop { 0% { transform: scale(1); } 40% { transform: scale(1.07); } 100% { transform: scale(1); } }
       .milo-pop { animation: milo-pop 0.3s ease-out; }
+      .milo-paso { transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; }
+      .milo-paso:hover { transform: translateY(-6px); background-color: #FFFDF6; box-shadow: 0 16px 34px rgba(58,18,24,0.13); }
+      .milo-paso:hover .milo-paso-num { color: #7B2434; }
+      .milo-paso-num { transition: color 0.3s ease; }
       .milo-carrusel { scroll-snap-type: x mandatory; }
       .milo-carrusel > * { scroll-snap-align: start; }
       @media (prefers-reduced-motion: reduce) {
         .milo-kenburns, .milo-cinta-tira, .milo-pop { animation: none; }
+        .milo-paso { transition: none; } .milo-paso:hover { transform: none; }
         .milo-link { transition: none; }
       }
     `}</style>

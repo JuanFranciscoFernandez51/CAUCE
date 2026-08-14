@@ -143,8 +143,8 @@ export function JessHome({ tenant }: { tenant: Client }) {
               { n: "02", t: "Diseñamos y planificamos", d: "Propuesta, cronograma, proveedores y ambientación. Todo por escrito y con seguimiento." },
               { n: "03", t: "Vos disfrutás", d: "El día del evento coordinamos todo: montaje, tiempos, proveedores e imprevistos." },
             ].map((p, i) => (
-              <Reveal key={p.n} delay={i * 120}>
-                <p className="relative inline-block px-3 text-[34px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA, backgroundColor: TINTA }}>{p.n}</p>
+              <Reveal key={p.n} delay={i * 120} className="jess-paso">
+                <p className="jess-paso-num relative px-3 text-[34px]" style={{ fontFamily: "var(--font-pinyon)", color: TERRA, backgroundColor: TINTA }}>{p.n}</p>
                 <p className="mt-1 text-[16px] font-semibold">{p.t}</p>
                 <p className="mt-2 text-[13px] leading-relaxed opacity-75">{p.d}</p>
               </Reveal>
