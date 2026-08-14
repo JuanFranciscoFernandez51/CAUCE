@@ -429,3 +429,17 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .os-jess :is(button, a):active { transform: none; }
 }
+
+/* Selects y checks del admin Jess: nada de controles nativos grises. */
+.os-jess select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231A1816' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 11px;
+  padding-right: 2.25rem;
+}
+.os-jess :is(input[type="checkbox"], input[type="radio"]) { accent-color: #b85850; }
+.os-jess input[type="date"], .os-jess input[type="number"] { background-color: #fff; }

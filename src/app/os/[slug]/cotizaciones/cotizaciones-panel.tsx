@@ -42,16 +42,24 @@ export function CotizacionesPanel({
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState("");
   const [f, setF] = useState({ evento: "", tipo: "", fechaEvento: "", cliente: "", telefono: "", lugar: "", precioUsd: 0, nota: "" });
-  const [sel, setSel] = useState<Set<string>>(new Set());
+  // Cantidad por ítem de mobiliario (0 = no va). Tildar pone 1; el stepper suma.
+  const [cant, setCant] = useState<Record<string, number>>({});
 
   const etiqueta = "text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground";
   const input = "h-10 w-full border border-border bg-white px-3 text-sm outline-none focus:border-primary";
 
   const todosLosItems = useMemo(() => mobiliario.flatMap((s) => s.items), [mobiliario]);
   const totalMob = useMemo(
-    () => todosLosItems.filter((i) => sel.has(i.id)).reduce((a, i) => a + i.precio, 0),
-    [sel, todosLosItems]
+    () => todosLosItems.reduce((a, i) => a + (cant[i.id] ?? 0) * i.precio, 0),
+    [cant, todosLosItems]
   );
+  function ponerCant(id: string, n: number) {
+    setCant((c) => {
+      const nx = { ...c };
+      if (n <= 0) delete nx[id]; else nx[id] = n;
+      return nx;
+    });
+  }
 
   function usarPlantilla() {
     setF({ ...f, precioUsd: plantilla.precio, nota: plantilla.nota });
@@ -61,7 +69,7 @@ export function CotizacionesPanel({
     if (!f.cliente.trim()) return setError("Elegí o cargá el cliente");
     if (!f.evento.trim()) return setError("Poné el nombre del evento");
     setOcupado(true); setError("");
-    const items = todosLosItems.filter((i) => sel.has(i.id)).map((i) => ({ detalle: i.nombre, cant: 1, unitario: i.precio }));
+    const items = todosLosItems.filter((i) => (cant[i.id] ?? 0) > 0).map((i) => ({ detalle: i.nombre, cant: cant[i.id], unitario: i.precio }));
     const r = await fetch(`/api/os/${slug}/presupuestos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,7 +92,7 @@ export function CotizacionesPanel({
     if (!r.ok) return setError("No se pudo guardar");
     const d = (await r.json()) as { id: string };
     setAbierto(false);
-    setSel(new Set());
+    setCant({});
     setF({ evento: "", tipo: "", fechaEvento: "", cliente: "", telefono: "", lugar: "", precioUsd: 0, nota: "" });
     window.open(`/os/${slug}/cotizaciones/${d.id}/imprimir`, "_blank");
     router.refresh();
@@ -243,8 +251,8 @@ export function CotizacionesPanel({
                 <div className="flex items-baseline justify-between border-b border-border pb-1.5">
                   <p className={etiqueta}>Mobiliario · Seleccioná los ítems</p>
                   <span className="flex gap-3 text-[11px]">
-                    <button onClick={() => setSel(new Set(todosLosItems.filter((i) => i.precio > 0).map((i) => i.id)))} className="underline underline-offset-2 hover:opacity-70">Seleccionar todo</button>
-                    <button onClick={() => setSel(new Set())} className="underline underline-offset-2 hover:opacity-70">Limpiar</button>
+                    <button onClick={() => setCant(Object.fromEntries(todosLosItems.filter((i) => i.precio > 0).map((i) => [i.id, 1])))} className="underline underline-offset-2 hover:opacity-70">Seleccionar todo</button>
+                    <button onClick={() => setCant({})} className="underline underline-offset-2 hover:opacity-70">Limpiar</button>
                   </span>
                 </div>
                 <div className="mt-3 max-h-72 space-y-4 overflow-y-auto pr-1">
@@ -256,15 +264,32 @@ export function CotizacionesPanel({
                           <label key={i.id} className="flex cursor-pointer items-center gap-2 bg-white px-2.5 py-1.5 text-[13px]">
                             <input
                               type="checkbox"
-                              checked={sel.has(i.id)}
-                              onChange={(e) => {
-                                const n = new Set(sel);
-                                if (e.target.checked) n.add(i.id); else n.delete(i.id);
-                                setSel(n);
-                              }}
+                              checked={(cant[i.id] ?? 0) > 0}
+                              onChange={(e) => ponerCant(i.id, e.target.checked ? 1 : 0)}
                             />
                             <span className="flex-1 leading-tight">{i.nombre}</span>
-                            <span className="tabular-nums text-muted-foreground">{i.precio ? plata(i.precio) : "consultar"}</span>
+                            {(cant[i.id] ?? 0) > 0 ? (
+                              <span className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
+                                <button
+                                  type="button"
+                                  onClick={() => ponerCant(i.id, (cant[i.id] ?? 1) - 1)}
+                                  className="h-5 w-5 border border-border leading-none transition hover:bg-muted"
+                                >
+                                  −
+                                </button>
+                                <span className="w-6 text-center font-semibold tabular-nums">{cant[i.id]}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => ponerCant(i.id, (cant[i.id] ?? 1) + 1)}
+                                  className="h-5 w-5 border border-border leading-none transition hover:bg-muted"
+                                >
+                                  +
+                                </button>
+                              </span>
+                            ) : null}
+                            <span className="tabular-nums text-muted-foreground">
+                              {i.precio ? ((cant[i.id] ?? 0) > 1 ? plata(i.precio * cant[i.id]) : plata(i.precio)) : "consultar"}
+                            </span>
                           </label>
                         ))}
                       </div>
