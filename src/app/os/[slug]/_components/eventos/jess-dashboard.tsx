@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Client } from "@prisma/client";
+import { Reveal } from "@/app/sitio/[slug]/_components/conce/reveal";
 import { db } from "@/lib/db";
 
 /**
@@ -77,16 +78,16 @@ export async function JessDashboard({ tenant }: { tenant: Client }) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <div key={k.t} className="rounded-xl border border-border bg-card p-4">
+        {kpis.map((k, i) => (
+          <Reveal key={k.t} delay={i * 70} className="rounded-xl border border-border bg-card p-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{k.t}</p>
             <p className="mt-2 text-[26px] font-bold tabular-nums">{k.v}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{k.d}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-4">
+      <Reveal><section className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Cobranzas pendientes</h2>
           <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{conSaldo.length ? "" : "Al día"}</span>
@@ -105,10 +106,10 @@ export async function JessDashboard({ tenant }: { tenant: Client }) {
         ) : (
           <p className="py-6 text-center text-sm text-muted-foreground">No tenés cobranzas pendientes</p>
         )}
-      </section>
+      </section></Reveal>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-card p-4">
+        <Reveal><section className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Próximos eventos</h2>
             <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Cuenta regresiva</span>
@@ -137,9 +138,9 @@ export async function JessDashboard({ tenant }: { tenant: Client }) {
               No hay eventos próximos. <Link href={`${base}/eventos-org?nuevo=1`} className="underline">Cargar uno</Link>
             </p>
           )}
-        </section>
+        </section></Reveal>
 
-        <section className="rounded-xl border border-border bg-card p-4">
+        <Reveal><section className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Hitos pendientes</h2>
             <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Tareas</span>
@@ -164,10 +165,10 @@ export async function JessDashboard({ tenant }: { tenant: Client }) {
           ) : (
             <p className="py-6 text-center text-sm text-muted-foreground">Todo al día</p>
           )}
-        </section>
+        </section></Reveal>
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-4">
+      <Reveal><section className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Eventos por estado</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {Object.entries(ESTADOS).map(([k, v]) => {
@@ -180,7 +181,7 @@ export async function JessDashboard({ tenant }: { tenant: Client }) {
             );
           })}
         </div>
-      </section>
+      </section></Reveal>
     </div>
   );
 }

@@ -406,3 +406,26 @@ h3 {
   .jess-kenburns { animation: none; }
   .jess-link { transition: none; }
 }
+
+/* ── Admin Jess (os-jess): esquinas apenas redondeadas y micro-efectos rápidos ──
+   Sutiles a propósito: 150-180ms, nada que retrase el uso diario. */
+.os-jess :is(button, input, select, textarea) { border-radius: 0.5rem; }
+.os-jess :is(button, a, input, select, textarea, summary) {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+.os-jess :is(button, a):active { transform: scale(0.98); }
+.os-jess :is(input, select, textarea):focus-visible {
+  outline: none;
+  border-color: #b85850;
+  box-shadow: 0 0 0 3px rgba(184, 88, 80, 0.14);
+}
+.os-jess :is(section, div):is(.rounded-xl, .rounded-lg) {
+  transition: box-shadow 0.18s ease;
+}
+.os-jess div.rounded-xl:hover { box-shadow: 0 6px 22px rgba(26, 24, 22, 0.07); }
+.os-jess tbody tr { transition: background-color 0.15s ease; }
+.os-jess tbody tr:hover { background-color: rgba(26, 24, 22, 0.035); }
+@media (prefers-reduced-motion: reduce) {
+  .os-jess :is(button, a):active { transform: none; }
+}

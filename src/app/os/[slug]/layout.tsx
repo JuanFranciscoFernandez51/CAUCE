@@ -310,6 +310,7 @@ export default async function OsLayout({
     estilo.esquinas === "rectas" ? "os-esquinas-rectas" : "",
     estilo.esquinas === "redondeadas" ? "os-esquinas-redondeadas" : "",
     estilo.densidad === "compacta" ? "os-densidad-compacta" : "",
+    tpl === "eventos" ? "os-jess" : "",
   ]
     .filter(Boolean)
     .join(" ");
