@@ -5,6 +5,7 @@ import { getTenantBySlug, tenantBranding, tenantEstilo } from "@/lib/tenant";
 import { resolveOsRole, isOsOwner } from "../_components/os-role";
 import { ModuleDisabled } from "../_components/module-disabled";
 import { BrandingSection } from "../_components/config-panel";
+import { ConfigJess, type ConfigJessInicial } from "./config-jess";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,37 @@ export default async function ConfigPage({ params }: { params: Promise<{ slug: s
   }
 
   const brandingRaw = tenantBranding(tenant);
+
+  // Template eventos: la configuración completa al estilo de su panel.
+  const tplCfg = (tenant.settings as { template?: string } | null)?.template;
+  if (tplCfg === "eventos") {
+    const st = (tenant.settings ?? {}) as Record<string, unknown>;
+    const pl = (st.plantillaCotizacion ?? {}) as { precio?: number; moneda?: string; servicios?: { nombre: string; items: string[] }[]; nota?: string };
+    const inicial: ConfigJessInicial = {
+      displayName: brandingRaw.displayName,
+      eslogan: String(st.eslogan ?? ""),
+      email: tenant.email ?? "",
+      telefono: tenant.whatsapp ?? "",
+      cuit: String(st.cuit ?? ""),
+      instagram: String(st.instagram ?? ""),
+      direccion: String(st.direccion ?? ""),
+      tiposEvento: (st.tiposEvento as string[]) ?? [],
+      categoriasProveedores: (st.categoriasProveedores as string[]) ?? ["Catering", "DJ", "Fotografía", "Video", "Flores", "Decoración", "Mobiliario", "Venue", "Transporte", "Pastelería", "Animación", "Otros"],
+      categoriasGastos: (st.categoriasGastos as string[]) ?? ["Catering", "Decoración", "Música", "Fotografía", "Flores", "Mobiliario", "Honorarios", "Otros"],
+      plantilla: {
+        precio: pl.precio ?? 7500,
+        moneda: pl.moneda ?? "USD",
+        servicios: pl.servicios ?? [],
+        nota: pl.nota ?? "",
+      },
+    };
+    return (
+      <div className="p-4 sm:p-6">
+        <ConfigJess slug={slug} inicial={inicial} />
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
