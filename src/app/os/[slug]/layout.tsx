@@ -246,7 +246,7 @@ export default async function OsLayout({
   const nav: NavEntry[] = [
     { label: "Dashboard", href: base, icon: "🏁", exact: true },
     tpl === "eventos"
-      ? { label: "Pendientes", href: `${base}/pendientes`, icon: "" }
+      ? { label: "Calendario", href: `${base}/calendario`, icon: "" }
       : { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
     ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
@@ -288,7 +288,7 @@ export default async function OsLayout({
     if (tareasPend || proxEv) {
       proximoJess = {
         texto: `${tareasPend} cosa${tareasPend === 1 ? "" : "s"} hoy${proxEv ? ` · Próximo: ${proxEv.nombre}` : ""}`,
-        href: tareasPend ? `${base}/pendientes` : `${base}/eventos-org`,
+        href: tareasPend ? `${base}/calendario#pendientes` : `${base}/eventos-org`,
       };
     }
   }
@@ -329,7 +329,6 @@ export default async function OsLayout({
           proximo={proximoJess}
           tabs={[
             { label: "Dashboard", href: base },
-            { label: "Pendientes", href: `${base}/pendientes` },
             { label: "Cotizaciones", href: `${base}/cotizaciones` },
             { label: "Eventos", href: `${base}/eventos-org`, badge: eventosActivos },
             { label: "Clientes", href: `${base}/crm` },

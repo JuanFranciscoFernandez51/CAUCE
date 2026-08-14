@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
+import { TareasBoard, type TareaRow } from "../pendientes/tareas-board";
+import { AgregarTarea } from "./agregar-tarea";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Calendario" };
@@ -30,7 +32,16 @@ export default async function CalendarioPage({
   const mesAnt = `${m0 === 0 ? anio - 1 : anio}-${String(m0 === 0 ? 12 : m0).padStart(2, "0")}`;
   const mesSig = `${m0 === 11 ? anio + 1 : anio}-${String(m0 === 11 ? 1 : m0 + 2).padStart(2, "0")}`;
 
-  const eventos = await db.eventoOrg.findMany({ where: { clientId: tenant.id } });
+  // Fechas siempre a mediodía local: evita el corrimiento UTC-3 (día anterior).
+  const aDia = (x: Date | string | null) => {
+    if (!x) return null;
+    const iso = typeof x === "string" ? x.slice(0, 10) : x.toISOString().slice(0, 10);
+    return new Date(iso + "T12:00");
+  };
+  const [eventos, tareas] = await Promise.all([
+    db.eventoOrg.findMany({ where: { clientId: tenant.id } }),
+    db.tarea.findMany({ where: { clientId: tenant.id }, orderBy: [{ orden: "asc" }, { createdAt: "asc" }] }),
+  ]);
   type Marca = { texto: string; color: string; href: string };
   const porDia = new Map<number, Marca[]>();
   const poner = (d: Date | null, m: Marca) => {
@@ -41,14 +52,30 @@ export default async function CalendarioPage({
   };
   const COLOR: Record<string, string> = { cotizado: "#9E9387", confirmado: "#B8935A", produccion: "#B85850", cerrado: "#5A8A57" };
   for (const e of eventos) {
-    poner(e.fecha, { texto: e.nombre, color: COLOR[e.estado] ?? "#9E9387", href: `/os/${slug}/eventos-org?abrir=${e.id}` });
+    poner(aDia(e.fecha), { texto: e.nombre, color: COLOR[e.estado] ?? "#9E9387", href: `/os/${slug}/eventos-org?abrir=${e.id}` });
     for (const h of (e.hitos as { titulo: string; fecha: string; hecho: boolean }[]) ?? []) {
       if (h.hecho) continue;
-      const f = new Date(h.fecha);
+      const f = aDia(h.fecha)!;
       const vencido = f < hoy;
       poner(f, { texto: h.titulo, color: vencido ? "#B85850" : "#5A8A57", href: `/os/${slug}/eventos-org?abrir=${e.id}` });
     }
   }
+
+  // Tareas con fecha: al calendario. Sin fecha: quedan solo en el tablero de abajo.
+  for (const t of tareas) {
+    if (t.estado === "hecho" || !t.vence) continue;
+    poner(aDia(t.vence), { texto: t.titulo, color: "#1A1816", href: `/os/${slug}/calendario#pendientes` });
+  }
+  const filas: TareaRow[] = tareas.map((t) => ({
+    id: t.id,
+    titulo: t.titulo,
+    prioridad: t.prioridad,
+    categoria: t.categoria,
+    vence: t.vence?.toISOString().slice(0, 10) ?? null,
+    estado: t.estado,
+    hechaAt: t.hechaAt?.toISOString() ?? null,
+  }));
+  const pendCount = filas.filter((t) => t.estado !== "hecho").length;
 
   const celdas: (number | null)[] = [...Array(arranque).fill(null), ...Array.from({ length: diasEnMes }, (_, i) => i + 1)];
   const nombreMes = primer.toLocaleDateString("es-AR", { month: "long", year: "numeric" });
@@ -59,7 +86,7 @@ export default async function CalendarioPage({
         <div>
           <h1 className="text-[40px] leading-none" style={{ fontFamily: "var(--font-italiana)" }}>Calendario</h1>
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Eventos confirmados + hitos por evento
+            Eventos, hitos y tareas — todo lo que viene, en un solo lugar
           </p>
         </div>
         <Link href={`/os/${slug}/calendario`} className="border border-border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition hover:bg-muted">
@@ -74,7 +101,7 @@ export default async function CalendarioPage({
           <Link href={`?m=${mesSig}`} className="border border-border px-3 py-1.5 transition hover:bg-muted">›</Link>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          {[["Evento", "#B8935A"], ["Hito", "#5A8A57"], ["Hito vencido", "#B85850"]].map(([l, c]) => (
+          {[["Evento", "#B8935A"], ["Hito", "#5A8A57"], ["Hito vencido", "#B85850"], ["Tarea", "#1A1816"]].map(([l, c]) => (
             <span key={l} className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5" style={{ backgroundColor: c }} /> {l}
             </span>
@@ -113,6 +140,19 @@ export default async function CalendarioPage({
           );
         })}
       </div>
+
+      {/* Pendientes: el pipeline vive acá mismo */}
+      <section id="pendientes" className="space-y-3 pt-2">
+        <div>
+          <h2 className="text-[28px] leading-none" style={{ fontFamily: "var(--font-italiana)" }}>Pendientes</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Con fecha aparecen arriba en el calendario; sin fecha quedan acá.
+            <span className="ml-3 font-semibold text-foreground">{pendCount} pendientes</span>
+          </p>
+        </div>
+        <AgregarTarea slug={slug} />
+        <TareasBoard slug={slug} tareas={filas} />
+      </section>
     </div>
   );
 }
