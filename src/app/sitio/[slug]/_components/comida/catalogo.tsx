@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { BotonSumar, ENVIO_GRATIS } from "./pedido-store";
 import { Reveal } from "../conce/reveal";
 
@@ -204,6 +204,70 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
           </div>
         );
       })}
+    </section>
+  );
+}
+
+/** Destacados del home: 5 productos que se desplazan al costado (lineup estilo Vespa). */
+export function Destacados({ productos, base }: { productos: Prod[]; base: string }) {
+  const riel = useRef<HTMLDivElement>(null);
+  const mover = (dir: number) => riel.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+
+  return (
+    <section id="catalogo" className="mx-auto max-w-[1180px] px-7 pb-14 pt-12">
+      <Reveal>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
+              Destacados
+            </p>
+            <h2
+              className="mt-3 text-[38px] font-black sm:text-[54px]"
+              style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1, letterSpacing: "-0.02em" }}
+            >
+              Los que más salen
+            </h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => mover(-1)} aria-label="Anterior" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}>‹</button>
+            <button onClick={() => mover(1)} aria-label="Siguiente" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}>›</button>
+            <a
+              href={`${base}/catalogo`}
+              className="px-[22px] py-[13px] text-[14px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
+              style={{ backgroundColor: BORDO, color: CREMA, letterSpacing: "0.04em" }}
+            >
+              Ver catálogo completo
+            </a>
+          </div>
+        </div>
+      </Reveal>
+
+      <div ref={riel} className="milo-carrusel mt-8 flex gap-[22px] overflow-x-auto pb-3" style={{ scrollbarWidth: "none" }}>
+        {productos.map((p, i) => (
+          <article
+            key={p.id}
+            className="group flex w-[280px] flex-none flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
+            style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(123,36,52,0.14)" }}
+          >
+            <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
+              <FotoCard fotos={p.fotos} alt={p.nombre} />
+              {p.precio >= ENVIO_GRATIS ? <BadgeEnvio /> : null}
+              <span className="absolute bottom-2 right-3 text-[26px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: "rgba(251,243,222,0.95)", textShadow: "0 1px 8px rgba(58,18,24,.45)" }}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex flex-1 flex-col gap-2 p-5">
+              <p className="text-[21px] font-bold" style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1.1 }}>
+                {p.nombre}
+              </p>
+              <div className="mt-auto flex items-center justify-between gap-3">
+                <p className="text-[20px] font-bold" style={{ color: TINTA }}>{plata(p.precio)}</p>
+                <BotonSumar producto={{ id: p.id, nombre: p.nombre, precio: p.precio, foto: p.fotos[0] ?? null }} />
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

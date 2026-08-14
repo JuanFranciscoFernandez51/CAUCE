@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { intentosDeBusqueda } from "@/lib/buscar-repuestos";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -63,6 +63,10 @@ export default async function TiendaPage({
   const sp = await searchParams;
   const site = await getBazarSite(slug);
   if (!site) notFound();
+  // Casa Milo: la tienda genérica no existe — el catálogo con su estética es la pestaña.
+  if ((site.tenant.settings as { template?: string } | null)?.template === "comida") {
+    redirect(`/sitio/${site.tenant.slug}/catalogo`);
+  }
   const { tenant, info } = site;
   const base = `/sitio/${tenant.slug}`;
 

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { getTenantBySlug } from "@/lib/tenant";
+import { CatalogoMilo } from "../_components/comida/pagina-catalogo";
 import { CONCE_TIPOS, tipoLabel } from "@/lib/conce";
 import {
   aCardVehiculo,
@@ -24,6 +26,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const t0 = await getTenantBySlug(slug);
+  if ((t0?.settings as { template?: string } | null)?.template === "comida") {
+    return { title: "Catálogo — Casa Milo" };
+  }
   const site = await getConceSite(slug);
   if (!site) return { title: "Catálogo" };
   return {
@@ -78,6 +84,10 @@ export default async function CatalogoPage({
   searchParams: Promise<SP>;
 }) {
   const { slug } = await params;
+  const t0 = await getTenantBySlug(slug);
+  if ((t0?.settings as { template?: string } | null)?.template === "comida") {
+    return <CatalogoMilo tenant={t0!} />;
+  }
   const sp = await searchParams;
   const site = await getConceSite(slug);
   if (!site) notFound();

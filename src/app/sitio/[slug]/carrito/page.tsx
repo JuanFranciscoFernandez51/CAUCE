@@ -4,6 +4,7 @@ import { bazarSettings } from "@/lib/bazar-server";
 import { getBazarSite } from "../_lib/bazar-site";
 import { BazarShell } from "../_components/bazar/bazar-shell";
 import { CarritoPage } from "../_components/bazar/carrito-page";
+import { CarritoMilo } from "../_components/comida/pagina-carrito";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,11 @@ export default async function CarritoRoute({
   if (!site) notFound();
 
   const settings = bazarSettings(site.tenant);
+
+  // Casa Milo: el carrito con SU estética (chrome bordó/crema), no la genérica.
+  if ((site.tenant.settings as { template?: string } | null)?.template === "comida") {
+    return <CarritoMilo tenant={site.tenant} retornoPago={sp.pago ?? null} retornoPedido={sp.pedido ?? null} />;
+  }
 
   return (
     <BazarShell info={site.info}>

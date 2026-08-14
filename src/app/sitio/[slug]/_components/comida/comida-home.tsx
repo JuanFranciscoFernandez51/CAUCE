@@ -1,7 +1,8 @@
 import type { Client } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PedidoProvider, BarraPedido } from "./pedido-store";
-import { Catalogo } from "./catalogo";
+import { Destacados } from "./catalogo";
+import { MiloEstilos, MiloCinta, MiloHeader } from "./milo-chrome";
 import { Reveal } from "../conce/reveal";
 
 /**
@@ -15,11 +16,7 @@ const CREMA = "#FBF3DE";
 const CELESTE = "#A9C6F5";
 const TINTA = "#3A1218";
 
-const NAV = [
-  { href: "#catalogo", label: "Catálogo" },
-  { href: "#como", label: "Cómo funciona" },
-  { href: "#cobertura", label: "Cobertura" },
-];
+
 
 const PASOS = [
   { n: "01", t: "Armás tu pedido", d: "Sumás lo que quieras del catálogo. El mínimo es 2 kg." },
@@ -66,72 +63,21 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
     .split("·")
     .map((p) => p.trim())
     .filter(Boolean);
-  const tanda = [...promesas, ...promesas, ...promesas, ...promesas];
+  const base = `/sitio/${tenant.slug}`;
+  const NAV = [
+    { href: `${base}/catalogo`, label: "Catálogo" },
+    { href: `${base}#como`, label: "Cómo funciona" },
+    { href: `${base}#cobertura`, label: "Cobertura" },
+  ];
 
   return (
     <PedidoProvider slug={tenant.slug}>
       <div style={{ backgroundColor: CREMA, color: TINTA, fontFamily: "var(--font-archivo)" }}>
-        {/* Motion propio de Casa Milo (globals.css lo edita otro flujo: va scoped acá).
-            Escala única: 200ms hovers / 300ms overlays / 700ms reveals (conce-reveal). */}
-        <style>{`
-          @keyframes milo-kenburns { from { transform: scale(1.02); } to { transform: scale(1.1); } }
-          .milo-kenburns { animation: milo-kenburns 16s ease-in-out infinite alternate; }
-          @keyframes milo-cinta { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-          .milo-cinta { overflow: hidden; }
-          .milo-cinta-tira { display: inline-flex; white-space: nowrap; width: max-content; animation: milo-cinta 30s linear infinite; }
-          .milo-cinta:hover .milo-cinta-tira { animation-play-state: paused; }
-          .milo-link { background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1.5px; padding-bottom: 3px; transition: background-size 0.2s ease; }
-          .milo-link:hover { background-size: 100% 1.5px; }
-          @keyframes milo-pop { 0% { transform: scale(1); } 40% { transform: scale(1.07); } 100% { transform: scale(1); } }
-          .milo-pop { animation: milo-pop 0.3s ease-out; }
-          @media (prefers-reduced-motion: reduce) {
-            .milo-kenburns, .milo-cinta-tira, .milo-pop { animation: none; }
-            .milo-link { transition: none; }
-          }
-        `}</style>
+        <MiloEstilos />
 
-        {/* 1.1 Barra de anuncio → cinta de promesas girando (pausa en hover) */}
-        <div className="milo-cinta" style={{ backgroundColor: BORDO, color: CREMA }}>
-          <div className="milo-cinta-tira py-2.5">
-            {tanda.map((p, i) => (
-              <span key={i} className="px-5 text-[13px] font-semibold uppercase" style={{ letterSpacing: "0.14em" }}>
-                {p} <span className="pl-5" style={{ color: CELESTE }}>•</span>
-              </span>
-            ))}
-          </div>
-        </div>
+        <MiloCinta promesas={promesas} />
 
-        {/* 1.2 Header */}
-        <header
-          className="sticky top-0 z-40 backdrop-blur-[8px]"
-          style={{ backgroundColor: "rgba(251,243,222,0.94)", borderBottom: "1px solid rgba(123,36,52,0.16)" }}
-        >
-          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-6 px-7 py-4">
-            <a
-              href="#top"
-              className="text-[30px] font-black"
-              style={{ fontFamily: "var(--font-bodoni)", color: BORDO, letterSpacing: "-0.02em" }}
-            >
-              Casa Milo
-            </a>
-            <nav className="hidden items-center gap-7 md:flex">
-              {NAV.map((n) => (
-                <a key={n.href} href={n.href} className="milo-link text-[15px] font-medium" style={{ color: TINTA }}>
-                  {n.label}
-                </a>
-              ))}
-            </nav>
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noreferrer"
-              className="px-[22px] py-3 text-[14px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
-              style={{ backgroundColor: BORDO, color: CREMA, letterSpacing: "0.06em" }}
-            >
-              Pedir por WhatsApp
-            </a>
-          </div>
-        </header>
+        <MiloHeader base={base} wa={wa} nav={NAV} />
 
         {/* 1.3 Hero */}
         <section className="mx-auto grid max-w-[1180px] items-center gap-11 px-7 pb-10 pt-9 md:grid-cols-[1.35fr_0.65fr]">
@@ -206,16 +152,20 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           </div>
         </div>
 
-        {/* 1.5 Catálogo */}
-        <Catalogo
-          productos={productos.map((p) => ({
-            id: p.id,
-            nombre: p.nombre,
-            precio: p.precio,
-            descripcion: p.descripcion ?? "",
-            categoria: p.categoria,
-            fotos: fotosDe(p.fotos),
-          }))}
+        {/* 1.5 Destacados: 5 productos en carrusel; el catálogo entero vive en su pestaña */}
+        <Destacados
+          base={base}
+          productos={[...productos]
+            .sort((a, b) => Number(/combo/i.test(b.categoria)) - Number(/combo/i.test(a.categoria)))
+            .slice(0, 5)
+            .map((p) => ({
+              id: p.id,
+              nombre: p.nombre,
+              precio: p.precio,
+              descripcion: p.descripcion ?? "",
+              categoria: p.categoria,
+              fotos: fotosDe(p.fotos),
+            }))}
         />
 
         {/* 1.6 Cómo funciona */}
@@ -340,6 +290,11 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 </li>
               ) : null}
               <li style={{ color: "#6B4A4F" }}>Lun a sáb · 10 a 20 hs</li>
+              <li>
+                <a href={`/sitio/${tenant.slug}/terminos`} className="transition hover:opacity-70">
+                  Términos y condiciones
+                </a>
+              </li>
             </ul>
           </div>
         </footer>
