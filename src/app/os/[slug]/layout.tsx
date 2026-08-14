@@ -182,9 +182,9 @@ export default async function OsLayout({
   // Template eventos (Jess Design): el embudo de eventos y las cotizaciones.
   if (tpl === "eventos") {
     opsItems.unshift(
-      { label: "Eventos", href: `${base}/eventos-org`, icon: "✦" },
-      { label: "Cotizaciones", href: `${base}/presupuestos`, icon: "📄" },
-      { label: "Proveedores", href: `${base}/proveedores`, icon: "🤝" }
+      { label: "Eventos", href: `${base}/eventos-org`, icon: "" },
+      { label: "Cotizaciones", href: `${base}/cotizaciones`, icon: "" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "" }
     );
   }
 
@@ -238,12 +238,14 @@ export default async function OsLayout({
       { label: "Clientes", href: `${base}/clientes`, icon: "🧑" }
     );
   }
-  opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
+  if (tpl !== "eventos") opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [
     { label: "Dashboard", href: base, icon: "🏁", exact: true },
-    { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
+    tpl === "eventos"
+      ? { label: "Pendientes", href: `${base}/pendientes`, icon: "" }
+      : { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
     ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(tpl === "repuestos"
@@ -258,16 +260,27 @@ export default async function OsLayout({
           },
         ]
       : []),
-    ...(owner ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
-    ...(owner ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
+    ...(owner && tpl !== "eventos" ? [{ label: "Reportes", href: `${base}/reportes`, icon: "📊" }] : []),
+    ...(owner && tpl !== "eventos" ? [{ label: "Actividad", href: `${base}/actividad`, icon: "🕘" }] : []),
     ...(owner
       ? [
           { label: "Configuración de la página", href: `${base}/config`, icon: "⚙️" },
           { label: "Usuarios", href: `${base}/usuarios`, icon: "👤" },
         ]
       : []),
-    { label: "Asistente IA", href: `${base}/asistente`, icon: "✨" },
+    ...(tpl !== "eventos" ? [{ label: "Asistente IA", href: `${base}/asistente`, icon: "✨" }] : []),
   ];
+
+  // Una empresa de diseño no quiere emojis en su barra: el tema "elegante"
+  // deja las etiquetas solas, en mayúsculas espaciadas.
+  const navElegante = ((tenant.branding as { estilo?: { navTema?: string } } | null)?.estilo?.navTema) === "elegante";
+  const navFinal: NavEntry[] = navElegante
+    ? nav.map((e) =>
+        "items" in e && e.items
+          ? { ...e, icon: "", items: e.items.map((i) => ({ ...i, icon: "" })) }
+          : { ...e, icon: "" }
+      )
+    : nav;
 
   // Las "terminaciones" elegidas por el cliente (esquinas, nav, densidad).
   const estilo = tenantEstilo(tenant);
@@ -290,13 +303,24 @@ export default async function OsLayout({
         displayName={branding.displayName}
         logo={branding.logo || null}
         initial={branding.displayName.charAt(0).toUpperCase()}
-        nav={nav}
+        nav={navFinal}
         posicion={estilo.nav}
         grupos={estilo.grupos}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
         <InstallPrompt appName={branding.displayName} />
+        {tpl === "eventos" ? (
+          <a
+            href={`${base}/asistente`}
+            aria-label="Asistente IA"
+            title="Asistente IA"
+            className="fixed bottom-5 left-5 z-50 flex h-13 w-13 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
+            style={{ backgroundColor: "#1A1816", color: "#EDE8DE", width: 52, height: 52, fontSize: 20 }}
+          >
+            ✦
+          </a>
+        ) : null}
         <footer className="border-t py-4">
           <p className="text-center text-xs text-muted-foreground">
             ⚡ Powered by{" "}

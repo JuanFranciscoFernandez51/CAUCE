@@ -12,6 +12,7 @@ const TOPO = "#9E9387";
 const TERRA = "#B85850";
 
 export function JessHome({ tenant }: { tenant: Client }) {
+  const logo = ((tenant.branding as { logo?: string } | null)?.logo) ?? null;
   const st = (tenant.settings ?? {}) as {
     instagram?: string;
     plantillaCotizacion?: { servicios?: { nombre: string; items: string[] }[] };
@@ -28,12 +29,10 @@ export function JessHome({ tenant }: { tenant: Client }) {
       <header className="sticky top-0 z-40" style={{ backgroundColor: TINTA, color: CREMA }}>
         <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-6 py-4">
           <a href="#top" className="flex items-center gap-3">
-            <span
-              className="flex h-10 w-10 items-center justify-center rounded-full border text-[18px]"
-              style={{ borderColor: "rgba(237,232,222,.4)", fontFamily: "var(--font-pinyon)" }}
-            >
-              J
-            </span>
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="Jess Design" className="h-11 w-auto" />
+            ) : null}
             <span>
               <span className="block text-[15px] font-semibold tracking-[0.34em]">JESS</span>
               <span className="block text-[9px] tracking-[0.5em] opacity-70">DESIGN</span>
@@ -171,7 +170,13 @@ export function JessHome({ tenant }: { tenant: Client }) {
       {/* Footer */}
       <footer style={{ backgroundColor: TINTA, color: CREMA }}>
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-6 py-10">
-          <p className="text-[22px] tracking-[0.3em]" style={{ fontFamily: "var(--font-italiana)" }}>JESS DESIGN</p>
+          <span className="flex items-center gap-4">
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="" className="h-14 w-auto" />
+            ) : null}
+            <p className="text-[22px] tracking-[0.3em]" style={{ fontFamily: "var(--font-italiana)" }}>JESS DESIGN</p>
+          </span>
           <p className="text-[20px]" style={{ fontFamily: "var(--font-pinyon)", color: TOPO }}>
             Sofisticación en cada detalle
           </p>

@@ -105,6 +105,7 @@ model Client {
   ventas                Venta[]
   eventos               Evento[]
   eventosOrg            EventoOrg[]
+  tareas                Tarea[]
   actividad             Actividad[]
   presupuestosTaller    PresupuestoTaller[]
   accounts              Account[]
@@ -1623,4 +1624,24 @@ model EventoOrg {
 
   @@index([clientId, estado])
   @@index([clientId, fecha])
+}
+
+/// Tarea del pipeline de pendientes (Por hacer → En progreso → Hecho),
+/// como el tablero de Vespa: prioridad, categoría y vencimiento.
+model Tarea {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  titulo    String
+  detalle   String?   @db.Text
+  prioridad String    @default("media") // alta|media|baja
+  categoria String?
+  vence     DateTime?
+  estado    String    @default("por_hacer") // por_hacer|en_progreso|hecho
+  orden     Int       @default(0)
+  hechaAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([clientId, estado, orden])
 }
