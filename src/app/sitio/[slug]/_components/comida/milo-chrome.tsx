@@ -24,7 +24,7 @@ export function MiloEstilos() {
       .milo-pop { animation: milo-pop 0.3s ease-out; }
       .milo-paso { transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; }
       .milo-paso:hover { transform: translateY(-6px); background-color: #FFFDF6; box-shadow: 0 16px 34px rgba(58,18,24,0.13); }
-      .milo-paso:hover .milo-paso-num { color: #7B2434; }
+      .milo-paso:hover .milo-paso-num { color: #7A303B; }
       .milo-paso-num { transition: color 0.3s ease; }
       .milo-carrusel { scroll-snap-type: x mandatory; }
       .milo-carrusel > * { scroll-snap-align: start; }
@@ -99,7 +99,7 @@ export function MiloHeader({ base, wa, nav }: { base: string; wa: string | null;
   return (
     <header
       className="sticky top-0 z-40 backdrop-blur-[8px]"
-      style={{ backgroundColor: "rgba(251,243,222,0.94)", borderBottom: "1px solid rgba(123,36,52,0.16)" }}
+      style={{ backgroundColor: "rgba(254,250,239,0.94)", borderBottom: "1px solid rgba(122,48,59,0.16)" }}
     >
       <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-6 px-7 py-4">
         <Link
@@ -131,10 +131,10 @@ export function MediosDePago() {
   const chip = "flex h-9 items-center justify-center rounded-[3px] bg-white px-3";
   return (
     <div className="flex flex-wrap items-center gap-2.5">
-      <span className={chip} style={{ border: "1px solid rgba(123,36,52,0.15)" }}>
+      <span className={chip} style={{ border: "1px solid rgba(122,48,59,0.15)" }}>
         <span className="text-[15px] font-black italic tracking-tight" style={{ color: "#1A1F71" }}>VISA</span>
       </span>
-      <span className={chip} style={{ border: "1px solid rgba(123,36,52,0.15)" }}>
+      <span className={chip} style={{ border: "1px solid rgba(122,48,59,0.15)" }}>
         <span className="relative mr-1 inline-block h-4 w-7">
           <span className="absolute left-0 top-0 h-4 w-4 rounded-full" style={{ backgroundColor: "#EB001B" }} />
           <span className="absolute right-0 top-0 h-4 w-4 rounded-full opacity-90" style={{ backgroundColor: "#F79E1B" }} />

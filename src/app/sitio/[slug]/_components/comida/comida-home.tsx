@@ -7,13 +7,13 @@ import { Reveal } from "../conce/reveal";
 
 /**
  * Home de Casa Milo — según el brand book y el handoff de diseño.
- * Bordó #7B2434, crema #FBF3DE, celeste #A9C6F5 (un solo uso por bloque) y
+ * Bordó #7A303B, crema #FEFAEF, celeste #B0CEFE (un solo uso por bloque) y
  * tinta #3A1218. Bodoni Moda para titulares, Archivo para el texto.
  * El pedido se arma acá y se cierra por WhatsApp: no hay checkout.
  */
-const BORDO = "#7B2434";
-const CREMA = "#FBF3DE";
-const CELESTE = "#A9C6F5";
+const BORDO = "#7A303B";
+const CREMA = "#FEFAEF";
+const CELESTE = "#B0CEFE";
 const TINTA = "#3A1218";
 
 
@@ -106,20 +106,22 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:bg-black/[0.04] active:scale-[0.98] motion-reduce:transform-none"
-                style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}
+                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
+                style={{ backgroundColor: CELESTE, color: TINTA, fontWeight: 700 }}
               >
                 WhatsApp
               </a>
-              <span className="text-[14px]" style={{ color: "#6B4A4F" }}>
-                Entrega en el día en CABA · <strong>envío sin cargo desde $60.000</strong>
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold" style={{ backgroundColor: "rgba(176,206,254,0.35)", color: TINTA }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BORDO }} />
+                Entrega en el día en CABA · envío sin cargo desde $60.000
               </span>
             </div>
           </Reveal>
 
           {/* Marco bordó desplazado: es parte de la identidad. La foto respira con ken burns. */}
           <Reveal delay={120} className="w-full max-w-[320px] justify-self-end">
-            <div style={{ background: BORDO, padding: "18px 18px 0 0" }}>
+            <div style={{ background: CELESTE, padding: "0 0 14px 14px" }}>
+            <div style={{ background: BORDO, padding: "18px 18px 0 0", transform: "translate(-14px,-14px)" }}>
               <div className="aspect-square w-full overflow-hidden" style={{ transform: "translate(18px,18px)" }}>
                 {foto(productos[0]?.fotos) ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -133,11 +135,12 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 )}
               </div>
             </div>
+            </div>
           </Reveal>
         </section>
 
         {/* 1.4 Franja de diferenciales */}
-        <div style={{ backgroundColor: BORDO, color: CREMA }}>
+        <div style={{ backgroundColor: BORDO, color: CREMA, borderTop: `4px solid ${CELESTE}` }}>
           <div className="mx-auto flex max-w-[1180px] flex-wrap justify-between gap-x-9 gap-y-3 px-7 py-[26px]">
             {DIFERENCIALES.map((d, i) => (
               <Reveal key={d} delay={i * 90}>
@@ -184,7 +187,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
           <div className="mt-10 grid gap-7 md:grid-cols-3">
             {PASOS.map((p, i) => (
               <Reveal key={p.n} delay={i * 90}>
-                <div className="milo-paso" style={{ borderTop: `3px solid ${BORDO}`, padding: "20px 14px 16px" }}>
+                <div className="milo-paso" style={{ borderTop: `3px solid ${CELESTE}`, padding: "20px 14px 16px" }}>
                 <p className="milo-paso-num text-[44px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE }}>
                   {p.n}
                 </p>
@@ -213,13 +216,13 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
               >
                 Toda CABA, en el día
               </h2>
-              <p className="mt-5 text-[17px]" style={{ color: "rgba(251,243,222,0.85)" }}>
+              <p className="mt-5 text-[17px]" style={{ color: "rgba(254,250,239,0.85)" }}>
                 {st.horarios ? `${st.horarios}. ` : "Salimos todos los días de 10 a 20 hs. "}
                 {envios.corte ?? "Los pedidos confirmados antes de las 17 hs se entregan ese mismo día."}
               </p>
               <div className="mt-6 flex flex-wrap gap-2.5">
                 {(envios.barrios ?? []).map((b) => (
-                  <span key={b} className="px-4 py-2 text-[14px]" style={{ border: "1px solid rgba(169,198,245,0.5)" }}>
+                  <span key={b} className="px-4 py-2 text-[14px]" style={{ border: "1px solid rgba(176,206,254,0.5)" }}>
                     {b}
                   </span>
                 ))}
@@ -227,15 +230,15 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
             </Reveal>
 
             <Reveal delay={120}>
-              <div className="h-full p-[34px]" style={{ backgroundColor: "rgba(251,243,222,0.08)" }}>
+              <div className="h-full p-[34px]" style={{ backgroundColor: "rgba(254,250,239,0.08)" }}>
               <p className="text-[26px] font-bold" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE }}>
                 Preguntas rápidas
               </p>
               <div className="mt-5">
                 {FAQ.map((f, i) => (
-                  <div key={f.p} className="py-4" style={i ? { borderTop: "1px solid rgba(169,198,245,0.3)" } : undefined}>
+                  <div key={f.p} className="py-4" style={i ? { borderTop: "1px solid rgba(176,206,254,0.3)" } : undefined}>
                     <p className="text-[16px] font-bold">{f.p}</p>
-                    <p className="mt-1 text-[14.5px]" style={{ color: "rgba(251,243,222,0.85)" }}>
+                    <p className="mt-1 text-[14.5px]" style={{ color: "rgba(254,250,239,0.85)" }}>
                       {f.r}
                     </p>
                   </div>

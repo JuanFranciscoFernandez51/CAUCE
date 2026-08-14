@@ -3,9 +3,9 @@
  * bordó, crema, celeste (un solo uso por bloque) y tinta.
  * Bodoni Moda para titulares, Archivo para el texto. Esquinas rectas.
  */
-export const BORDO = "#7B2434";
-export const CREMA = "#FBF3DE";
-export const CELESTE = "#A9C6F5";
+export const BORDO = "#7A303B";
+export const CREMA = "#FEFAEF";
+export const CELESTE = "#B0CEFE";
 export const TINTA = "#3A1218";
 /** Tenue para textos secundarios sobre crema. */
 export const TENUE = "#6B4A4F";

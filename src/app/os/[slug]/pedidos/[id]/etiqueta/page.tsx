@@ -32,9 +32,9 @@ export default async function EtiquetaPage({
     tinta?: string;
     displayName?: string;
   };
-  const BORDO = marca.primary ?? "#7B2434";
-  const CELESTE = marca.accent ?? "#A9C6F5";
-  const CREMA = marca.fondo ?? "#FBF3DE";
+  const BORDO = marca.primary ?? "#7A303B";
+  const CELESTE = marca.accent ?? "#B0CEFE";
+  const CREMA = marca.fondo ?? "#FEFAEF";
   const TINTA = marca.tinta ?? "#3A1218";
   const nombre = marca.displayName ?? tenant.name;
   const st = (tenant.settings ?? {}) as { instagram?: string; eslogan?: string };

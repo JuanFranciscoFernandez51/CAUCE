@@ -5,9 +5,9 @@ import { BotonSumar, ENVIO_GRATIS } from "./pedido-store";
 import { Reveal } from "../conce/reveal";
 
 /** Catálogo de Casa Milo: filtros por categoría, grupos y card con "Sumar". */
-const BORDO = "#7B2434";
-const CREMA = "#FBF3DE";
-const CELESTE = "#A9C6F5";
+const BORDO = "#7A303B";
+const CREMA = "#FEFAEF";
+const CELESTE = "#B0CEFE";
 const TINTA = "#3A1218";
 
 export type Prod = {
@@ -113,7 +113,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                 letterSpacing: "0.04em",
                 backgroundColor: activo ? BORDO : "transparent",
                 color: activo ? CREMA : BORDO,
-                border: `1.5px solid ${activo ? BORDO : "rgba(123,36,52,0.35)"}`,
+                border: `1.5px solid ${activo ? BORDO : "rgba(122,48,59,0.35)"}`,
               }}
             >
               {c}
@@ -130,7 +130,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
           <div key={cat} style={{ marginTop: gi === 0 ? 40 : 52 }}>
             <p
               className="pb-3 text-[13px] font-semibold uppercase"
-              style={{ color: "#6B4A4F", letterSpacing: "0.2em", borderBottom: "1px solid rgba(123,36,52,0.2)" }}
+              style={{ color: "#6B4A4F", letterSpacing: "0.2em", borderBottom: "1px solid rgba(122,48,59,0.2)" }}
             >
               {cat}
             </p>
@@ -155,7 +155,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                       <p className="text-[28px] font-bold" style={{ fontFamily: "var(--font-bodoni)", lineHeight: 1.1 }}>
                         {p.nombre}
                       </p>
-                      <p className="flex-1 text-[14px] leading-[1.45]" style={{ color: "rgba(251,243,222,0.85)" }}>
+                      <p className="flex-1 text-[14px] leading-[1.45]" style={{ color: "rgba(254,250,239,0.85)" }}>
                         {p.descripcion}
                       </p>
                       <div className="mt-2 flex items-center justify-between gap-3">
@@ -167,7 +167,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                 ) : (
                   <article
                     className="group flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
-                    style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(123,36,52,0.14)" }}
+                    style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(122,48,59,0.14)" }}
                   >
                     <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
                       <FotoCard fotos={p.fotos} alt={p.nombre} />
@@ -229,8 +229,8 @@ export function Destacados({ productos, base }: { productos: Prod[]; base: strin
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => mover(-1)} aria-label="Anterior" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}>‹</button>
-            <button onClick={() => mover(1)} aria-label="Siguiente" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}>›</button>
+            <button onClick={() => mover(-1)} aria-label="Anterior" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO, backgroundColor: "rgba(176,206,254,0.3)" }}>‹</button>
+            <button onClick={() => mover(1)} aria-label="Siguiente" className="h-11 w-11 text-[18px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] motion-reduce:transform-none" style={{ border: `1.5px solid ${BORDO}`, color: BORDO, backgroundColor: "rgba(176,206,254,0.3)" }}>›</button>
             <a
               href={`${base}/catalogo`}
               className="px-[22px] py-[13px] text-[14px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
@@ -247,12 +247,12 @@ export function Destacados({ productos, base }: { productos: Prod[]; base: strin
           <article
             key={p.id}
             className="group flex w-[280px] flex-none flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
-            style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(123,36,52,0.14)" }}
+            style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(122,48,59,0.14)" }}
           >
             <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
               <FotoCard fotos={p.fotos} alt={p.nombre} />
               {p.precio >= ENVIO_GRATIS ? <BadgeEnvio /> : null}
-              <span className="absolute bottom-2 right-3 text-[26px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: "rgba(251,243,222,0.95)", textShadow: "0 1px 8px rgba(58,18,24,.45)" }}>
+              <span className="absolute bottom-2 right-3 text-[26px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE, textShadow: "0 1px 8px rgba(58,18,24,.55)" }}>
                 {String(i + 1).padStart(2, "0")}
               </span>
             </div>
