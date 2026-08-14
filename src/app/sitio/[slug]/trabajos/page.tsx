@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug, hasModule } from "@/lib/tenant";
-import { JessHeader, JessFooter, jessDatos, JESS_TINTA, JESS_CREMA, JESS_TOPO, JESS_TERRA } from "../_components/eventos/jess-chrome";
+import { JessHeader, JessFooter, jessDatos, JESS_TINTA, JESS_CREMA, JESS_TOPO, JESS_TERRA, type JessTrabajo } from "../_components/eventos/jess-chrome";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: `Nuestros trabajos — ${nombre}` };
 }
 
-// Arranca con la foto que eligió Fran; el resto sale de las publicaciones del panel.
-const FOTOS_BASE = [
-  { url: "https://res.cloudinary.com/dgtlyzyra/image/upload/v1786728002/jessdesign/hero-abrazo.png", texto: "Mi trabajo empieza mucho antes del evento. Y termina cuando vos me decís que fue perfecto." },
-];
-
 export default async function TrabajosPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tenant = await getTenantBySlug(slug);
@@ -26,19 +22,18 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
   if (tpl !== "eventos") notFound();
 
   const { logo, ig, st, base } = jessDatos(tenant);
+  const trabajos = st.trabajos ?? [];
 
-  // Fotos: las fijas de settings + lo que suban a Publicaciones en el panel.
+  // Momentos sueltos: lo que suben a Publicaciones en el panel.
   const pubs = await db.bazarPublicacion.findMany({
     where: { clientId: tenant.id },
     orderBy: { createdAt: "desc" },
-    take: 40,
+    take: 24,
   });
-  const dePanel = pubs.flatMap((p) => {
-    const fotos = (p.fotos as string[] | null) ?? [];
-    return fotos.map((url) => ({ url, texto: p.caption || undefined }));
-  });
-  const fotos = [...(st.fotosTrabajos ?? []), ...dePanel, ...FOTOS_BASE]
-    .filter((f, i, arr) => arr.findIndex((x) => x.url === f.url) === i);
+  const enTrabajos = new Set(trabajos.flatMap((t) => [t.portada, ...t.fotos]));
+  const momentos = pubs
+    .flatMap((p) => ((p.fotos as string[] | null) ?? []).map((url) => ({ url, texto: p.caption || undefined })))
+    .filter((f, i, arr) => !enTrabajos.has(f.url) && arr.findIndex((x) => x.url === f.url) === i);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: JESS_CREMA, color: JESS_TINTA, fontFamily: "var(--font-montserrat)" }}>
@@ -55,19 +50,53 @@ export default async function TrabajosPage({ params }: { params: Promise<{ slug:
           </p>
         </div>
 
-        <div className="mt-12 columns-1 gap-5 sm:columns-2 lg:columns-3 [&>figure]:mb-5">
-          {fotos.map((f) => (
-            <figure key={f.url} className="break-inside-avoid bg-white p-3 pb-4">
+        {/* Portadas estilo portfolio: en hover la foto respira y aparece de qué es */}
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {trabajos.map((t) => (
+            <Link
+              key={t.id}
+              href={`${base}/trabajos/${t.id}`}
+              className="group relative block overflow-hidden bg-white"
+              style={{ aspectRatio: "4 / 5" }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={f.url} alt={f.texto ?? "Trabajo de Jess Design"} className="w-full object-cover" />
-              {f.texto ? (
-                <figcaption className="mt-3 px-1 text-[13px] leading-relaxed" style={{ color: "#6d645b" }}>
-                  {f.texto}
-                </figcaption>
-              ) : null}
-            </figure>
+              <img
+                src={t.portada}
+                alt={t.titulo}
+                className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+              />
+              <span
+                className="absolute inset-0 flex flex-col items-center justify-end pb-10 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{ background: "linear-gradient(180deg, rgba(26,24,22,0) 30%, rgba(26,24,22,.72) 100%)", color: JESS_CREMA }}
+              >
+                <span className="text-[10px] font-semibold tracking-[0.4em]">{t.tipo.toUpperCase()}</span>
+                <span className="mt-2 px-6 text-[30px] leading-tight" style={{ fontFamily: "var(--font-italiana)" }}>
+                  {t.titulo}
+                </span>
+                <span className="mt-3 border-b pb-0.5 text-[10px] tracking-[0.3em]" style={{ borderColor: "rgba(237,232,222,.5)" }}>
+                  VER TRABAJO
+                </span>
+              </span>
+            </Link>
           ))}
         </div>
+
+        {momentos.length ? (
+          <div className="mt-20">
+            <p className="text-center text-[11px] font-semibold tracking-[0.4em]" style={{ color: JESS_TOPO }}>MOMENTOS</p>
+            <div className="mt-8 columns-1 gap-5 sm:columns-2 lg:columns-3 [&>figure]:mb-5">
+              {momentos.map((f) => (
+                <figure key={f.url} className="break-inside-avoid overflow-hidden bg-white p-3 pb-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f.url} alt={f.texto ?? "Jess Design"} className="w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+                  {f.texto ? (
+                    <figcaption className="mt-3 px-1 text-[13px] leading-relaxed" style={{ color: "#6d645b" }}>{f.texto}</figcaption>
+                  ) : null}
+                </figure>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-14 text-center">
           <p className="text-[14px]" style={{ color: JESS_TOPO }}>

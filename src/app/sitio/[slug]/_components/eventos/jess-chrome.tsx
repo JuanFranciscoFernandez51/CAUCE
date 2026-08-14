@@ -10,6 +10,16 @@ export const JESS_CREMA = "#EDE8DE";
 export const JESS_TOPO = "#9E9387";
 export const JESS_TERRA = "#B85850";
 
+/** Un trabajo del portfolio: portada con hover + página propia con book de fotos. */
+export type JessTrabajo = {
+  id: string;
+  titulo: string;
+  tipo: string;
+  descripcion: string;
+  portada: string;
+  fotos: string[];
+};
+
 export function jessDatos(tenant: Client) {
   const logo = ((tenant.branding as { logo?: string } | null)?.logo) ?? null;
   const st = (tenant.settings ?? {}) as {
@@ -17,6 +27,7 @@ export function jessDatos(tenant: Client) {
     plantillaCotizacion?: { servicios?: { nombre: string; items: string[] }[] };
     tiposEvento?: string[];
     fotosTrabajos?: { url: string; texto?: string }[];
+    trabajos?: JessTrabajo[];
   };
   return {
     logo,
