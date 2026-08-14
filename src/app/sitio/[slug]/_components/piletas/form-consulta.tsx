@@ -19,12 +19,12 @@ export function FormConsulta({ slug }: { slug: string }) {
   }
 
   const campo =
-    "w-full border bg-white px-4 py-3.5 text-[15px] outline-none transition focus:border-[#17827A]";
-  const borde = { borderColor: "#E3E0D6" };
+    "w-full border-0 border-b bg-transparent px-0 py-2.5 text-[15px] outline-none transition focus:border-[#17827A]";
+  const borde = { borderColor: "#E3E0D6", borderBottomWidth: 1, borderBottomStyle: "solid" as const };
 
   if (estado === "ok")
     return (
-      <div className="flex flex-col items-start justify-center gap-2 border p-8" style={borde}>
+      <div className="flex flex-col items-start justify-center gap-2 p-4" style={borde}>
         <p className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-cormorant)", color: "#14201E" }}>
           Recibimos tu consulta
         </p>

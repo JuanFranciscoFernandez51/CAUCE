@@ -104,7 +104,7 @@ export default async function OsLayout({
   const opsOrder = OPS_ORDER.filter((m) => m !== "sitio" || esInmobiliaria(tenant.rubro));
   // Si la marca define su fondo y su tinta, el panel usa la misma estética que
   // su web: el dueño entra y reconoce su negocio, no una herramienta genérica.
-  const paleta = (tenant.branding ?? {}) as { fondo?: string; tinta?: string; display?: string };
+  const paleta = (tenant.branding ?? {}) as { fondo?: string; tinta?: string; display?: string; fuente?: string };
   const themeVars = {
     "--primary": branding.primary,
     "--primary-foreground": "#ffffff",
@@ -121,6 +121,8 @@ export default async function OsLayout({
         }
       : {}),
     ...(paleta.tinta ? { "--foreground": paleta.tinta, "--card-foreground": paleta.tinta } : {}),
+    // La marca puede traer su propia tipografía: el panel habla su idioma.
+    ...(paleta.fuente ? { fontFamily: paleta.fuente } : {}),
   } as React.CSSProperties;
 
   // El middleware ya exige sesión en /os; acá validamos pertenencia al tenant.
