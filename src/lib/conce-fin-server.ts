@@ -1,7 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
-import { nombreVehiculo, numeroOperacion } from "@/lib/conce";
+import { nombreVehiculo, numeroOperacion, pagosDe, permutasDe, totalEntregado } from "@/lib/conce";
 import { planDeCuotas } from "@/lib/conce-fin";
+import { vincularContacto } from "@/lib/conce-server";
 import { registrarActividad } from "@/lib/actividad";
 
 /**
@@ -185,13 +186,14 @@ export async function financiacionDeBoleto(opts: {
     });
     if (yaTiene) return { creada: false as const }; // idempotencia
 
-    const permutas = Array.isArray(op.permutas)
-      ? (op.permutas as { valorTomado?: number }[]).reduce(
-          (a, p) => a + (Number(p?.valorTomado) || 0),
-          0
-        )
-      : 0;
-    const entrega = (op.sena ?? 0) + permutas;
+    // La entrega es TODO lo que ya puso el comprador: pagos cargados + seña +
+    // el valor de las permutas tomadas. Lo que sobra es lo que se financia.
+    const entrega = totalEntregado({
+      pagos: pagosDe(op.pagos),
+      permutas: permutasDe(op.permutas),
+      sena: op.sena ?? 0,
+      moneda: op.moneda,
+    });
     const aFinanciar = Math.max(0, (op.precio ?? 0) - entrega);
     if (aFinanciar <= 0) return { creada: false as const };
 
@@ -201,8 +203,23 @@ export async function financiacionDeBoleto(opts: {
 
     const cantidadCuotas = op.finCuotas && op.finCuotas > 0 ? op.finCuotas : 12;
 
+    // La financiación SIEMPRE queda colgada del cliente del CRM. Si el boleto
+    // todavía no lo tenía vinculado (alta vieja), lo vinculamos ahora.
+    const contactId =
+      op.contactId ??
+      (await vincularContacto(tx, opts.clientId, {
+        nombre: op.nombre,
+        telefono: op.telefono,
+        email: op.email,
+        dni: op.dni,
+        domicilio: op.domicilio,
+      }));
+    if (contactId && contactId !== op.contactId) {
+      await tx.conceOperacion.update({ where: { id: op.id }, data: { contactId } });
+    }
+
     const fin = await crearFinanciacion(tx, opts.clientId, {
-      contactId: op.contactId,
+      contactId,
       operacionId: op.id,
       descripcion,
       origen: "BOLETO_AUTOMATICA",
@@ -211,7 +228,8 @@ export async function financiacionDeBoleto(opts: {
       cantidadCuotas,
       valorCuota: op.finValorCuota,
       moneda: op.moneda,
-      fechaInicio: new Date(),
+      // Arranca el día del boleto: las cuotas vencen a partir de ahí.
+      fechaInicio: op.fecha ?? new Date(),
       diaVencimiento: op.finDiaVenc ?? 10,
       observaciones: `Generada sola al entregar el boleto ${numeroOperacion(op.tipo, op.numero)}.`,
     });

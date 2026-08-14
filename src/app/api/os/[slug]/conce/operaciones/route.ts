@@ -19,6 +19,14 @@ export const permutaSchema = z.object({
   vehiculoId: z.string().trim().max(60).nullable().optional(),
 });
 
+export const pagoSchema = z.object({
+  metodo: z.string().trim().max(40).default("efectivo"),
+  monto: z.number().min(0).default(0),
+  moneda: z.enum(["ARS", "USD"]).default("ARS"),
+  fecha: z.string().trim().max(20).optional().default(""),
+  detalle: z.string().trim().max(200).optional().default(""),
+});
+
 const createSchema = z.object({
   tipo: z.enum(["MANDATO", "BOLETO"]),
   fecha: z.string().trim().optional(),
@@ -27,6 +35,7 @@ const createSchema = z.object({
   domicilio: z.string().trim().max(200).optional().default(""),
   telefono: z.string().trim().max(40).optional().default(""),
   email: z.string().trim().max(120).optional().default(""),
+  contactId: z.string().trim().max(60).nullable().optional(),
   vehiculoId: z.string().trim().max(60).optional(),
   vehiculoTexto: z.string().trim().max(300).optional().default(""),
   vehMarca: z.string().trim().max(80).optional().default(""),
@@ -34,6 +43,7 @@ const createSchema = z.object({
   vehAnio: z.number().int().min(1950).max(2030).nullable().optional(),
   vehKm: z.number().int().min(0).nullable().optional(),
   permutas: z.array(permutaSchema).max(10).optional(),
+  pagos: z.array(pagoSchema).max(30).optional(),
   dominio: z.string().trim().max(20).optional().default(""),
   chasis: z.string().trim().max(60).optional().default(""),
   motorNro: z.string().trim().max(60).optional().default(""),
@@ -74,12 +84,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     if (v) vehiculoId = v.id;
   }
 
-  // Todo cliente entra al CRM único (busca por teléfono/email/nombre).
+  // Todo cliente entra al CRM único: si lo eligieron del buscador se usa ese y
+  // se le completan los huecos (DNI/domicilio); si es nuevo, se crea.
   const contactId = await vincularContacto(db, g.tenant.id, {
     nombre: d.nombre,
     telefono: d.telefono,
     email: d.email,
     dni: d.dni,
+    domicilio: d.domicilio,
+    contactId: d.contactId,
   });
 
   const operacion = await db.conceOperacion.create({
@@ -101,6 +114,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
       vehAnio: d.vehAnio ?? null,
       vehKm: d.vehKm ?? null,
       permutas: (d.permutas ?? []).filter((p) => p.marca.trim()),
+      pagos: (d.pagos ?? []).filter((p) => p.monto > 0),
       dominio: d.dominio || null,
       chasis: d.chasis || null,
       motorNro: d.motorNro || null,

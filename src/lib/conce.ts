@@ -121,6 +121,85 @@ export const PERMUTA_VACIA: Permuta = {
   vehiculoId: null,
 };
 
+// ── Pagos del boleto (combinables, patrón OC de Motos Fernández) ──────────
+
+/** Un pago suelto del boleto. Un boleto puede tener N pagos de distinta forma. */
+export type Pago = {
+  /** efectivo | transferencia | dolares | cheque | tarjeta | deposito | otro */
+  metodo: string;
+  monto: number;
+  /** Cada pago lleva SU moneda: un boleto puede mezclar pesos y dólares. */
+  moneda: string;
+  /** YYYY-MM-DD (vacío = la fecha del boleto). */
+  fecha?: string;
+  detalle?: string;
+};
+
+export const PAGO_METODOS: { valor: string; label: string }[] = [
+  { valor: "efectivo", label: "Efectivo" },
+  { valor: "transferencia", label: "Transferencia" },
+  { valor: "dolares", label: "Dólares" },
+  { valor: "cheque", label: "Cheque" },
+  { valor: "tarjeta", label: "Tarjeta" },
+  { valor: "deposito", label: "Depósito" },
+  { valor: "otro", label: "Otro" },
+];
+
+export function pagoMetodoLabel(metodo: string): string {
+  return PAGO_METODOS.find((m) => m.valor === metodo)?.label ?? metodo;
+}
+
+export const PAGO_VACIO: Pago = {
+  metodo: "efectivo",
+  monto: 0,
+  moneda: "ARS",
+  fecha: "",
+  detalle: "",
+};
+
+export function pagosDe(json: unknown): Pago[] {
+  if (!Array.isArray(json)) return [];
+  return json.filter(
+    (p): p is Pago =>
+      Boolean(p) && typeof p === "object" && typeof (p as Pago).metodo === "string"
+  );
+}
+
+/**
+ * Total pagado en la moneda de la operación. Los pagos en otra moneda NO se
+ * mezclan (no inventamos cotización): se informan aparte.
+ */
+export function totalPagado(pagos: Pago[], moneda: string): number {
+  return pagos
+    .filter((p) => (p.moneda || "ARS") === moneda)
+    .reduce((a, p) => a + (Number(p.monto) || 0), 0);
+}
+
+/** Total pagado en monedas distintas a la de la operación, agrupado. */
+export function pagadoOtrasMonedas(pagos: Pago[], moneda: string): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const p of pagos) {
+    const m = p.moneda || "ARS";
+    if (m === moneda) continue;
+    out[m] = (out[m] ?? 0) + (Number(p.monto) || 0);
+  }
+  return out;
+}
+
+/**
+ * Cuánto entregó el comprador en la moneda del boleto: pagos + seña + el valor
+ * de las permutas tomadas. Es la "entrega" que descuenta lo que se financia.
+ */
+export function totalEntregado(opts: {
+  pagos: Pago[];
+  permutas: Permuta[];
+  sena: number;
+  moneda: string;
+}): number {
+  const permutas = opts.permutas.reduce((a, p) => a + (Number(p.valorTomado) || 0), 0);
+  return totalPagado(opts.pagos, opts.moneda) + (Number(opts.sena) || 0) + permutas;
+}
+
 /** Cartelito de origen de un vehículo que entró solo al stock. */
 export function origenVehiculoTexto(
   origenTipo: string | null | undefined,

@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { guardConceApi } from "../../_guard";
-import { permutaSchema } from "../route";
+import { pagoSchema, permutaSchema } from "../route";
 import {
   anularOperacion,
   concretarOperacion,
@@ -29,6 +29,7 @@ const patchSchema = z
     domicilio: z.string().trim().max(200).nullable(),
     telefono: z.string().trim().max(40).nullable(),
     email: z.string().trim().max(120).nullable(),
+    contactId: z.string().trim().max(60).nullable(),
     vehiculoTexto: z.string().trim().max(300).nullable(),
     vehiculoId: z.string().trim().max(60).nullable(),
     vehMarca: z.string().trim().max(80).nullable(),
@@ -36,6 +37,7 @@ const patchSchema = z
     vehAnio: z.number().int().min(1950).max(2030).nullable(),
     vehKm: z.number().int().min(0).nullable(),
     permutas: z.array(permutaSchema).max(10),
+    pagos: z.array(pagoSchema).max(30),
     dominio: z.string().trim().max(20).nullable(),
     chasis: z.string().trim().max(60).nullable(),
     motorNro: z.string().trim().max(60).nullable(),
@@ -78,7 +80,7 @@ export async function PATCH(
   if (!op) return NextResponse.json({ error: "No existe" }, { status: 404 });
 
   // Campos "planos" (todo menos el estado, que dispara automatizaciones).
-  const { estado: nuevoEstado, fecha, vehiculoId, permutas, ...resto } = d;
+  const { estado: nuevoEstado, fecha, vehiculoId, permutas, pagos, contactId, ...resto } = d;
 
   // El vehículo del stock tiene que ser de ESTE tenant.
   let vehiculoIdFinal: string | null | undefined;
@@ -100,19 +102,44 @@ export async function PATCH(
     ...(permutas !== undefined
       ? { permutas: permutas.filter((p) => p.marca.trim()) as unknown as Prisma.InputJsonValue }
       : {}),
+    ...(pagos !== undefined
+      ? { pagos: pagos.filter((p) => p.monto > 0) as unknown as Prisma.InputJsonValue }
+      : {}),
   };
 
   if (Object.keys(datosPlanos).length > 0) {
     await db.conceOperacion.update({ where: { id }, data: datosPlanos });
-    // Si tocaron los datos de la persona, mantenemos el cliente del CRM al día.
-    if (resto.nombre || resto.telefono !== undefined || resto.email !== undefined) {
-      const actual = await db.conceOperacion.findFirst({
-        where: { id, clientId: g.tenant.id },
-        select: { nombre: true, telefono: true, email: true, dni: true, contactId: true },
+  }
+
+  // Si tocaron los datos de la persona (o eligieron otro cliente del buscador),
+  // mantenemos el CRM al día: completa los huecos de su ficha (DNI/domicilio)
+  // sin pisar lo que ya esté cargado.
+  if (
+    contactId !== undefined ||
+    resto.nombre ||
+    resto.telefono !== undefined ||
+    resto.email !== undefined ||
+    resto.dni !== undefined ||
+    resto.domicilio !== undefined
+  ) {
+    const actual = await db.conceOperacion.findFirst({
+      where: { id, clientId: g.tenant.id },
+      select: {
+        nombre: true,
+        telefono: true,
+        email: true,
+        dni: true,
+        domicilio: true,
+        contactId: true,
+      },
+    });
+    if (actual) {
+      const vinculado = await vincularContacto(db, g.tenant.id, {
+        ...actual,
+        contactId: contactId ?? actual.contactId,
       });
-      if (actual && !actual.contactId) {
-        const contactId = await vincularContacto(db, g.tenant.id, actual);
-        if (contactId) await db.conceOperacion.update({ where: { id }, data: { contactId } });
+      if (vinculado && vinculado !== actual.contactId) {
+        await db.conceOperacion.update({ where: { id }, data: { contactId: vinculado } });
       }
     }
   }
