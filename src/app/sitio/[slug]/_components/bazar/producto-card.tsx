@@ -18,10 +18,10 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl border t-card transition-shadow hover:shadow-lg"
+      className="group sube relative flex flex-col overflow-hidden rounded-2xl border t-card"
       style={{ borderColor: "var(--t-borde)" }}
     >
-      <Link href={`/sitio/${slug}/producto/${p.slug}`} className="sube block">
+      <Link href={`/sitio/${slug}/producto/${p.slug}`} className="block">
         <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: "var(--t-suave)" }}>
           {p.foto ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -86,7 +86,7 @@ export function ProductoCard({ slug, p }: { slug: string; p: BazarCardData }) {
             }
             aria-label={`Agregar ${p.nombre} al carrito`}
             title={aPedido ? "Agregar — lo pedimos al proveedor" : "Agregar al carrito"}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-bold transition-transform hover:scale-105"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-bold transition-transform duration-200 hover:scale-105 active:scale-95 motion-reduce:transform-none"
             style={{ backgroundColor: "var(--tpl, " + "var(--tpl, #3FA9A5)" + ")", color: "var(--tpl-sobre, #fff)" }}
           >
             +

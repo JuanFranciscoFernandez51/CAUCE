@@ -2,6 +2,7 @@ import type { Client } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PedidoProvider, BarraPedido } from "./pedido-store";
 import { Catalogo } from "./catalogo";
+import { Reveal } from "../conce/reveal";
 
 /**
  * Home de Casa Milo — según el brand book y el handoff de diseño.
@@ -59,15 +60,42 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
 
   const foto = (f: unknown) => (Array.isArray(f) && typeof f[0] === "string" ? (f[0] as string) : null);
 
+  // Promesas reales para la cinta: si hay anuncio cargado se parte por "·".
+  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $30.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
+    .split("·")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const tanda = [...promesas, ...promesas, ...promesas, ...promesas];
+
   return (
     <PedidoProvider slug={tenant.slug}>
       <div style={{ backgroundColor: CREMA, color: TINTA, fontFamily: "var(--font-archivo)" }}>
-        {/* 1.1 Barra de anuncio */}
-        <div
-          className="px-5 py-2.5 text-center text-[13px] font-semibold uppercase"
-          style={{ backgroundColor: BORDO, color: CREMA, letterSpacing: "0.14em" }}
-        >
-          {st.anuncio ?? "Entrega en el día en CABA · Pedido mínimo 2 kg · Envío sin cargo desde $30.000"}
+        {/* Motion propio de Casa Milo (globals.css lo edita otro flujo: va scoped acá).
+            Escala única: 200ms hovers / 300ms overlays / 700ms reveals (conce-reveal). */}
+        <style>{`
+          @keyframes milo-kenburns { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+          .milo-kenburns { animation: milo-kenburns 16s ease-in-out infinite alternate; }
+          @keyframes milo-cinta { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+          .milo-cinta { overflow: hidden; }
+          .milo-cinta-tira { display: inline-flex; white-space: nowrap; width: max-content; animation: milo-cinta 30s linear infinite; }
+          .milo-cinta:hover .milo-cinta-tira { animation-play-state: paused; }
+          .milo-link { background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1.5px; padding-bottom: 3px; transition: background-size 0.2s ease; }
+          .milo-link:hover { background-size: 100% 1.5px; }
+          @media (prefers-reduced-motion: reduce) {
+            .milo-kenburns, .milo-cinta-tira { animation: none; }
+            .milo-link { transition: none; }
+          }
+        `}</style>
+
+        {/* 1.1 Barra de anuncio → cinta de promesas girando (pausa en hover) */}
+        <div className="milo-cinta" style={{ backgroundColor: BORDO, color: CREMA }}>
+          <div className="milo-cinta-tira py-2.5">
+            {tanda.map((p, i) => (
+              <span key={i} className="px-5 text-[13px] font-semibold uppercase" style={{ letterSpacing: "0.14em" }}>
+                {p} <span className="pl-5" style={{ color: CELESTE }}>•</span>
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* 1.2 Header */}
@@ -85,7 +113,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
             </a>
             <nav className="hidden items-center gap-7 md:flex">
               {NAV.map((n) => (
-                <a key={n.href} href={n.href} className="text-[15px] font-medium transition hover:opacity-70" style={{ color: TINTA }}>
+                <a key={n.href} href={n.href} className="milo-link text-[15px] font-medium" style={{ color: TINTA }}>
                   {n.label}
                 </a>
               ))}
@@ -94,7 +122,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
               href={waLink}
               target="_blank"
               rel="noreferrer"
-              className="px-[22px] py-3 text-[14px] font-semibold uppercase transition hover:opacity-90"
+              className="px-[22px] py-3 text-[14px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
               style={{ backgroundColor: BORDO, color: CREMA, letterSpacing: "0.06em" }}
             >
               Pedir por WhatsApp
@@ -104,7 +132,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
 
         {/* 1.3 Hero */}
         <section className="mx-auto grid max-w-[1180px] items-center gap-11 px-7 pb-10 pt-9 md:grid-cols-[1.35fr_0.65fr]">
-          <div>
+          <Reveal>
             <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
               Milanesas & pollo premium · BS-AS
             </p>
@@ -120,7 +148,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
             <div className="mt-7 flex flex-wrap items-center gap-4">
               <a
                 href="#catalogo"
-                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition hover:opacity-90"
+                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
                 style={{ backgroundColor: BORDO, color: CREMA }}
               >
                 Ver catálogo
@@ -129,7 +157,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition hover:bg-black/[0.04]"
+                className="px-[30px] py-[15px] text-[15px] font-semibold uppercase transition-all duration-200 hover:-translate-y-0.5 hover:bg-black/[0.04] active:scale-[0.98] motion-reduce:transform-none"
                 style={{ border: `1.5px solid ${BORDO}`, color: BORDO }}
               >
                 WhatsApp
@@ -138,39 +166,39 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 Entrega en el día en CABA · <strong>envío sin cargo desde $30.000</strong>
               </span>
             </div>
-          </div>
+          </Reveal>
 
-          {/* Marco bordó desplazado: es parte de la identidad */}
-          <div className="w-full max-w-[320px] justify-self-end">
+          {/* Marco bordó desplazado: es parte de la identidad. La foto respira con ken burns. */}
+          <Reveal delay={120} className="w-full max-w-[320px] justify-self-end">
             <div style={{ background: BORDO, padding: "18px 18px 0 0" }}>
-              {foto(productos[0]?.fotos) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={foto(productos[0]?.fotos)!}
-                  alt="Milanesa de Casa Milo"
-                  className="aspect-square w-full object-cover"
-                  style={{ transform: "translate(18px,18px)" }}
-                />
-              ) : (
-                <div
-                  className="aspect-square w-full"
-                  style={{ transform: "translate(18px,18px)", backgroundColor: "#EADFC4" }}
-                />
-              )}
+              <div className="aspect-square w-full overflow-hidden" style={{ transform: "translate(18px,18px)" }}>
+                {foto(productos[0]?.fotos) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={foto(productos[0]?.fotos)!}
+                    alt="Milanesa de Casa Milo"
+                    className="milo-kenburns h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full" style={{ backgroundColor: "#EADFC4" }} />
+                )}
+              </div>
             </div>
-          </div>
+          </Reveal>
         </section>
 
         {/* 1.4 Franja de diferenciales */}
         <div style={{ backgroundColor: BORDO, color: CREMA }}>
           <div className="mx-auto flex max-w-[1180px] flex-wrap justify-between gap-x-9 gap-y-3 px-7 py-[26px]">
             {DIFERENCIALES.map((d, i) => (
-              <p key={d} className="text-[15px] font-medium">
-                <span className="mr-2 font-bold" style={{ color: CELESTE }}>
-                  0{i + 1}
-                </span>
-                {d}
-              </p>
+              <Reveal key={d} delay={i * 90}>
+                <p className="text-[15px] font-medium">
+                  <span className="mr-2 font-bold" style={{ color: CELESTE }}>
+                    0{i + 1}
+                  </span>
+                  {d}
+                </p>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -189,18 +217,21 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
 
         {/* 1.6 Cómo funciona */}
         <section id="como" className="mx-auto max-w-[1180px] px-7 py-20">
-          <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
-            Cómo funciona
-          </p>
-          <h2
-            className="mt-3 text-[38px] font-black sm:text-[54px]"
-            style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1, letterSpacing: "-0.02em" }}
-          >
-            Pedís y comés el mismo día
-          </h2>
+          <Reveal>
+            <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
+              Cómo funciona
+            </p>
+            <h2
+              className="mt-3 text-[38px] font-black sm:text-[54px]"
+              style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1, letterSpacing: "-0.02em" }}
+            >
+              Pedís y comés el mismo día
+            </h2>
+          </Reveal>
           <div className="mt-10 grid gap-7 md:grid-cols-3">
-            {PASOS.map((p) => (
-              <div key={p.n} style={{ borderTop: `3px solid ${BORDO}`, paddingTop: 20 }}>
+            {PASOS.map((p, i) => (
+              <Reveal key={p.n} delay={i * 90}>
+                <div style={{ borderTop: `3px solid ${BORDO}`, paddingTop: 20 }}>
                 <p className="text-[44px] font-black" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE }}>
                   {p.n}
                 </p>
@@ -210,7 +241,8 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 <p className="mt-2 text-[15px] leading-[1.55]" style={{ color: "#4A2A30" }}>
                   {p.d}
                 </p>
-              </div>
+                </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -218,7 +250,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
         {/* 1.7 Cobertura + FAQ */}
         <section id="cobertura" style={{ backgroundColor: BORDO, color: CREMA }}>
           <div className="mx-auto grid max-w-[1180px] gap-14 px-7 py-20 md:grid-cols-2">
-            <div>
+            <Reveal>
               <p className="text-[13px] font-semibold uppercase" style={{ color: CELESTE, letterSpacing: "0.22em" }}>
                 Cobertura
               </p>
@@ -239,9 +271,10 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                   </span>
                 ))}
               </div>
-            </div>
+            </Reveal>
 
-            <div className="p-[34px]" style={{ backgroundColor: "rgba(251,243,222,0.08)" }}>
+            <Reveal delay={120}>
+              <div className="h-full p-[34px]" style={{ backgroundColor: "rgba(251,243,222,0.08)" }}>
               <p className="text-[26px] font-bold" style={{ fontFamily: "var(--font-bodoni)", color: CELESTE }}>
                 Preguntas rápidas
               </p>
@@ -255,7 +288,8 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                   </div>
                 ))}
               </div>
-            </div>
+              </div>
+            </Reveal>
           </div>
         </section>
 

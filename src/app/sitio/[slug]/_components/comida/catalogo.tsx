@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { BotonSumar } from "./pedido-store";
+import { Reveal } from "../conce/reveal";
 
 /** Catálogo de Casa Milo: filtros por categoría, grupos y card con "Sumar". */
 const BORDO = "#7B2434";
@@ -29,22 +30,24 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
 
   return (
     <section id="catalogo" className="mx-auto max-w-[1180px] px-7 pb-10 pt-12">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
-            Catálogo
+      <Reveal>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="text-[13px] font-semibold uppercase" style={{ color: BORDO, letterSpacing: "0.22em" }}>
+              Catálogo
+            </p>
+            <h2
+              className="mt-3 text-[38px] font-black sm:text-[54px]"
+              style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1, letterSpacing: "-0.02em" }}
+            >
+              Elegí tu corte
+            </h2>
+          </div>
+          <p className="max-w-[360px] text-[15px]" style={{ color: "#6B4A4F" }}>
+            Precios por pack, listos para freezer. Sumá al pedido y lo cerramos por WhatsApp.
           </p>
-          <h2
-            className="mt-3 text-[38px] font-black sm:text-[54px]"
-            style={{ fontFamily: "var(--font-bodoni)", color: BORDO, lineHeight: 1, letterSpacing: "-0.02em" }}
-          >
-            Elegí tu corte
-          </h2>
         </div>
-        <p className="max-w-[360px] text-[15px]" style={{ color: "#6B4A4F" }}>
-          Precios por pack, listos para freezer. Sumá al pedido y lo cerramos por WhatsApp.
-        </p>
-      </div>
+      </Reveal>
 
       {/* Filtros */}
       <div className="mt-7 flex flex-wrap gap-2.5">
@@ -54,7 +57,7 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
             <button
               key={c}
               onClick={() => setFiltro(c)}
-              className="px-[22px] py-[11px] text-[14px] font-semibold transition"
+              className="px-[22px] py-[11px] text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none"
               style={{
                 letterSpacing: "0.04em",
                 backgroundColor: activo ? BORDO : "transparent",
@@ -86,11 +89,19 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
             >
               {items.map((p) =>
                 combo ? (
-                  <article key={p.id} className="grid md:grid-cols-[1fr_1.1fr]" style={{ backgroundColor: BORDO, color: CREMA, minHeight: 230 }}>
-                    <div style={{ backgroundColor: "#5F1B28" }}>
+                  <article
+                    key={p.id}
+                    className="group grid transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none md:grid-cols-[1fr_1.1fr]"
+                    style={{ backgroundColor: BORDO, color: CREMA, minHeight: 230 }}
+                  >
+                    <div className="overflow-hidden" style={{ backgroundColor: "#5F1B28" }}>
                       {p.foto ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.foto} alt={p.nombre} className="h-full w-full object-cover" />
+                        <img
+                          src={p.foto}
+                          alt={p.nombre}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
+                        />
                       ) : null}
                     </div>
                     <div className="flex flex-col gap-2 p-6">
@@ -112,13 +123,17 @@ export function Catalogo({ productos }: { productos: Prod[] }) {
                 ) : (
                   <article
                     key={p.id}
-                    className="flex flex-col"
+                    className="group flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none"
                     style={{ backgroundColor: "#FFFDF6", border: "1px solid rgba(123,36,52,0.14)" }}
                   >
-                    <div className="aspect-[4/3] w-full" style={{ backgroundColor: "#EFE3C9" }}>
+                    <div className="aspect-[4/3] w-full overflow-hidden" style={{ backgroundColor: "#EFE3C9" }}>
                       {p.foto ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.foto} alt={p.nombre} className="h-full w-full object-cover" />
+                        <img
+                          src={p.foto}
+                          alt={p.nombre}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
+                        />
                       ) : null}
                     </div>
                     <div className="flex flex-1 flex-col gap-2.5 p-5">

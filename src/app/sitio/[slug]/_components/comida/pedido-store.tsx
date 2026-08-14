@@ -49,7 +49,7 @@ export function BarraPedido({
         <div className="ml-auto flex items-center gap-3">
           <button
             onClick={vaciar}
-            className="px-4 py-2 text-[13px] font-semibold uppercase tracking-wide transition hover:opacity-80"
+            className="px-4 py-2 text-[13px] font-semibold uppercase tracking-wide transition-all duration-200 hover:opacity-80 active:scale-[0.98] motion-reduce:transform-none"
             style={{ border: "1px solid rgba(251,243,222,.4)" }}
           >
             Vaciar
@@ -59,7 +59,7 @@ export function BarraPedido({
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-[14px] text-[13px] font-semibold uppercase tracking-wide transition hover:opacity-80"
+              className="px-5 py-[14px] text-[13px] font-semibold uppercase tracking-wide transition-all duration-200 hover:opacity-80 active:scale-[0.98] motion-reduce:transform-none"
               style={{ border: "1px solid rgba(251,243,222,.4)" }}
             >
               Cerrar por WhatsApp
@@ -68,7 +68,7 @@ export function BarraPedido({
           {/* Comprar en la web: datos, pago y el pedido cae en Despacho. */}
           <Link
             href={`${base}/carrito`}
-            className="px-[26px] py-[14px] text-[14px] font-bold uppercase tracking-wide transition hover:opacity-90"
+            className="px-[26px] py-[14px] text-[14px] font-bold uppercase tracking-wide transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
             style={{ backgroundColor: "#A9C6F5", color: "#3A1218" }}
           >
             Completar pedido
@@ -93,7 +93,7 @@ export function BotonSumar({
       onClick={() =>
         agregar({ productoId: producto.id, nombre: producto.nombre, precio: producto.precio, foto: producto.foto ?? null })
       }
-      className="px-[18px] py-3 text-[13px] font-semibold uppercase tracking-wide transition hover:opacity-90"
+      className="px-[18px] py-3 text-[13px] font-semibold uppercase tracking-wide transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 active:scale-[0.98] motion-reduce:transform-none"
       style={
         invertido
           ? { backgroundColor: "#A9C6F5", color: "#7B2434", fontWeight: 700 }
