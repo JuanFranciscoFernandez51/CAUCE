@@ -16,7 +16,7 @@ export async function CatalogoMilo({ tenant }: { tenant: Client }) {
     select: { id: true, nombre: true, precio: true, descripcion: true, categoria: true, fotos: true },
   });
   const fotosDe = (f: unknown) => (Array.isArray(f) ? f.filter((x): x is string => typeof x === "string") : []);
-  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $30.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
+  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $60.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
     .split("·").map((p) => p.trim()).filter(Boolean);
 
   return (

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CarritoProvider, useCarrito } from "../bazar/carrito-store";
 
 /** Umbral real de envío sin cargo (mismo dato que promete el hero y la cinta). */
-export const ENVIO_GRATIS = 30000;
+export const ENVIO_GRATIS = 60000;
 
 /**
  * Pedido de Casa Milo. No hay checkout: el pedido se arma acá y se cierra por

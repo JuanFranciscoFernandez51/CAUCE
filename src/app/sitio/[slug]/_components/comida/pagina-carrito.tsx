@@ -17,7 +17,7 @@ export function CarritoMilo({
   };
   const wa = tenant.whatsapp?.replace(/\D/g, "") || null;
   const base = `/sitio/${tenant.slug}`;
-  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Envío sin cargo desde $30.000 · Pagás al recibir o por MercadoPago")
+  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Envío sin cargo desde $60.000 · Pagás al recibir o por MercadoPago")
     .split("·").map((p) => p.trim()).filter(Boolean);
 
   // Variables .tienda para que el checkout compartido tome la paleta de la casa.

@@ -21,7 +21,7 @@ const SECCIONES: { t: string; c: string[] }[] = [
     c: [
       "El pedido mínimo es de 2 kg. Los pedidos confirmados antes de las 17 hs se entregan el mismo día; los posteriores, al día siguiente en la primera franja disponible.",
       "Hacemos entregas en toda CABA. Al confirmar el pedido coordinamos dirección y franja horaria. Si no hay nadie en el domicilio en la franja acordada, reprogramamos la entrega (puede aplicar un costo de reenvío).",
-      "El envío es sin cargo para pedidos desde $30.000. Por debajo de ese monto, el costo de envío se informa antes de pagar.",
+      "El envío es sin cargo para pedidos desde $60.000. Por debajo de ese monto, el costo de envío se informa antes de pagar.",
     ],
   },
   {
@@ -71,7 +71,7 @@ export default async function TerminosPage({ params }: { params: Promise<{ slug:
     <PedidoProvider slug={tenant.slug}>
       <div className="min-h-screen" style={{ backgroundColor: CREMA, color: TINTA, fontFamily: "var(--font-archivo)" }}>
         <MiloEstilos />
-        <MiloCinta promesas={["Entrega en el día en CABA", "Envío sin cargo desde $30.000", "Pagás al recibir o por MercadoPago"]} />
+        <MiloCinta promesas={["Entrega en el día en CABA", "Envío sin cargo desde $60.000", "Pagás al recibir o por MercadoPago"]} />
         <MiloHeader base={base} wa={wa} nav={[{ href: base, label: "Inicio" }, { href: `${base}/catalogo`, label: "Catálogo" }]} />
 
         <div className="mx-auto max-w-[840px] px-7 py-14">

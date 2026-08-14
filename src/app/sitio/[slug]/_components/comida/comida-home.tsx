@@ -59,7 +59,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
   const foto = (f: unknown) => fotosDe(f)[0] ?? null;
 
   // Promesas reales para la cinta: si hay anuncio cargado se parte por "·".
-  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $30.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
+  const promesas = (st.anuncio ?? "Entrega en el día en CABA · Milanesas y pollo premium · Envío sin cargo desde $60.000 · Rebozado propio, sin conservantes · Pedido mínimo 2 kg")
     .split("·")
     .map((p) => p.trim())
     .filter(Boolean);
@@ -112,7 +112,7 @@ export async function ComidaHome({ tenant }: { tenant: Client }) {
                 WhatsApp
               </a>
               <span className="text-[14px]" style={{ color: "#6B4A4F" }}>
-                Entrega en el día en CABA · <strong>envío sin cargo desde $30.000</strong>
+                Entrega en el día en CABA · <strong>envío sin cargo desde $60.000</strong>
               </span>
             </div>
           </Reveal>
