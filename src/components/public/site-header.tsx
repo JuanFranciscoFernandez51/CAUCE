@@ -11,6 +11,7 @@ const NAV = [
   { href: "/precios", clave: "nav.precios" },
   { href: "/casos", clave: "nav.casos" },
   { href: "/consultoria", clave: "nav.consultoria" },
+  { href: "/animaciones", clave: "nav.animaciones" },
 ] as const;
 
 /** Header flotante tipo píldora (estética menta): sticky, redondeado, sombra suave. */

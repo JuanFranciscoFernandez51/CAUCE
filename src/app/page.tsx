@@ -8,7 +8,15 @@ import { catalogoPorArea } from "@/lib/procesos-catalogo";
 import { PublicShell } from "@/components/public/shell";
 import { ESPEJOS, PIEZA_BASE } from "@/lib/piezas";
 import { Doors } from "@/components/public/doors";
-import { Reveal, Parallax, StepsFlow } from "@/components/public/menta";
+import { Reveal, StepsFlow } from "@/components/public/menta";
+import { FondoDither } from "@/components/public/fondo-dither";
+import {
+  Manifiesto,
+  CarruselCasos,
+  CintaClaim,
+  CardGlow,
+  BotonEspecular,
+} from "@/components/public/vivo";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +99,18 @@ const SHOTS = {
     "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262114/cauce/sistema/hero/yjgjy29urlaxv33t4kti.png",
 };
 
+/** Las capturas, listas para el carrusel 3D (alt = qué hace, sin humo). */
+const SHOTS_CARRUSEL = [
+  { image: SHOTS.mfDashboard, alt: "Dashboard real de Motos Fernández en Cauce" },
+  { image: SHOTS.lbCaja, alt: "Caja en 4 monedas de La Base en Cauce" },
+  { image: SHOTS.vbArca, alt: "Facturación ARCA — Vespa Bahía" },
+  { image: SHOTS.mfOutreach, alt: "Avisos por WhatsApp — Motos Fernández" },
+  { image: SHOTS.lbCalendario, alt: "Calendario del mes — La Base" },
+  { image: SHOTS.mfInstagram, alt: "Publicar en Instagram con un botón — Motos Fernández" },
+  { image: SHOTS.mfTaller, alt: "Taller con órdenes de trabajo — Motos Fernández" },
+  { image: SHOTS.vbStock, alt: "Stock del catálogo — Vespa Bahía" },
+];
+
 const DIA_CAUCE: [string, string, string][] = [
   ["09:02", "Un cliente sacó turno solo desde tu página", "📅"],
   ["10:40", 'Trabajo terminado: aviso de "listo para retirar" armado por WhatsApp', "🔧"],
@@ -98,42 +118,6 @@ const DIA_CAUCE: [string, string, string][] = [
   ["16:30", "Entró una consulta por la web y ya está en tu lista de clientes", "💬"],
   ["20:00", "La caja del día cerró sola: ingresos, gastos y diferencia", "✅"],
 ];
-
-/** Marca de captura real flotante, con rotación leve y sombra suave. */
-function Shot({
-  src,
-  alt,
-  label,
-  className = "",
-  priority = false,
-}: {
-  src: string;
-  alt: string;
-  /** Punto de ataque en 4 palabras. */
-  label?: string;
-  className?: string;
-  priority?: boolean;
-}) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_70px_-24px_rgba(11,15,22,0.45)] ${className}`}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        priority={priority}
-        sizes="(min-width: 1024px) 400px, 90vw"
-        className="object-cover object-left-top"
-      />
-      {label ? (
-        <span className="absolute bottom-2 left-2 z-10 rounded-full bg-[#0B1220] dark:bg-[#1b2745]/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
-          {label}
-        </span>
-      ) : null}
-    </div>
-  );
-}
 
 /** La tarjeta "Un día cualquiera adentro de Cauce" (contenido intacto, look menta). */
 function DiaCard({ className = "" }: { className?: string }) {
@@ -173,7 +157,7 @@ export default async function LandingPage() {
     const caso = CASOS.find((c) => c.area === area);
     return (
       <Reveal key={area} delay={delay} className="h-full">
-        <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
+        <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
           <div className="flex items-center gap-3">
             <span
               aria-hidden
@@ -215,130 +199,51 @@ export default async function LandingPage() {
 
   return (
     <PublicShell>
-      {/* ══ HERO — claro, título gigante + collage de capturas reales ══ */}
+      {/* ══ HERO — tipografía gigante con UNA palabra verde serif + paisaje dither ══ */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 pb-14 pt-12 sm:px-6 sm:pt-16 lg:pt-20">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1fr]">
-            <div>
-              <Reveal>
-                <span className="inline-flex items-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
-                  Web + sistema de gestión a medida — Bahía Blanca, Argentina
-                </span>
-              </Reveal>
-              <Reveal delay={90}>
-                <h1 className="title-mega mt-5 text-[42px] sm:text-6xl lg:text-7xl xl:text-[80px]">
-                  Tu negocio entero, en un sistema{" "}
-                  <span className="text-primary">hecho 100% a tu medida</span>
-                </h1>
-              </Reveal>
-              <Reveal delay={190}>
-                <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                  Tu página web, tu gestión y tus avisos automáticos, armados como trabajás
-                  vos. Dejá el Excel, el cuaderno y las cosas lentas:{" "}
-                  <span className="font-medium text-foreground">
-                    todo en un solo lugar, simple y con tu marca.
-                  </span>
-                </p>
-              </Reveal>
-              <Reveal delay={280}>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a
-                    href={WA_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background transition hover:opacity-90"
-                  >
-                    Armemos el tuyo por WhatsApp
-                  </a>
-                  <Link
-                    href="/casos"
-                    className="inline-flex h-12 items-center rounded-full border border-border bg-card px-7 text-sm font-medium transition hover:bg-muted"
-                  >
-                    Ver casos reales →
-                  </Link>
-                </div>
-              </Reveal>
+        <FondoDither />
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 text-center sm:px-6 sm:pt-24 lg:pt-28">
+          <Reveal>
+            <span className="inline-flex items-center rounded-full border border-border bg-card/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+              Web + sistema de gestión a medida — Bahía Blanca, Argentina
+            </span>
+          </Reveal>
+          <Reveal delay={90}>
+            <h1 className="title-mega mx-auto mt-6 max-w-5xl text-[56px] sm:text-8xl lg:text-[112px]">
+              Que tu negocio <span className="palabra-verde">fluya</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={190}>
+            <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+              Tu página web, tu gestión y tus avisos automáticos, armados como trabajás
+              vos. Dejá el Excel, el cuaderno y las cosas lentas:{" "}
+              <span className="font-medium text-foreground">
+                todo en un solo lugar, simple y con tu marca.
+              </span>
+            </p>
+          </Reveal>
+          <Reveal delay={280}>
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={WA_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background transition hover:opacity-90 active:scale-[0.98]"
+              >
+                Armemos el tuyo por WhatsApp
+              </a>
+              <Link
+                href="/casos"
+                className="inline-flex h-12 items-center rounded-full border border-border bg-card px-7 text-sm font-medium transition hover:bg-muted active:scale-[0.98]"
+              >
+                Ver casos reales →
+              </Link>
             </div>
-
-            {/* Collage desktop: capturas reales flotando con chips de UI y parallax */}
-            <div className="relative hidden h-[600px] lg:block">
-              <Parallax amount={34} className="absolute right-0 top-0 z-10 w-[400px]">
-                <Reveal delay={150}>
-                  <div className="rotate-[2deg]">
-                    <Shot
-                      src={SHOTS.mfDashboard}
-                  label="📊 Tu negocio en números, en vivo"
-                      alt="Dashboard real de Motos Fernández en Cauce"
-                      className="aspect-[16/10]"
-                      priority
-                    />
-                    <span className="ui-chip absolute -bottom-4 right-8 bg-card text-foreground">
-                      ✓ Factura ARCA emitida
-                    </span>
-                  </div>
-                </Reveal>
-              </Parallax>
-              <Parallax amount={-30} className="absolute bottom-4 right-8 z-30 w-[330px]">
-                <Reveal delay={300}>
-                  <div className="rotate-[-2deg]">
-                    <Shot
-                      src={SHOTS.lbCaja}
-                  label="💵 La caja cierra sola"
-                      alt="Caja en 4 monedas de La Base en Cauce"
-                      className="aspect-[16/10]"
-                    />
-                    <span className="ui-chip absolute -top-4 right-6 bg-primary text-primary-foreground">
-                      📅 Un turno entró desde la web
-                    </span>
-                  </div>
-                </Reveal>
-              </Parallax>
-              <Parallax amount={20} className="absolute left-0 top-10 z-20 w-[300px]">
-                <Reveal delay={240}>
-                  <div className="rotate-[-1.5deg]">
-                    <DiaCard />
-                    <span className="ui-chip absolute -bottom-4 left-8 bg-[#0B1220] dark:bg-[#1b2745] text-white">
-                      ⚡ Aviso de service enviado
-                    </span>
-                  </div>
-                </Reveal>
-              </Parallax>
-            </div>
-          </div>
-
-          {/* Collage mobile: apilado */}
-          <div className="mt-12 space-y-6 lg:hidden">
-            <Reveal>
-              <div className="relative rotate-[1deg]">
-                <Shot
-                  src={SHOTS.mfDashboard}
-                  label="📊 Tu negocio en números, en vivo"
-                  alt="Dashboard real de Motos Fernández en Cauce"
-                  className="aspect-[16/10]"
-                  priority
-                />
-                <span className="ui-chip absolute -bottom-4 left-4 bg-card text-foreground">
-                  ✓ Factura ARCA emitida
-                </span>
-              </div>
-            </Reveal>
-            <Reveal delay={120}>
-              <div className="relative pt-2">
-                <DiaCard />
-                <span className="ui-chip absolute -top-2 right-4 bg-primary text-primary-foreground">
-                  ⚡ Aviso de service enviado
-                </span>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal className="mt-16">
-            <Doors />
           </Reveal>
         </div>
 
         {/* Franja de logos de los casos, en gris */}
-        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6">
           <Reveal>
             <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Negocios reales que ya fluyen con Cauce
@@ -373,6 +278,24 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ══ MANIFIESTO — texto que se escribe solo al scrollear + un día adentro ══ */}
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.25fr_0.75fr]">
+          <Manifiesto
+            es="No vendemos horas: vendemos procesos que se manejan solos. Tu página, tu gestión y tus avisos, armados como trabajás vos — para que el día rinda y el negocio fluya."
+            en="We don't sell hours: we sell processes that run themselves. Your website, your operations and your reminders, built the way you work — so the day goes further and your business flows."
+          />
+          <Reveal delay={120}>
+            <div className="relative">
+              <DiaCard className="rotate-[-1.5deg]" />
+              <span className="ui-chip absolute -top-3 right-4 bg-primary text-primary-foreground">
+                📅 Un turno entró desde la web
+              </span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ══ CÓMO FUNCIONA — mega-tarjeta clara, columna sticky + línea que se dibuja ══ */}
       <section id="como-funciona" className="scroll-mt-24 px-3 sm:px-4">
         <div className="mx-auto max-w-6xl rounded-[32px] border border-border bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
@@ -393,7 +316,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ══ LA ENTREGA CAUCE — mega-tarjeta oscura con capturas flotando ══ */}
+      {/* ══ LA ENTREGA CAUCE — mega-tarjeta oscura + carrusel 3D de capturas ══ */}
       <section className="mt-6 px-3 sm:px-4">
         <div className="menta-dark relative mx-auto max-w-6xl overflow-hidden rounded-[32px] px-6 py-16 sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           {/* Glow de fondo */}
@@ -442,7 +365,7 @@ export default async function LandingPage() {
               },
             ].map((x, i) => (
               <Reveal key={x.t} delay={i * 100} className="h-full">
-                <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-7">
+                <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-7 transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.06]">
                   <span
                     aria-hidden
                     className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl shadow-[0_14px_34px_-12px_rgba(46,107,255,0.7)]"
@@ -468,69 +391,25 @@ export default async function LandingPage() {
             </p>
           </Reveal>
 
-          {/* Collage oscuro: capturas reales del producto con chips y parallax */}
-          <div className="relative mt-14 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Parallax amount={26}>
-              <Reveal>
-                <Shot
-                  src={SHOTS.mfInstagram}
-                  label="📷 Instagram publica solo"
-                  alt="Publicar en Instagram con un botón — Motos Fernández"
-                  className="aspect-[4/3] rotate-[-1.5deg]"
-                />
-              </Reveal>
-            </Parallax>
-            <Parallax amount={-24}>
-              <Reveal delay={90}>
-                <div className="relative rotate-[1.5deg]">
-                  <Shot
-                    src={SHOTS.vbArca}
-                  label="🧾 Factura ARCA en 1 clic"
-                    alt="Facturación ARCA — Vespa Bahía"
-                    className="aspect-[4/3]"
-                  />
-                  <span className="ui-chip absolute -bottom-3 left-3 bg-card text-foreground">
-                    ✓ Factura ARCA emitida
-                  </span>
-                </div>
-              </Reveal>
-            </Parallax>
-            <Parallax amount={30}>
-              <Reveal delay={180}>
-                <div className="relative rotate-[1deg]">
-                  <Shot
-                    src={SHOTS.mfOutreach}
-                  label="💬 Avisos por WhatsApp, solos"
-                    alt="Avisos por WhatsApp — Motos Fernández"
-                    className="aspect-[4/3]"
-                  />
-                  <span className="ui-chip absolute -top-3 right-3 bg-primary text-primary-foreground">
-                    ⚡ Aviso de service enviado
-                  </span>
-                </div>
-              </Reveal>
-            </Parallax>
-            <Parallax amount={-20}>
-              <Reveal delay={270}>
-                <div className="relative rotate-[-1deg]">
-                  <Shot
-                    src={SHOTS.lbCalendario}
-                  label="📅 Turnos que entran de la web"
-                    alt="Calendario del mes — La Base"
-                    className="aspect-[4/3]"
-                  />
-                  <span className="ui-chip absolute -bottom-3 right-3 bg-[#0B1220] dark:bg-[#1b2745] text-white ring-1 ring-white/15">
-                    📷 Publicado en Instagram
-                  </span>
-                </div>
-              </Reveal>
-            </Parallax>
-          </div>
+          {/* Carrusel 3D con capturas reales del producto */}
+          <Reveal className="relative mt-12">
+            <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Así se ve por dentro
+            </p>
+            <div className="mt-6">
+              <CarruselCasos items={SHOTS_CARRUSEL} />
+            </div>
+          </Reveal>
         </div>
       </section>
 
+      {/* ══ SEPARADOR — el claim girando en una cinta ══ */}
+      <section className="overflow-hidden py-6 sm:py-10">
+        <CintaClaim texto="Que tu negocio fluya ✦ Cauce" />
+      </section>
+
       {/* ══ ÁREAS — mega-tarjeta clara con chips + grilla ══ */}
-      <section className="mt-6 px-3 sm:px-4">
+      <section className="px-3 sm:px-4">
         <div className="mx-auto max-w-6xl rounded-[32px] border border-border bg-card px-6 py-16 shadow-[0_2px_40px_-16px_rgba(17,17,17,0.1)] sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           <div className="mx-auto max-w-3xl text-center">
             <Reveal>
@@ -573,7 +452,7 @@ export default async function LandingPage() {
             {areaCard("FINANZAS", 0)}
             {areaCard("OPERACIONES", 80)}
             <Reveal delay={160} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
+              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="flex items-center gap-3">
                   <span
                     aria-hidden
@@ -614,7 +493,7 @@ export default async function LandingPage() {
             {areaCard("VENTAS_CRM", 160)}
             {areaCard("RRHH", 0)}
             <Reveal delay={80} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6">
+              <div className="flex h-full flex-col rounded-3xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="flex items-center gap-3">
                   <span
                     aria-hidden
@@ -665,7 +544,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ══ PRECIOS — mega-tarjeta oscura ══ */}
+      {/* ══ PRECIOS — mega-tarjeta oscura con cards que brillan ══ */}
       <section className="mt-6 px-3 sm:px-4">
         <div className="menta-dark relative mx-auto max-w-6xl overflow-hidden rounded-[32px] px-6 py-16 sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           <div
@@ -686,121 +565,127 @@ export default async function LandingPage() {
 
           <div className="relative mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Reveal className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <h3 className="font-display text-lg font-medium tracking-tight">
-                  1 · La base (va siempre)
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {PIEZA_BASE.queIncluye}
-                </p>
-                <div className="mt-5">
-                  <p className="font-display text-3xl font-medium">
-                    {fmtUsd(PIEZA_BASE.setupUsd)}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
-                      por única vez
-                    </span>
+              <CardGlow>
+                <div className="flex h-full flex-col p-6">
+                  <h3 className="font-display text-lg font-medium tracking-tight">
+                    1 · La base (va siempre)
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    {PIEZA_BASE.queIncluye}
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    + {fmtUsd(PIEZA_BASE.monthlyUsd)}/mes (hosting, soporte y mejoras)
-                  </p>
+                  <div className="mt-5">
+                    <p className="font-display text-3xl font-medium">
+                      {fmtUsd(PIEZA_BASE.setupUsd)}
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {" "}
+                        por única vez
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      + {fmtUsd(PIEZA_BASE.monthlyUsd)}/mes (hosting, soporte y mejoras)
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </CardGlow>
             </Reveal>
             <Reveal delay={90} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <h3 className="font-display text-lg font-medium tracking-tight">
-                  2 · Las piezas de tu rubro
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  Taller con órdenes de trabajo, turnos online, ventas con cuotas, caja
-                  diaria, eventos con cronómetro… Sumás solo lo que usás — nada de pestañas
-                  de otro rubro.
-                </p>
-                <div className="mt-5">
-                  <p className="font-display text-3xl font-medium">
-                    {fmtUsd(40)}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
-                      por componente
-                    </span>
+              <CardGlow>
+                <div className="flex h-full flex-col p-6">
+                  <h3 className="font-display text-lg font-medium tracking-tight">
+                    2 · Las piezas de tu rubro
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    Taller con órdenes de trabajo, turnos online, ventas con cuotas, caja
+                    diaria, eventos con cronómetro… Sumás solo lo que usás — nada de pestañas
+                    de otro rubro.
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    + un mensual chico por mantenerla viva
-                  </p>
+                  <div className="mt-5">
+                    <p className="font-display text-3xl font-medium">
+                      {fmtUsd(40)}
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {" "}
+                        por componente
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      + un mensual chico por mantenerla viva
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </CardGlow>
             </Reveal>
             <Reveal delay={180} className="h-full">
-              {/* Destacado: tarjeta clara sobre el fondo oscuro */}
-              <div className="menta flex h-full flex-col rounded-3xl bg-card p-6 shadow-[0_24px_70px_-24px_rgba(11,15,22,0.7)]">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-display text-lg font-medium tracking-tight">
-                    3 · Un negocio completo, real
-                  </h3>
-                </div>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {ESPEJOS[0].nombre}: {ESPEJOS[0].historia}
-                </p>
-                <div className="mt-5">
-                  <p className="font-display text-3xl font-medium">
-                    desde {fmtUsd(ESPEJOS[0].setupUsd)}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
-                      todo armado
-                    </span>
+              {/* Destacado: tarjeta clara sobre el fondo oscuro, con glow animado */}
+              <CardGlow destacada>
+                <div className="menta flex h-full flex-col rounded-[23px] bg-card p-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-display text-lg font-medium tracking-tight">
+                      3 · Un negocio completo, real
+                    </h3>
+                  </div>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    {ESPEJOS[0].nombre}: {ESPEJOS[0].historia}
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    + {fmtUsd(ESPEJOS[0].monthlyUsd)}/mes con soporte directo
-                  </p>
+                  <div className="mt-5">
+                    <p className="font-display text-3xl font-medium">
+                      desde {fmtUsd(ESPEJOS[0].setupUsd)}
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {" "}
+                        todo armado
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      + {fmtUsd(ESPEJOS[0].monthlyUsd)}/mes con soporte directo
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </CardGlow>
             </Reveal>
             <Reveal delay={270} className="h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <h3 className="font-display text-lg font-medium tracking-tight">
-                  4 · Escala
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  Para empresas grandes: desarrollos a medida, integraciones con tus
-                  sistemas, infraestructura dedicada y equipo asignado. Lo armamos juntos.
-                </p>
-                <div className="mt-5">
-                  <p className="font-display text-3xl font-medium">A medida</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    valores según el proyecto
+              <CardGlow>
+                <div className="flex h-full flex-col p-6">
+                  <h3 className="font-display text-lg font-medium tracking-tight">
+                    4 · Escala
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    Para empresas grandes: desarrollos a medida, integraciones con tus
+                    sistemas, infraestructura dedicada y equipo asignado. Lo armamos juntos.
                   </p>
+                  <div className="mt-5">
+                    <p className="font-display text-3xl font-medium">A medida</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      valores según el proyecto
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </CardGlow>
             </Reveal>
           </div>
 
           <Reveal className="relative mt-10 text-center">
-            <a
-              href={WA_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-12 items-center rounded-full bg-card px-7 text-sm font-semibold text-foreground transition hover:bg-card/90"
-            >
+            <BotonEspecular href={WA_URL}>
               Armemos tu presupuesto por WhatsApp →
-            </a>
+            </BotonEspecular>
           </Reveal>
         </div>
       </section>
 
-      {/* ══ CTA FINAL — doble puerta ══ */}
-      <section className="mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-24">
-        <Reveal>
-          <h2 className="title-mega text-center text-4xl sm:text-5xl">
-            Que tu negocio <span className="text-primary">fluya</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-center text-lg text-muted-foreground">
-            Elegí tu puerta: las dos terminan con tu sistema andando y tu día más liviano.
-          </p>
-        </Reveal>
-        <Reveal delay={120} className="mt-10">
-          <Doors compact />
-        </Reveal>
+      {/* ══ CTA FINAL — doble puerta, con el paisaje asomando de nuevo ══ */}
+      <section className="relative overflow-hidden">
+        <FondoDither invertida />
+        <div className="relative mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
+          <Reveal>
+            <h2 className="title-mega text-center text-5xl sm:text-6xl lg:text-7xl">
+              Que tu negocio <span className="palabra-verde">fluya</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-center text-lg text-muted-foreground">
+              Elegí tu puerta: las dos terminan con tu sistema andando y tu día más liviano.
+            </p>
+          </Reveal>
+          <Reveal delay={120} className="mt-10">
+            <Doors compact />
+          </Reveal>
+        </div>
       </section>
     </PublicShell>
   );

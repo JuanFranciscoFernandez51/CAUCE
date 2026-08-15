@@ -46,6 +46,11 @@ export function SiteFooter() {
                   Pedir diagnóstico
                 </Link>
               </li>
+              <li>
+                <Link href="/animaciones" className="transition-colors hover:text-foreground">
+                  Animaciones
+                </Link>
+              </li>
             </ul>
           </nav>
           <div className="text-sm text-muted-foreground">

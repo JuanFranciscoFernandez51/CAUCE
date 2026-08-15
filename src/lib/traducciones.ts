@@ -204,6 +204,8 @@ export const EN: Record<string, string> = {
     "We don't sell hours. We sell processes that run themselves.",
   Explorar: "Explore",
   "Pedir diagnóstico": "Request an assessment",
+  Animaciones: "Animations",
+  "Así se ve por dentro": "This is what it looks like inside",
   "Dónde estamos": "Where we are",
   "Bahía Blanca, Argentina — operamos remoto en todo el país.":
     "Bahía Blanca, Argentina — working remotely across the country.",

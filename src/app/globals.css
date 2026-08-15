@@ -460,3 +460,114 @@ h3 {
   .jess-paso, .jess-paso .jess-paso-num { transition: none; }
   .jess-paso:hover { transform: none; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   HOME "EXCLUSIVA" (ago-2026): fondo dither generativo + palabra
+   verde en itálica serif (Cormorant) + manifiesto y cintas.
+   Referencia: tipografía gigante estilo "Circular" con paisaje
+   pixelado asomando detrás. Todo CSS, sin assets externos.
+   ════════════════════════════════════════════════════════════ */
+
+/* El verde editorial de la home (solo acentos, el CTA sigue azul). */
+.menta { --verde: #2f6e46; }
+.dark .menta { --verde: #8fdcae; }
+
+/* La palabra acentuada del titular: serif itálica en verde. */
+.menta .palabra-verde {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--verde);
+  letter-spacing: 0;
+  padding-right: 0.08em; /* que la itálica no se recorte */
+}
+
+/* ── FondoDither: paisaje + trama + ruido, difuminado hacia la página ── */
+.fondo-dither {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 97%);
+}
+.fondo-dither-invertida {
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 97%);
+  mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 97%);
+}
+.fondo-dither > div { position: absolute; inset: 0; }
+
+/* 1 · Paisaje: cielo claro, sol tenue y montañas en 3-4 verdes/oliva. */
+.fd-paisaje {
+  background:
+    /* halo de sol arriba a la derecha */
+    radial-gradient(42% 30% at 72% 10%, rgba(255, 253, 238, 0.9), rgba(255, 253, 238, 0) 70%),
+    /* montaña cercana izquierda (la más oscura) */
+    radial-gradient(90% 44% at 10% 102%, #2f5540 0 55%, rgba(47, 85, 64, 0) 56%),
+    /* montaña cercana derecha */
+    radial-gradient(78% 38% at 82% 103%, #3c6449 0 52%, rgba(60, 100, 73, 0) 53%),
+    /* cordón medio */
+    radial-gradient(130% 33% at 42% 104%, #567e58 0 58%, rgba(86, 126, 88, 0) 59%),
+    /* lomada lejana, casi bruma */
+    radial-gradient(170% 29% at 62% 105%, #7fa478 0 62%, rgba(127, 164, 120, 0) 63%),
+    /* cielo → valle */
+    linear-gradient(to bottom, #eef2e7 0%, #e0e9d3 38%, #c7d9b8 66%, #a7c298 100%);
+}
+.fondo-dither-invertida .fd-paisaje { transform: scaleY(-1); }
+
+/* 2 · Trama dither: dos grillas de puntos desfasadas, estilo halftone. */
+.fd-trama {
+  mix-blend-mode: soft-light;
+  opacity: 0.85;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.8) 0.9px, transparent 1.25px),
+    radial-gradient(rgba(12, 32, 18, 0.9) 0.9px, transparent 1.25px);
+  background-size: 5px 5px, 5px 5px;
+  background-position: 0 0, 2.5px 2.5px;
+}
+
+/* 3 · Ruido de "revista escaneada": feTurbulence inline, tile chico. */
+.fd-ruido {
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* 4 · En oscuro el paisaje baja el brillo y un velo lo funde con el fondo. */
+.fd-oscuro { display: none; }
+.dark .menta .fd-paisaje { filter: brightness(0.45) saturate(0.72); }
+.dark .menta .fd-trama { opacity: 0.55; }
+.dark .menta .fd-oscuro {
+  display: block;
+  background: linear-gradient(to bottom, rgba(11, 18, 32, 0.3), rgba(11, 18, 32, 0.62));
+}
+.dark .menta .fondo-dither-invertida .fd-oscuro {
+  background: linear-gradient(to top, rgba(11, 18, 32, 0.3), rgba(11, 18, 32, 0.62));
+}
+
+/* ── Manifiesto (ScrollReveal): pisa los tamaños del CSS portado ── */
+.menta .manifiesto-texto,
+.menta .scroll-reveal p.manifiesto-texto {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4.4vw, 3.3rem);
+  line-height: 1.16;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* ── Cinta del claim (TextLoop): contenida para que sea un separador ── */
+.menta .cinta-claim {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ── Cards con BorderGlow: que la card interna llene el marco ── */
+.menta .card-glow .border-glow-inner { height: 100%; display: flex; }
+.menta .card-glow .border-glow-inner > * { flex: 1; }
+
+/* Botón especular: que el label no herede el subrayado de links. */
+.menta .specular-button { font-family: var(--font-sans); }
