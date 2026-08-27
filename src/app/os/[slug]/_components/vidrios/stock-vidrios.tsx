@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { StockTable, type StockRow } from "./stock-table";
+import { ImportadorStock } from "../../importar-stock/importador";
 
 /** Pantalla de Stock del template vidrios: filtros + tabla editable. */
 export async function StockVidrios({
@@ -74,15 +75,19 @@ export async function StockVidrios({
             {sinPrecio ? ` · ${sinPrecio} sin precio cargado` : ""}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/os/${slug}/importar-stock`} className="rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-muted">
-            📄 Importar PDF
-          </Link>
-          <Link href={`${base}/nuevo`} className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90">
-            + Nuevo producto
-          </Link>
-        </div>
+        <Link href={`${base}/nuevo`} className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90">
+          + Nuevo producto
+        </Link>
       </div>
+
+      <details className="rounded-xl border bg-card">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">
+          📥 Cargar archivo — pedido del proveedor o lista de precios
+        </summary>
+        <div className="border-t p-4">
+          <ImportadorStock slug={slug} />
+        </div>
+      </details>
 
       <div className="flex flex-wrap items-center gap-2">
         {chip(base, !categoria, "Todas")}

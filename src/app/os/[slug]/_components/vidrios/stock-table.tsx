@@ -60,8 +60,69 @@ export function StockTable({ slug, filas, categorias }: { slug: string; filas: S
     router.refresh();
   }
 
+  const [editando, setEditando] = useState<string | null>(null); // `${id}:${campo}`
   const num = "w-24 rounded-md border bg-card px-2 py-1 text-right text-sm tabular-nums";
   const txt = "w-full rounded-md border bg-card px-2 py-1 text-sm";
+
+  /** Celda de solo lectura hasta que le hacés doble click. */
+  function Celda({
+    f,
+    campo,
+    tipo = "texto",
+    ancho = "",
+    render,
+  }: {
+    f: StockRow;
+    campo: keyof StockRow;
+    tipo?: "texto" | "numero" | "select";
+    ancho?: string;
+    render?: (v: string | number | null) => React.ReactNode;
+  }) {
+    const clave = `${f.id}:${String(campo)}`;
+    const v = valor(f, campo);
+    if (editando === clave) {
+      if (tipo === "select") {
+        return (
+          <select
+            autoFocus
+            value={String(v ?? "")}
+            onChange={(e) => editar(f.id, campo, e.target.value)}
+            onBlur={() => setEditando(null)}
+            className={`${txt} ${ancho}`}
+          >
+            {[...new Set([f.categoria, ...categorias])].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        );
+      }
+      return (
+        <input
+          autoFocus
+          type={tipo === "numero" ? "number" : "text"}
+          min={tipo === "numero" ? 0 : undefined}
+          value={(v as string | number | null) ?? ""}
+          onChange={(e) =>
+            editar(f.id, campo, tipo === "numero" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value)
+          }
+          onBlur={() => setEditando(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === "Escape") setEditando(null);
+          }}
+          className={`${tipo === "numero" ? num : txt} ${ancho}`}
+        />
+      );
+    }
+    return (
+      <span
+        onDoubleClick={() => setEditando(clave)}
+        title="Doble click para editar"
+        className={`block cursor-text rounded px-1 py-1 hover:bg-muted/60 ${tipo === "numero" ? "text-right tabular-nums" : ""}`}
+      >
+        {render ? render(v as string | number | null) : (v as string | number | null) || <span className="text-muted-foreground">—</span>}
+      </span>
+    );
+  }
 
   return (
     <div className="overflow-x-auto rounded-xl border">
@@ -86,48 +147,26 @@ export function StockTable({ slug, filas, categorias }: { slug: string; filas: S
               <tr key={f.id} className={sucio ? "bg-primary/5" : "transition-colors hover:bg-muted/30"}>
                 <td className="px-3 py-2 font-mono text-xs font-semibold">{f.sku ?? "—"}</td>
                 <td className="px-3 py-2 min-w-[280px]">
-                  <input
-                    value={String(valor(f, "nombre") ?? "")}
-                    onChange={(e) => editar(f.id, "nombre", e.target.value)}
-                    className={txt}
-                  />
+                  <Celda f={f} campo="nombre" />
                 </td>
                 <td className="px-3 py-2">
-                  <input
-                    value={String(valor(f, "marca") ?? "")}
-                    onChange={(e) => editar(f.id, "marca", e.target.value)}
-                    className="w-28 rounded-md border bg-card px-2 py-1 text-sm"
-                  />
+                  <Celda f={f} campo="marca" ancho="w-28" />
                 </td>
                 <td className="px-3 py-2">
-                  <select
-                    value={String(valor(f, "categoria") ?? "")}
-                    onChange={(e) => editar(f.id, "categoria", e.target.value)}
-                    className="w-32 rounded-md border bg-card px-2 py-1 text-sm"
-                  >
-                    {[...new Set([f.categoria, ...categorias])].map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <Celda f={f} campo="categoria" tipo="select" ancho="w-32" />
                 </td>
                 <td className="px-3 py-2 text-right">
-                  <input
-                    type="number"
-                    min={0}
-                    value={Number(valor(f, "stock") ?? 0)}
-                    onChange={(e) => editar(f.id, "stock", Number(e.target.value))}
-                    className={`${num} w-16 ${Number(valor(f, "stock")) <= 2 ? "text-destructive" : ""}`}
-                  />
+                  <span className={Number(valor(f, "stock")) <= 2 ? "text-destructive" : ""}>
+                    <Celda f={f} campo="stock" tipo="numero" ancho="w-16" />
+                  </span>
                 </td>
                 {(["precioSeguro", "precio", "precioSinMO"] as const).map((campo) => (
                   <td key={campo} className="px-3 py-2 text-right">
-                    <input
-                      type="number"
-                      min={0}
-                      placeholder="—"
-                      value={(valor(f, campo) as number | null) ?? ""}
-                      onChange={(e) => editar(f.id, campo, e.target.value === "" ? null : Number(e.target.value))}
-                      className={num}
+                    <Celda
+                      f={f}
+                      campo={campo}
+                      tipo="numero"
+                      render={(v) => (v ? `$ ${Number(v).toLocaleString("es-AR")}` : <span className="text-muted-foreground">—</span>)}
                     />
                   </td>
                 ))}

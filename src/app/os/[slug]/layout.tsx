@@ -215,7 +215,8 @@ export default async function OsLayout({
     opsItems.unshift(
       { label: "Pedidos", href: `${base}/pedidos`, icon: "🧾" },
       { label: "Repuestos & Stock", href: `${base}/productos`, icon: "🔩" },
-      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" }
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
+      { label: "Clientes", href: `${base}/clientes`, icon: "📇" }
     );
   }
   // Template concesionaria (Ri Cars): sus módulos propios primero en Operaciones.
@@ -238,11 +239,11 @@ export default async function OsLayout({
       0,
       opsItems.length,
       { label: "Stock", href: `${base}/productos`, icon: "🪟" },
-      { label: "Importar PDF", href: `${base}/importar-stock`, icon: "📄" },
       { label: "Órdenes", href: `${base}/ordenes`, icon: "🧾" },
       { label: "Taller", href: `${base}/colocaciones`, icon: "🔧" },
       { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
-      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" }
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
+      { label: "Clientes", href: `${base}/clientes`, icon: "📇" }
     );
   }
   // Template dooh (circuito de pantallas LED): la carpeta de clientes va
@@ -265,10 +266,10 @@ export default async function OsLayout({
       : tpl === "vidrios"
         ? []
         : [{ label: "Para hoy", href: `${base}/hoy`, icon: "☀️" }]),
-    ...(crm ? [{ label: tpl === "vidrios" ? "Clientes" : "CRM", href: `${base}/crm`, icon: "📇" }] : []),
-    { label: "Operaciones", icon: "🛠️", items: opsItems },
-    // Vidrios: Tareas y Finanzas viven afuera de Operaciones, a un click.
+    // Vidrios: Tareas pegada al Dashboard; Clientes vive dentro de Operaciones.
     ...(tpl === "vidrios" ? [{ label: "Tareas", href: `${base}/tareas`, icon: "🗂️" }] : []),
+    ...(crm && tpl !== "vidrios" ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
+    { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(tpl === "vidrios" && owner ? [{ label: "Finanzas", href: `${base}/caja`, icon: "💵" }] : []),
     ...(tpl === "repuestos"
       ? [
