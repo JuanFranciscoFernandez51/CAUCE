@@ -261,9 +261,12 @@ export default async function OsLayout({
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [
     { label: "Dashboard", href: base, icon: "🏁", exact: true },
-    tpl === "eventos"
-      ? { label: "Calendario", href: `${base}/calendario`, icon: "" }
-      : { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
+    // Vidrios no usa "Para hoy": sus pendientes viven en Tareas.
+    ...(tpl === "eventos"
+      ? [{ label: "Calendario", href: `${base}/calendario`, icon: "" }]
+      : tpl === "vidrios"
+        ? []
+        : [{ label: "Para hoy", href: `${base}/hoy`, icon: "☀️" }]),
     ...(crm ? [{ label: tpl === "vidrios" ? "Clientes" : "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(tpl === "repuestos"
