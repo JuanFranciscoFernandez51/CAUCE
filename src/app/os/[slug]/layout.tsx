@@ -231,6 +231,22 @@ export default async function OsLayout({
       { label: "Publicar", href: `${base}/publicar`, icon: "📣" }
     );
   }
+  // Template vidrios (Código Auto): parabrisas — stock de depósito, órdenes de
+  // pedido con boleto imprimible y la bandeja de facturación ARCA.
+  if (tpl === "vidrios") {
+    opsItems.splice(
+      0,
+      opsItems.length,
+      { label: "Stock", href: `${base}/productos`, icon: "🪟" },
+      { label: "Órdenes", href: `${base}/ordenes`, icon: "🧾" },
+      { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
+      { label: "Turnos", href: `${base}/turnos`, icon: "📅" },
+      { label: "Taller", href: `${base}/taller`, icon: "🔧" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
+      { label: "Tareas", href: `${base}/tareas`, icon: "🗂️" },
+      ...(owner ? [{ label: "Finanzas", href: `${base}/caja`, icon: "💵" }] : [])
+    );
+  }
   // Template dooh (circuito de pantallas LED): la carpeta de clientes va
   // pegada a Pantallas, que es su módulo principal.
   if (tpl === "dooh") {
@@ -240,7 +256,7 @@ export default async function OsLayout({
       { label: "Clientes", href: `${base}/clientes`, icon: "🧑" }
     );
   }
-  if (tpl !== "eventos" && tpl !== "comida") opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
+  if (tpl !== "eventos" && tpl !== "comida" && tpl !== "vidrios") opsItems.push({ label: "Procesos", href: `${base}/procesos`, icon: "⚡" });
 
   // Navegación reagrupada: Dashboard · CRM · Operaciones · Config · Usuarios · Asistente IA.
   const nav: NavEntry[] = [
@@ -248,7 +264,7 @@ export default async function OsLayout({
     tpl === "eventos"
       ? { label: "Calendario", href: `${base}/calendario`, icon: "" }
       : { label: "Para hoy", href: `${base}/hoy`, icon: "☀️" },
-    ...(crm ? [{ label: "CRM", href: `${base}/crm`, icon: "📇" }] : []),
+    ...(crm ? [{ label: tpl === "vidrios" ? "Clientes" : "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
     ...(tpl === "repuestos"
       ? [

@@ -15,6 +15,7 @@ import { APPT_STATUS } from "./_lib/labels";
 import { BazarDashboard } from "./_components/bazar/dashboard";
 import { ConceDashboard } from "./_components/conce/dashboard";
 import { JessDashboard } from "./_components/eventos/jess-dashboard";
+import { VidriosDashboard } from "./_components/vidrios/dashboard";
 
 export default async function OsHomePage({
   params,
@@ -32,6 +33,10 @@ export default async function OsHomePage({
   }
   if (tpl === "bazar" || tpl === "repuestos" || tpl === "comida") {
     return <BazarDashboard tenant={tenant} />;
+  }
+  // Template vidrios (Código Auto): órdenes por colocar, turnos, stock bajo y facturación.
+  if (tpl === "vidrios") {
+    return <VidriosDashboard tenant={tenant} />;
   }
 
   // Template concesionaria: dashboard propio con ventas, stock y consultas.

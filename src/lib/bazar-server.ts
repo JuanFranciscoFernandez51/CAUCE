@@ -13,8 +13,10 @@ import { ESTADOS_PAGOS, itemsDe, type PedidoEstado } from "@/lib/bazar";
 
 // ── Tenant ────────────────────────────────────────────────────────────────
 
-/** Templates que usan la tienda del bazar (catálogo, carrito, checkout, pedidos). */
-const CON_TIENDA = ["bazar", "repuestos", "comida"];
+/** Templates que usan la tienda del bazar (catálogo, carrito, checkout, pedidos).
+ * "vidrios" (Código Auto) entra solo por el admin de productos: usa el stock
+ * con edición inline como depósito de parabrisas y repuestos, sin tienda pública. */
+const CON_TIENDA = ["bazar", "repuestos", "comida", "vidrios"];
 
 export function esBazar(tenant: Client): boolean {
   const tpl = (tenant.settings as { template?: string } | null)?.template;
