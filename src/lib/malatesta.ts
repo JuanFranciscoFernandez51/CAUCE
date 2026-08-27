@@ -88,7 +88,14 @@ export function parsearPedidoMalatesta(texto: string): FilaPedido[] {
   }
 
   return filas.map((f) => {
-    const descripcion = f.descripcion.replace(/\s*-\s*$/, "").replace(/\s+/g, " ").trim();
+    // El PDF mete el nombre del cliente y el texto legal del pie dentro del
+    // renglón: cortamos ahí para que la descripción quede limpia.
+    const descripcion = f.descripcion
+      .split(/\s*-\s*\d{4,}\s+[A-ZÑÁÉÍÓÚ]+\s+[A-ZÑÁÉÍÓÚ]/)[0]
+      .split(/Queremos recordarles|se compromete a|Pagina|FECHA|CLIENTE:/i)[0]
+      .replace(/\s*-\s*$/, "")
+      .replace(/\s+/g, " ")
+      .trim();
     return {
       cant: f.cant,
       codigo: f.codigo,
