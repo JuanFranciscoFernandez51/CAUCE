@@ -1,8 +1,11 @@
+"use client";
+
+import { useId } from "react";
+
 /**
- * Logotipo de Código Auto: la palabra en condensada itálica con las rayas
- * horizontales en la mitad de arriba, como el cartel del local. Es
- * tipográfico y vectorial, así que no tiene fondo y sirve en cualquier
- * tamaño: web, boleto impreso y panel.
+ * Logotipo de Código Auto en SVG: la palabra en condensada itálica con las
+ * rayas horizontales en la mitad de arriba, como el cartel del local.
+ * Vectorial y sin fondo: sirve igual en web, en el boleto impreso y en el panel.
  */
 export function LogoCodigoAuto({
   alto = 44,
@@ -15,34 +18,59 @@ export function LogoCodigoAuto({
   /** Muestra la bajada "Parabrisas · Autopartes · Venta y colocación". */
   bajada?: boolean;
 }) {
-  // Dos capas recortadas contra el texto: abajo el color macizo, arriba las
-  // rayas. El grosor de la raya acompaña el tamaño del logo.
-  const paso = Math.max(3, Math.round(alto * 0.1));
-  const linea = Math.max(1.5, paso * 0.42);
-  const relleno = [
-    `linear-gradient(180deg, transparent 0 45%, ${color} 45% 100%)`,
-    `repeating-linear-gradient(180deg, ${color} 0 ${linea}px, transparent ${linea}px ${paso}px)`,
-  ].join(", ");
+  const uid = useId().replace(/:/g, "");
+  // Caja del wordmark en unidades del viewBox (la tipografía se ajusta sola).
+  const W = 1000;
+  const H = 190;
+  const corte = H * 0.47; // dónde terminan las rayas y arranca el macizo
+  const fuente = {
+    fontFamily: "var(--font-archivo), 'Archivo', 'Arial Narrow', system-ui, sans-serif",
+    fontSize: 165,
+    fontWeight: 900,
+    fontStyle: "italic" as const,
+    fontStretch: "62.5%",
+    letterSpacing: "-2",
+  };
 
   return (
     <span className="inline-flex flex-col" style={{ lineHeight: 1 }}>
-      <span
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ height: alto, width: "auto", display: "block" }}
+        role="img"
         aria-label="Código Auto"
-        className="select-none font-black uppercase italic"
-        style={{
-          fontFamily: "var(--font-archivo)",
-          fontStretch: "62.5%",
-          fontSize: alto,
-          letterSpacing: "-0.02em",
-          backgroundImage: relleno,
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-          WebkitTextFillColor: "transparent",
-        }}
       >
-        Codigo Auto
-      </span>
+        <defs>
+          {/* Las rayas del cartel */}
+          <pattern id={`rayas-${uid}`} width="10" height="15" patternUnits="userSpaceOnUse">
+            <rect width="10" height="7" fill={color} />
+          </pattern>
+          <clipPath id={`arriba-${uid}`}>
+            <rect x="0" y="0" width={W} height={corte} />
+          </clipPath>
+          <clipPath id={`abajo-${uid}`}>
+            <rect x="0" y={corte} width={W} height={H - corte} />
+          </clipPath>
+        </defs>
+
+        {/* Mitad de abajo: macizo */}
+        <text x="0" y="150" textLength={W} lengthAdjust="spacingAndGlyphs" fill={color} clipPath={`url(#abajo-${uid})`} style={fuente}>
+          CODIGO AUTO
+        </text>
+        {/* Mitad de arriba: rayada */}
+        <text
+          x="0"
+          y="150"
+          textLength={W}
+          lengthAdjust="spacingAndGlyphs"
+          fill={`url(#rayas-${uid})`}
+          clipPath={`url(#arriba-${uid})`}
+          style={fuente}
+        >
+          CODIGO AUTO
+        </text>
+      </svg>
+
       {bajada ? (
         <span
           className="mt-1 font-semibold uppercase"

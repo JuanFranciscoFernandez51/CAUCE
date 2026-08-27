@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug, tenantBranding } from "@/lib/tenant";
+import { LogoCodigoAuto } from "@/app/sitio/[slug]/_components/vidrios/logo-codigoauto";
 import { esVidrios, ordenDatos, ordenItems, totalOrden, vehiculoLinea } from "@/lib/vidrios";
 import { BotonesImprimir } from "./botones";
 
@@ -56,20 +57,7 @@ export default async function ImprimirOrdenPage({
         <div className="flex items-center justify-between gap-6" style={{ backgroundColor: VERDE, color: "#ffffff", padding: "10mm 16mm" }}>
           <div className="flex items-center gap-4">
             <div>
-              <p
-                style={{
-                  fontSize: 34,
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  fontFamily: "var(--font-archivo)",
-                  fontStretch: "62.5%",
-                  fontStyle: "italic",
-                  textTransform: "uppercase",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {branding.displayName}
-              </p>
+              <LogoCodigoAuto alto={40} bajada={false} />
               <p style={{ fontSize: 11, opacity: 0.9, marginTop: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 {st.rubro ?? "Venta y colocación de parabrisas"}
               </p>
