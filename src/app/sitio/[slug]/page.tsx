@@ -15,6 +15,7 @@ import { BazarHome } from "./_components/bazar/bazar-home";
 import { RepuestosHome } from "./_components/repuestos/repuestos-home";
 import { ComidaHome } from "./_components/comida/comida-home";
 import { PiletasHome } from "./_components/piletas/piletas-home";
+import { VidriosHome } from "./_components/vidrios/vidrios-home";
 import { JessHome } from "./_components/eventos/jess-home";
 import { getConceSite } from "./_lib/conce-site";
 import { ConceHome } from "./_components/conce/conce-home";
@@ -80,6 +81,11 @@ export default async function SitioHome({
 
   if (tpl === "piletas") {
     return <PiletasHome tenant={tenant} />;
+  }
+
+  // Template VIDRIOS (Código Auto): parabrisas — landing verde con la mascota.
+  if (tpl === "vidrios") {
+    return <VidriosHome tenant={tenant} />;
   }
 
   if (tpl === "comida") {
