@@ -13,9 +13,10 @@ export type OrdenRow = {
   vehiculo: string;
   total: number;
   senia: number;
-  estado: string; // PENDIENTE | COLOCADO
+  estado: string; // PENDIENTE | CONFIRMADA | COLOCADO
   facturacion: OrdenFacturacion;
   fecha: string;
+  fechaColocacion: string | null;
 };
 
 const FACT_TONO: Record<OrdenFacturacion, string> = {
@@ -33,17 +34,35 @@ const FACT_LABEL: Record<OrdenFacturacion, string> = {
 export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRow[] }) {
   const router = useRouter();
   const [ocupada, setOcupada] = useState<string | null>(null);
+  const [confirmando, setConfirmando] = useState<string | null>(null);
+  const [fecha, setFecha] = useState("");
   const plata = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
+  const manana = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
-  async function toggleEstado(o: OrdenRow) {
-    setOcupada(o.id);
-    await fetch(`/api/os/${slug}/ordenes/${o.id}`, {
+  async function patch(id: string, body: Record<string, unknown>) {
+    setOcupada(id);
+    await fetch(`/api/os/${slug}/ordenes/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado: o.estado === "PENDIENTE" ? "COLOCADO" : "PENDIENTE" }),
+      body: JSON.stringify(body),
     });
     setOcupada(null);
     router.refresh();
+  }
+
+  // Ciclo del estado: pendiente → (confirmar con fecha) → en taller → colocado → pendiente.
+  async function clickEstado(o: OrdenRow) {
+    if (o.estado === "PENDIENTE") {
+      setFecha(manana());
+      setConfirmando(o.id);
+      return;
+    }
+    await patch(o.id, { estado: o.estado === "CONFIRMADA" ? "COLOCADO" : "PENDIENTE" });
+  }
+
+  async function confirmarATaller(o: OrdenRow) {
+    setConfirmando(null);
+    await patch(o.id, { estado: "CONFIRMADA", fechaColocacion: fecha || manana() });
   }
 
   return (
@@ -79,16 +98,42 @@ export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRo
                 {o.senia > 0 ? plata(o.senia) : "—"}
               </td>
               <td className="px-3 py-2.5">
-                <button
-                  onClick={() => toggleEstado(o)}
-                  disabled={ocupada === o.id}
-                  title="Click para cambiar el estado"
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition hover:opacity-80 disabled:opacity-50 ${
-                    o.estado === "COLOCADO" ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
-                  }`}
-                >
-                  {o.estado === "COLOCADO" ? "✓ Colocado" : "⏳ Pendiente"}
-                </button>
+                {confirmando === o.id ? (
+                  <span className="flex items-center gap-1.5">
+                    <input
+                      type="date"
+                      value={fecha}
+                      onChange={(e) => setFecha(e.target.value)}
+                      className="h-7 rounded-md border bg-card px-1.5 text-xs"
+                    />
+                    <button
+                      onClick={() => confirmarATaller(o)}
+                      className="rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground transition hover:opacity-90"
+                    >
+                      → Taller
+                    </button>
+                    <button onClick={() => setConfirmando(null)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => clickEstado(o)}
+                    disabled={ocupada === o.id}
+                    title={o.estado === "PENDIENTE" ? "Confirmar y mandar al taller" : "Click para cambiar el estado"}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition hover:opacity-80 disabled:opacity-50 ${
+                      o.estado === "COLOCADO"
+                        ? "bg-success/15 text-success"
+                        : o.estado === "CONFIRMADA"
+                          ? "bg-primary/15 text-primary"
+                          : "bg-warning/15 text-warning"
+                    }`}
+                  >
+                    {o.estado === "COLOCADO"
+                      ? "✓ Colocado"
+                      : o.estado === "CONFIRMADA"
+                        ? `🔧 En taller${o.fechaColocacion ? ` · ${o.fechaColocacion.split("-").reverse().slice(0, 2).join("/")}` : ""}`
+                        : "⏳ Confirmar → Taller"}
+                  </button>
+                )}
               </td>
               <td className="px-3 py-2.5">
                 <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${FACT_TONO[o.facturacion]}`}>

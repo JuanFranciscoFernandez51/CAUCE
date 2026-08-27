@@ -3,7 +3,7 @@ import type { Client, PresupuestoDoc } from "@prisma/client";
 /**
  * Lado server del template VIDRIOS (Código Auto): venta y colocación de
  * parabrisas. Las órdenes de pedido REUSAN PresupuestoDoc:
- *   - estado          → estado del trabajo: "PENDIENTE" | "COLOCADO"
+ *   - estado          → estado del trabajo: "PENDIENTE" | "CONFIRMADA" (en taller) | "COLOCADO"
  *   - datos (Json)    → { tipo:"orden", vehiculo, senia, facturacion }
  *   - items (Json)    → [{ codigo?, detalle, cant, unitario }]
  * Sin migraciones: todo lo específico del rubro viaja en los Json.
@@ -22,6 +22,8 @@ export type OrdenDatos = {
   vehiculo?: { marca?: string; modelo?: string; patente?: string };
   senia: number;
   facturacion: OrdenFacturacion;
+  /** Fecha de colocación acordada (YYYY-MM-DD) cuando la orden se confirma al taller. */
+  fechaColocacion?: string;
 };
 
 /** Lee los datos de la orden con defaults seguros (datos viejos o vacíos no rompen). */
@@ -32,6 +34,7 @@ export function ordenDatos(p: Pick<PresupuestoDoc, "datos">): OrdenDatos {
     vehiculo: d.vehiculo ?? {},
     senia: typeof d.senia === "number" ? d.senia : 0,
     facturacion: d.facturacion === "a_facturar" || d.facturacion === "facturada" ? d.facturacion : "sin_facturar",
+    fechaColocacion: typeof d.fechaColocacion === "string" ? d.fechaColocacion : undefined,
   };
 }
 

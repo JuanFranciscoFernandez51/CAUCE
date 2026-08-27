@@ -6,7 +6,8 @@ import { guardOsApi } from "../../_guard";
 
 /** Cambios de estado de una orden: trabajo (pendiente→colocado) y facturación. */
 const schema = z.object({
-  estado: z.enum(["PENDIENTE", "COLOCADO"]).optional(),
+  estado: z.enum(["PENDIENTE", "CONFIRMADA", "COLOCADO"]).optional(),
+  fechaColocacion: z.string().nullable().optional(),
   facturacion: z.enum(["sin_facturar", "a_facturar", "facturada"]).optional(),
 });
 
@@ -28,7 +29,15 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string;
     where: { id: orden.id },
     data: {
       ...(d.estado ? { estado: d.estado } : {}),
-      ...(d.facturacion ? { datos: { ...datos, facturacion: d.facturacion } } : {}),
+      ...(d.facturacion || d.fechaColocacion !== undefined
+        ? {
+            datos: {
+              ...datos,
+              ...(d.facturacion ? { facturacion: d.facturacion } : {}),
+              ...(d.fechaColocacion !== undefined ? { fechaColocacion: d.fechaColocacion ?? undefined } : {}),
+            },
+          }
+        : {}),
     },
   });
   return NextResponse.json({ ok: true });

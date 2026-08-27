@@ -241,7 +241,7 @@ export default async function OsLayout({
       { label: "Órdenes", href: `${base}/ordenes`, icon: "🧾" },
       { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
       { label: "Turnos", href: `${base}/turnos`, icon: "📅" },
-      { label: "Taller", href: `${base}/taller`, icon: "🔧" },
+      { label: "Taller", href: `${base}/colocaciones`, icon: "🔧" },
       { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
       { label: "Tareas", href: `${base}/tareas`, icon: "🗂️" },
       ...(owner ? [{ label: "Finanzas", href: `${base}/caja`, icon: "💵" }] : [])
