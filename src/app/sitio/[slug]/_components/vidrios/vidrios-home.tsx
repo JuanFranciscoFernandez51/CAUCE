@@ -1,381 +1,391 @@
 import type { Client } from "@prisma/client";
-import { tenantBranding } from "@/lib/tenant";
-import { Reveal } from "../conce/reveal";
 import { VidriosConsulta } from "./vidrios-consulta";
 
 /**
- * Landing de Código Auto (template VIDRIOS): hero verde con la mascota,
- * cinta de promesas, servicios, cómo trabajamos, ubicación y consulta al CRM.
- * WhatsApp e Instagram aparecen SOLO si están cargados (tenant.whatsapp /
- * settings.instagram) — Fran los pasa después y salen solos.
- * Perfil comercial (skill estética): movimiento que se siente, no se ve.
+ * Web de Código Auto (Bariloche) — parabrisas, autopartes y colocación.
+ * Diseño aprobado por el cliente: verde #009B57 + negro, titulares
+ * condensados en itálica y foto real donde hay, placeholder donde falta.
  */
-const VERDE = "#008000";
-const VERDE_OSCURO = "#005c00";
-const TINTA = "#0c1f0c";
-const FONDO = "#f4faf4";
-const LINEA = "#cfe3cf";
+const VERDE = "#0DA25E";
+const NEGRO = "#141414";
+const HUESO = "#F1F2ED";
 
-const PROMESAS = [
-  "Parabrisas de todas las marcas",
-  "Colocación profesional",
-  "Trabajamos con todos los seguros",
-  "Repuestos y accesorios",
-  "Atención en el día",
-];
+type Foto = { hero?: string; taller?: string; local?: string[]; siniestros?: string };
+
+/** Titular condensado en itálica, la voz de la marca. */
+function Titulo({ children, className = "", tono = NEGRO }: { children: React.ReactNode; className?: string; tono?: string }) {
+  return (
+    <h2
+      className={`font-black uppercase leading-[0.92] ${className}`}
+      style={{
+        fontFamily: "var(--font-archivo)",
+        fontStretch: "75%",
+        fontStyle: "italic",
+        letterSpacing: "-0.01em",
+        color: tono,
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+/** Hueco de foto: si el cliente todavía no la mandó, queda el recuadro. */
+function Hueco({ alto = "h-[420px]", texto, foto }: { alto?: string; texto: string; foto?: string }) {
+  if (foto) {
+    return (
+      <div className={`${alto} overflow-hidden`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={foto} alt={texto} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+      </div>
+    );
+  }
+  return (
+    <div
+      className={`${alto} flex flex-col items-center justify-center gap-2 border-2 border-dashed text-center`}
+      style={{ borderColor: "rgba(20,20,20,.22)", backgroundColor: "rgba(20,20,20,.04)" }}
+    >
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(20,20,20,.45)" strokeWidth="1.6">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="m21 15-5-5L5 21" />
+      </svg>
+      <p className="text-sm" style={{ color: "rgba(20,20,20,.6)" }}>{texto}</p>
+    </div>
+  );
+}
 
 const SERVICIOS = [
-  {
-    icono: "🪟",
-    titulo: "Venta de parabrisas",
-    texto: "Vidrios para todas las marcas y modelos. Si no está en depósito, lo pedimos y llega en días.",
-  },
-  {
-    icono: "🔧",
-    titulo: "Colocación profesional",
-    texto: "Taller propio con equipo fijo. Sellado garantizado y el auto listo en el día.",
-  },
-  {
-    icono: "🛡️",
-    titulo: "Gestión con seguros",
-    texto: "¿Lo cubre el seguro? Cotizamos y hacemos la gestión con tu compañía para que no des vueltas.",
-  },
-  {
-    icono: "🔩",
-    titulo: "Repuestos",
-    texto: "Burletes, molduras, levantavidrios y accesorios. Consultanos por tu modelo.",
-  },
+  { t: "Parabrisas", d: "Cambio completo con kit de pegado y sellado. Modelos con sensor de lluvia, cámara y banda degradé." },
+  { t: "Lunetas y laterales", d: "Vidrios templados, ventiletes y lunetas con desempañador. Limpieza completa del habitáculo." },
+  { t: "Autopartes", d: "Burletes, molduras, espejos, escobillas y accesorios. Venta al público y a talleres." },
+  { t: "Reparación de picaduras", d: "Si el impacto es chico y no llegó al borde, se repara sin cambiar el cristal. Una fisura, no." },
+  { t: "Colocación", d: "Colocamos lo que vendemos y también el cristal que traiga el cliente o la aseguradora." },
 ];
 
-const PASOS = [
-  {
-    titulo: "Contanos qué se rompió",
-    texto: "Escribinos con la marca y modelo del auto. Si es por seguro, avisanos con qué compañía.",
-  },
-  {
-    titulo: "Te cotizamos en el día",
-    texto: "Confirmamos el vidrio, el precio y coordinamos el turno de colocación.",
-  },
-  {
-    titulo: "Lo colocamos y listo",
-    texto: "Dejás el auto en 9 de Julio 578 y te lo llevás con el vidrio colocado y sellado.",
-  },
+const PASOS_SEGURO = [
+  "Hacés la denuncia en tu aseguradora y pedís que el trabajo lo haga Código Auto.",
+  "Nos pasás el número de siniestro y los datos del auto por WhatsApp.",
+  "Conseguimos el cristal y te damos turno. La colocación lleva unas horas.",
 ];
 
-/** El PNG del logo vino con fondo blanco: Cloudinary lo vuelve transparente al vuelo. */
-const sinFondo = (url: string) =>
-  url.includes("res.cloudinary.com") ? url.replace("/upload/", "/upload/e_make_transparent:12/") : url;
-
-const DIRECCION = "9 de Julio 578, Bahía Blanca";
-const MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Código Auto " + DIRECCION)}`;
+const DATOS = [
+  { n: "25 años", d: "En el rubro en Bariloche" },
+  { n: "En el día", d: "Si la pieza está en stock" },
+  { n: "Garantía", d: "Escrita sobre la colocación" },
+  { n: "Todas", d: "Las marcas y modelos" },
+];
 
 export function VidriosHome({ tenant }: { tenant: Client }) {
-  const branding = tenantBranding(tenant);
-  const st = (tenant.settings ?? {}) as { instagram?: string; horarios?: string; direccion?: string };
-  const wa = (tenant.whatsapp ?? "").replace(/\D/g, "");
-  const waLink = wa ? `https://wa.me/${wa}` : "";
-  const ig = (st.instagram ?? "").replace(/^@/, "");
-  const direccion = st.direccion ?? DIRECCION;
+  const st = (tenant.settings ?? {}) as {
+    direccion?: string;
+    ciudad?: string;
+    provincia?: string;
+    telefono?: string;
+    instagram?: string;
+    fotos?: Foto;
+  };
+  const fotos = st.fotos ?? {};
+  const wa = tenant.whatsapp?.replace(/\D/g, "") || null;
+  const tel = st.telefono ?? "2944 632884";
+  const waLink = wa
+    ? `https://wa.me/54${wa.replace(/^0/, "")}?text=${encodeURIComponent("Hola! Necesito un presupuesto. Mi auto es marca, modelo y año:")}`
+    : null;
+  const maps = "https://maps.google.com/?q=9+de+Julio+578+San+Carlos+de+Bariloche";
+
+  const btn = "inline-flex items-center justify-center px-8 py-4 text-[15px] font-black uppercase italic transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] motion-reduce:transform-none";
+  const btnStyle = { fontFamily: "var(--font-archivo)", fontStretch: "75%" } as React.CSSProperties;
 
   return (
-    <div style={{ backgroundColor: FONDO, color: TINTA }}>
-      {/* Header sticky que reacciona */}
-      <header
-        className="sticky top-0 z-40 border-b backdrop-blur"
-        style={{ backgroundColor: "rgba(244,250,244,0.9)", borderColor: LINEA }}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <a href="#top" className="flex items-center gap-2.5" aria-label={branding.displayName}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={sinFondo(branding.logo)} alt="" className="h-9 w-9 object-contain" />
-            <span className="text-lg font-extrabold tracking-tight">
-              Código <span style={{ color: VERDE }}>Auto</span>
-            </span>
+    <div style={{ backgroundColor: HUESO, color: NEGRO, fontFamily: "var(--font-jost)" }}>
+      {/* ── Header verde ── */}
+      <header className="sticky top-0 z-40" style={{ backgroundColor: VERDE }}>
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-3">
+          <a href="#top" className="shrink-0">
+            {(tenant.branding as { logo?: string } | null)?.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={((tenant.branding as { logo?: string }).logo ?? "").replace("/upload/", "/upload/e_make_transparent:12/")}
+                alt="Código Auto"
+                className="h-11 w-auto"
+              />
+            ) : (
+              <span className="text-2xl font-black uppercase italic text-white" style={btnStyle}>Código Auto</span>
+            )}
           </a>
-          <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <a href="#servicios" className="vid-link">Servicios</a>
-            <a href="#pasos" className="vid-link">Cómo trabajamos</a>
-            <a href="#ubicacion" className="vid-link">Ubicación</a>
+          <nav className="hidden items-center gap-8 text-[15px] font-medium text-white md:flex">
+            <a href="#servicios" className="transition hover:opacity-75">Servicios</a>
+            <a href="#seguros" className="transition hover:opacity-75">Seguros</a>
+            <a href="#taller" className="transition hover:opacity-75">El taller</a>
           </nav>
           <a
-            href={waLink || "#contacto"}
-            {...(waLink ? { target: "_blank", rel: "noreferrer" } : {})}
-            className="rounded-lg px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90 active:scale-[0.98]"
-            style={{ backgroundColor: VERDE }}
+            href={`tel:${tel.replace(/\s/g, "")}`}
+            className="px-5 py-3 text-[15px] font-black italic text-white transition hover:opacity-90"
+            style={{ ...btnStyle, backgroundColor: "rgba(0,0,0,.78)" }}
           >
-            {waLink ? "WhatsApp" : "Cotizar"}
+            {tel}
           </a>
         </div>
       </header>
 
-      {/* Hero verde con la mascota */}
-      <section id="top" className="relative overflow-hidden" style={{ backgroundColor: VERDE, color: "#fff" }}>
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(52% 70% at 78% 30%, rgba(255,255,255,0.22) 0%, transparent 70%), radial-gradient(40% 55% at 15% 85%, rgba(0,0,0,0.25) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-16 sm:px-6 sm:py-20 md:grid-cols-[1.2fr_1fr] md:py-24">
-          <Reveal>
-            <div>
-              <p className="text-[12px] font-bold uppercase" style={{ letterSpacing: "0.28em", color: "#d6f5d6" }}>
-                Bahía Blanca · {direccion.split(",")[0]}
-              </p>
-              <h1 className="mt-5 text-5xl font-extrabold leading-[0.95] tracking-tight md:text-7xl">
-                Tu parabrisas,
-                <br />
-                resuelto <em className="not-italic" style={{ color: "#b8ffb8" }}>en el día</em>.
-              </h1>
-              <p className="mt-6 max-w-md text-lg" style={{ color: "rgba(255,255,255,0.85)" }}>
-                Venta y colocación de parabrisas para todas las marcas. Gestionamos con tu seguro y
-                te entregamos el auto listo.
-              </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <a
-                  href="#contacto"
-                  className="rounded-lg px-7 py-4 text-[15px] font-bold transition hover:opacity-90 active:scale-[0.98]"
-                  style={{ backgroundColor: "#fff", color: VERDE_OSCURO }}
-                >
-                  Pedí tu cotización
-                </a>
-                <a
-                  href="#servicios"
-                  className="rounded-lg border px-7 py-4 text-[15px] font-semibold transition hover:bg-white/10"
-                  style={{ borderColor: "rgba(255,255,255,0.5)" }}
-                >
-                  Ver servicios
-                </a>
-              </div>
-            </div>
-          </Reveal>
-          <Reveal delay={150} className="justify-self-center">
+      {/* ── Hero negro ── */}
+      <section id="top" className="relative overflow-hidden" style={{ backgroundColor: NEGRO }}>
+        {fotos.hero ? (
+          <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={sinFondo(branding.logo)}
-              alt={`Mascota de ${branding.displayName}`}
-              className="vid-flota w-56 drop-shadow-2xl sm:w-72 md:w-80"
-            />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Cinta marquee de promesas */}
-      <div className="overflow-hidden border-b py-3.5" style={{ backgroundColor: TINTA, color: "#d6f5d6", borderColor: TINTA }}>
-        <div className="vid-marquee flex w-max items-center gap-10 pr-10 text-[13px] font-semibold uppercase" style={{ letterSpacing: "0.14em" }}>
-          {[...PROMESAS, ...PROMESAS].map((t, i) => (
-            <span key={i} className="flex items-center gap-10">
-              {t} <span aria-hidden style={{ color: VERDE }}>✦</span>
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Servicios */}
-      <section id="servicios" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20">
-        <Reveal>
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Qué hacemos</h2>
-          <p className="mt-2 max-w-xl text-[15px]" style={{ color: "#3c553c" }}>
-            Cuatro sectores trabajando para que el vidrio esté cuando lo necesitás.
+            <img src={fotos.hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(20,20,20,.94) 40%, rgba(20,20,20,.55) 100%)" }} />
+          </>
+        ) : null}
+        <div className="relative mx-auto max-w-[1280px] px-6 py-16 sm:py-24">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.28em]" style={{ color: VERDE }}>
+            Bariloche · Desde hace 25 años
           </p>
-        </Reveal>
-        <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {SERVICIOS.map((s, i) => (
-            <Reveal key={s.titulo} delay={i * 90}>
-              <div
-                className="group h-full rounded-2xl border bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                style={{ borderColor: LINEA }}
-              >
-                <span
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl transition-transform duration-300 group-hover:scale-110"
-                  style={{ backgroundColor: FONDO }}
-                  aria-hidden
-                >
-                  {s.icono}
-                </span>
-                <h3 className="mt-4 text-lg font-bold">{s.titulo}</h3>
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: "#3c553c" }}>
-                  {s.texto}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Cómo trabajamos: banda oscura, 3 pasos */}
-      <section id="pasos" className="scroll-mt-20" style={{ backgroundColor: TINTA, color: "#fff" }}>
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <Reveal>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Cómo trabajamos<span style={{ color: "#b8ffb8" }}>.</span>
-            </h2>
-          </Reveal>
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            {PASOS.map((p, i) => (
-              <Reveal key={p.titulo} delay={i * 110}>
-                <div className="border-t pt-5" style={{ borderColor: "rgba(255,255,255,0.18)" }}>
-                  <span className="text-4xl font-extrabold" style={{ color: VERDE }}>
-                    0{i + 1}
-                  </span>
-                  <h3 className="mt-3 text-lg font-bold">{p.titulo}</h3>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
-                    {p.texto}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
+          <Titulo className="mt-5 max-w-[900px] text-[42px] sm:text-[76px]" tono="#ffffff">
+            Te rompieron el parabrisas.<br className="hidden sm:block" /> Nosotros lo resolvemos.
+          </Titulo>
+          <p className="mt-7 max-w-[520px] text-[17px] leading-[1.6]" style={{ color: "rgba(255,255,255,.78)" }}>
+            Parabrisas, lunetas, vidrios laterales y autopartes para todas las marcas. Conseguimos el cristal, lo
+            colocamos y gestionamos el trámite con tu seguro.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-4">
+            {waLink ? (
+              <a href={waLink} target="_blank" rel="noreferrer" className={btn} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
+                Pedir presupuesto
+              </a>
+            ) : (
+              <a href="#contacto" className={btn} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
+                Pedir presupuesto
+              </a>
+            )}
+            <a
+              href={`tel:${tel.replace(/\s/g, "")}`}
+              className={btn}
+              style={{ ...btnStyle, border: "2px solid rgba(255,255,255,.55)", color: "#fff" }}
+            >
+              Llamar al {tel}
+            </a>
           </div>
         </div>
-      </section>
 
-      {/* Ubicación */}
-      <section id="ubicacion" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
-        <div className="grid gap-8 md:grid-cols-2">
-          <Reveal>
-            <div className="h-full rounded-2xl border bg-white p-7" style={{ borderColor: LINEA }}>
-              <p className="text-[11px] font-bold uppercase" style={{ letterSpacing: "0.24em", color: VERDE }}>
-                Dónde estamos
+        {/* Franja de datos */}
+        <div className="relative grid grid-cols-2 md:grid-cols-4" style={{ backgroundColor: VERDE }}>
+          {DATOS.map((d, i) => (
+            <div
+              key={d.n}
+              className="px-6 py-6"
+              style={{ borderLeft: i ? "1px solid rgba(255,255,255,.28)" : undefined }}
+            >
+              <p className="text-[26px] font-black italic text-white" style={btnStyle}>{d.n}</p>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "rgba(255,255,255,.85)" }}>
+                {d.d}
               </p>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-tight">{direccion}</h2>
-              <p className="mt-2 text-sm" style={{ color: "#3c553c" }}>
-                A pasos del centro de Bahía Blanca. Podés dejar el auto y retirarlo con el vidrio colocado.
-              </p>
-              <a href={MAPS} target="_blank" rel="noreferrer" className="vid-link mt-5 inline-block text-sm font-bold" style={{ color: VERDE_OSCURO }}>
-                Cómo llegar (Google Maps) →
-              </a>
             </div>
-          </Reveal>
-          <Reveal delay={110}>
-            <div className="h-full rounded-2xl p-7" style={{ backgroundColor: VERDE, color: "#fff" }}>
-              <p className="text-[11px] font-bold uppercase" style={{ letterSpacing: "0.24em", color: "#d6f5d6" }}>
-                Horarios y contacto
-              </p>
-              <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed">
-                {st.horarios ?? "Lunes a viernes de 8 a 17 hs\nSábados de 9 a 13 hs"}
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                {waLink ? (
-                  <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg px-5 py-3 text-sm font-bold transition hover:opacity-90"
-                    style={{ backgroundColor: "#fff", color: VERDE_OSCURO }}
-                  >
-                    💬 WhatsApp
-                  </a>
-                ) : null}
-                {ig ? (
-                  <a
-                    href={`https://www.instagram.com/${ig}/`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg border px-5 py-3 text-sm font-semibold transition hover:bg-white/10"
-                    style={{ borderColor: "rgba(255,255,255,0.5)" }}
-                  >
-                    📷 @{ig}
-                  </a>
-                ) : null}
-                {!waLink && !ig ? (
-                  <a
-                    href="#contacto"
-                    className="rounded-lg px-5 py-3 text-sm font-bold transition hover:opacity-90"
-                    style={{ backgroundColor: "#fff", color: VERDE_OSCURO }}
-                  >
-                    Escribinos →
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* Contacto → CRM */}
-      <section id="contacto" className="scroll-mt-20 border-t" style={{ borderColor: LINEA }}>
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-2">
-          <Reveal>
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Pedí tu cotización
-              </h2>
-              <p className="mt-3 max-w-md text-[15px] leading-relaxed" style={{ color: "#3c553c" }}>
-                Contanos qué vidrio necesitás y te respondemos con precio y turno. Si es por
-                seguro, nos encargamos de la gestión.
-              </p>
-              <ul className="mt-6 space-y-2.5 text-sm" style={{ color: "#3c553c" }}>
-                <li>✔ Respuesta en el día</li>
-                <li>✔ Vidrios para todas las marcas</li>
-                <li>✔ Colocación con garantía</li>
-              </ul>
-            </div>
-          </Reveal>
-          <Reveal delay={110}>
-            <div className="rounded-2xl border bg-white p-6 shadow-sm sm:p-8" style={{ borderColor: LINEA }}>
+      {/* ── Servicios ── */}
+      <section id="servicios" className="mx-auto max-w-[1280px] px-6 py-20">
+        <div className="flex flex-wrap items-start justify-between gap-8">
+          <Titulo className="max-w-[540px] text-[38px] sm:text-[52px]">Todo el vidrio del automóvil</Titulo>
+          <p className="max-w-[460px] text-[16px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>
+            Trabajamos con cristal laminado y templado original y alternativo. Si no lo tenemos, lo pedimos.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {SERVICIOS.map((s) => (
+            <article
+              key={s.t}
+              className="bg-white p-7 transition-transform duration-300 hover:-translate-y-1.5 motion-reduce:transform-none"
+              style={{ borderTop: `4px solid ${VERDE}`, boxShadow: "0 1px 0 rgba(20,20,20,.06)" }}
+            >
+              <h3 className="text-[22px] font-black uppercase italic" style={btnStyle}>{s.t}</h3>
+              <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>{s.d}</p>
+            </article>
+          ))}
+
+          <article className="p-7 transition-transform duration-300 hover:-translate-y-1.5 motion-reduce:transform-none" style={{ backgroundColor: NEGRO }}>
+            <h3 className="text-[22px] font-black uppercase italic text-white" style={btnStyle}>
+              ¿No sabés qué cristal lleva tu auto?
+            </h3>
+            <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "rgba(255,255,255,.7)" }}>
+              Mandanos marca, modelo, año y una foto. Te decimos qué va y cuánto sale.
+            </p>
+            {waLink ? (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-block text-[15px] font-black uppercase italic transition hover:opacity-80"
+                style={{ ...btnStyle, color: VERDE }}
+              >
+                Escribinos por WhatsApp →
+              </a>
+            ) : (
+              <a href="#contacto" className="mt-5 inline-block text-[15px] font-black uppercase italic" style={{ ...btnStyle, color: VERDE }}>
+                Escribinos →
+              </a>
+            )}
+          </article>
+        </div>
+      </section>
+
+      {/* ── Seguros ── */}
+      <section id="seguros" className="bg-white">
+        <div className="mx-auto grid max-w-[1280px] items-start gap-12 px-6 py-20 lg:grid-cols-2">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.28em]" style={{ color: VERDE }}>
+              Siniestros y aseguradoras
+            </p>
+            <Titulo className="mt-4 max-w-[460px] text-[38px] sm:text-[52px]">Del parte al auto listo, lo manejamos nosotros</Titulo>
+            <p className="mt-6 max-w-[520px] text-[16px] leading-[1.65]" style={{ color: "rgba(20,20,20,.65)" }}>
+              Trabajamos habitualmente con siniestros. Vos hacés la denuncia, nos pasás el número y nosotros
+              coordinamos la orden, el cristal y el turno. En la mayoría de los casos solo pagás la franquicia si tu
+              póliza la tiene.
+            </p>
+            <ol className="mt-8">
+              {PASOS_SEGURO.map((p, i) => (
+                <li key={p} className="flex gap-5 border-t py-4" style={{ borderColor: "rgba(20,20,20,.12)" }}>
+                  <span className="text-[17px] font-black italic" style={{ ...btnStyle, color: VERDE }}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-[15px] leading-[1.6]" style={{ color: "rgba(20,20,20,.75)" }}>{p}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <Hueco alto="h-[520px]" texto="Foto: colocación en el taller" foto={fotos.siniestros} />
+        </div>
+      </section>
+
+      {/* ── El taller ── */}
+      <section id="taller" className="mx-auto max-w-[1280px] px-6 py-20">
+        <div className="flex flex-wrap items-start justify-between gap-8">
+          <Titulo className="max-w-[560px] text-[38px] sm:text-[52px]">El mismo local de 9 de Julio, hace 25 años</Titulo>
+          <p className="max-w-[420px] text-[16px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>
+            Seis personas, taller propio y stock de las piezas que más se rompen en Bariloche.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1">
+            <Hueco texto="Frente del local" foto={fotos.local?.[0]} />
+          </div>
+          <Hueco texto="El equipo trabajando" foto={fotos.local?.[1]} />
+          <Hueco texto="Detalle de colocación" foto={fotos.local?.[2]} />
+        </div>
+      </section>
+
+      {/* ── CTA verde ── */}
+      <section id="contacto" style={{ backgroundColor: VERDE }}>
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-10 px-6 py-20">
+          <div className="max-w-[620px]">
+            <Titulo className="text-[38px] sm:text-[56px]" tono="#ffffff">
+              Mandá marca, modelo y año. Te pasamos el precio hoy.
+            </Titulo>
+            <p className="mt-6 text-[17px]" style={{ color: "rgba(255,255,255,.85)" }}>
+              Presupuesto sin cargo, por WhatsApp o por teléfono.
+            </p>
+          </div>
+          {waLink ? (
+            <a href={waLink} target="_blank" rel="noreferrer" className={`${btn} px-12`} style={{ ...btnStyle, backgroundColor: "#fff", color: VERDE }}>
+              Escribinos ahora
+            </a>
+          ) : (
+            <div className="w-full max-w-[420px] bg-white p-6">
               <VidriosConsulta slug={tenant.slug} />
             </div>
-          </Reveal>
+          )}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ backgroundColor: TINTA, color: "#fff" }}>
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-4 py-10 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={sinFondo(branding.logo)} alt="" className="h-10 w-10 object-contain" />
-            <div>
-              <p className="font-extrabold">Código Auto</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
-                Venta y colocación de parabrisas · {direccion}
-              </p>
-            </div>
+      {/* ── Footer ── */}
+      <footer style={{ backgroundColor: NEGRO, color: "#fff" }}>
+        <div className="mx-auto grid max-w-[1280px] gap-10 px-6 py-16 md:grid-cols-4">
+          <div>
+            {(tenant.branding as { logo?: string } | null)?.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={((tenant.branding as { logo?: string }).logo ?? "").replace("/upload/", "/upload/e_make_transparent:12/")}
+                alt="Código Auto"
+                className="h-12 w-auto"
+              />
+            ) : (
+              <p className="text-2xl font-black uppercase italic" style={btnStyle}>Código Auto</p>
+            )}
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,.45)" }}>
+              Parabrisas · Autopartes · Venta y colocación
+            </p>
           </div>
-          <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-            {ig ? (
-              <a href={`https://www.instagram.com/${ig}/`} target="_blank" rel="noreferrer" className="transition hover:text-white">
-                Instagram
-              </a>
-            ) : null}
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,.5)" }}>
+              Dónde estamos
+            </p>
+            <a href={maps} target="_blank" rel="noreferrer" className="mt-3 block text-[16px] leading-[1.6] transition hover:opacity-70">
+              9 de Julio 578<br />San Carlos de Bariloche<br />Río Negro
+            </a>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,.5)" }}>
+              Contacto
+            </p>
+            <a href={`tel:${tel.replace(/\s/g, "")}`} className="mt-3 block text-[22px] font-black italic transition hover:opacity-80" style={btnStyle}>
+              {tel}
+            </a>
             {waLink ? (
-              <a href={waLink} target="_blank" rel="noreferrer" className="transition hover:text-white">
+              <a href={waLink} target="_blank" rel="noreferrer" className="mt-1 block text-[16px] transition hover:opacity-70" style={{ color: VERDE }}>
                 WhatsApp
               </a>
             ) : null}
-            <span>© {new Date().getFullYear()} Código Auto</span>
+            {st.instagram ? (
+              <a
+                href={`https://www.instagram.com/${st.instagram}/`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 block text-[16px] transition hover:opacity-70"
+                style={{ color: VERDE }}
+              >
+                @{st.instagram}
+              </a>
+            ) : null}
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,.5)" }}>
+              Horarios
+            </p>
+            <p className="mt-3 text-[16px] leading-[1.6]">
+              Lunes a viernes
+              <br />
+              <span style={{ color: "rgba(255,255,255,.7)" }}>8:30 a 18:00</span>
+            </p>
+            <p className="mt-3 text-[16px] leading-[1.6]">
+              Sábados
+              <br />
+              <span style={{ color: "rgba(255,255,255,.7)" }}>9:00 a 13:00</span>
+            </p>
           </div>
         </div>
       </footer>
 
-      {/* WhatsApp flotante — SOLO si hay número cargado */}
+      {/* WhatsApp flotante */}
       {waLink ? (
         <a
           href={waLink}
           target="_blank"
           rel="noreferrer"
-          aria-label="WhatsApp"
-          className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full text-2xl shadow-lg transition-transform hover:scale-105"
-          style={{ backgroundColor: "#25D366", color: "#fff" }}
+          aria-label="Escribinos por WhatsApp"
+          className="fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-300 hover:-translate-y-1 motion-reduce:transform-none"
+          style={{ backgroundColor: "#25D366" }}
         >
-          💬
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.2-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.5.5c-.2.2-.3.3-.1.6.2.3.9 1.4 1.9 2.3 1.3 1.2 2.4 1.5 2.7 1.7.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2.1 1c.3.2.5.3.6.4.1.2.1.7-.1 1.3Z" />
+          </svg>
         </a>
       ) : null}
-
-      <style>{`
-        @keyframes vid-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .vid-marquee { animation: vid-marquee 30s linear infinite; }
-        .vid-marquee:hover { animation-play-state: paused; }
-        @keyframes vid-flota { from { transform: translateY(0); } to { transform: translateY(-12px); } }
-        .vid-flota { animation: vid-flota 3.6s ease-in-out infinite alternate; }
-        .vid-link { background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 2px; transition: background-size .3s; padding-bottom: 2px; }
-        .vid-link:hover { background-size: 100% 2px; }
-        @media (prefers-reduced-motion: reduce) {
-          .vid-marquee, .vid-flota { animation: none; }
-        }
-      `}</style>
     </div>
   );
 }
