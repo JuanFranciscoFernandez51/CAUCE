@@ -6,6 +6,8 @@ import { getTenantBySlug } from "@/lib/tenant";
 import { esBazar } from "@/lib/bazar-server";
 import { ButtonLink } from "@/components/ui";
 import { ProductosTable } from "../_components/bazar/productos-table";
+import { StockVidrios } from "../_components/vidrios/stock-vidrios";
+import { esVidrios } from "@/lib/vidrios";
 import { ImportarCsv } from "../_components/bazar/importar-csv";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,9 @@ export default async function ProductosPage({
   const sp = await searchParams;
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esBazar(tenant)) notFound();
+
+  // Vidrios (Código Auto): stock de depósito con tres listas de precio.
+  if (esVidrios(tenant)) return <StockVidrios slug={slug} tenantId={tenant.id} q={sp.q ?? ""} categoria={sp.categoria ?? ""} />;
 
   const q = (sp.q ?? "").trim();
   const categoria = (sp.categoria ?? "").trim();

@@ -24,7 +24,7 @@ export default async function OrdenesPage({
   const tenant = await getTenantBySlug(slug);
   if (!tenant || !esVidrios(tenant)) notFound();
 
-  const filtro = sp.estado === "PENDIENTE" || sp.estado === "CONFIRMADA" || sp.estado === "COLOCADO" ? sp.estado : "";
+  const filtro = ["PENDIENTE", "CONFIRMADA", "COLOCADO", "ENTREGADO"].includes(sp.estado ?? "") ? sp.estado! : "";
   const q = (sp.q ?? "").trim();
 
   const lista = await db.presupuestoDoc.findMany({
@@ -86,6 +86,7 @@ export default async function OrdenesPage({
         {chip(`${base}?estado=PENDIENTE`, filtro === "PENDIENTE", !filtro ? `Pendientes · ${pendientes}` : "Pendientes")}
         {chip(`${base}?estado=CONFIRMADA`, filtro === "CONFIRMADA", "En taller")}
         {chip(`${base}?estado=COLOCADO`, filtro === "COLOCADO", "Colocadas")}
+        {chip(`${base}?estado=ENTREGADO`, filtro === "ENTREGADO", "Entregadas")}
         <form method="get" className="ml-auto flex gap-2">
           {filtro ? <input type="hidden" name="estado" value={filtro} /> : null}
           <input

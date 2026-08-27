@@ -240,12 +240,9 @@ export default async function OsLayout({
       { label: "Stock", href: `${base}/productos`, icon: "🪟" },
       { label: "Importar PDF", href: `${base}/importar-stock`, icon: "📄" },
       { label: "Órdenes", href: `${base}/ordenes`, icon: "🧾" },
-      { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
-      { label: "Turnos", href: `${base}/turnos`, icon: "📅" },
       { label: "Taller", href: `${base}/colocaciones`, icon: "🔧" },
-      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" },
-      { label: "Tareas", href: `${base}/tareas`, icon: "🗂️" },
-      ...(owner ? [{ label: "Finanzas", href: `${base}/caja`, icon: "💵" }] : [])
+      { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
+      { label: "Proveedores", href: `${base}/proveedores`, icon: "🏭" }
     );
   }
   // Template dooh (circuito de pantallas LED): la carpeta de clientes va
@@ -270,6 +267,9 @@ export default async function OsLayout({
         : [{ label: "Para hoy", href: `${base}/hoy`, icon: "☀️" }]),
     ...(crm ? [{ label: tpl === "vidrios" ? "Clientes" : "CRM", href: `${base}/crm`, icon: "📇" }] : []),
     { label: "Operaciones", icon: "🛠️", items: opsItems },
+    // Vidrios: Tareas y Finanzas viven afuera de Operaciones, a un click.
+    ...(tpl === "vidrios" ? [{ label: "Tareas", href: `${base}/tareas`, icon: "🗂️" }] : []),
+    ...(tpl === "vidrios" && owner ? [{ label: "Finanzas", href: `${base}/caja`, icon: "💵" }] : []),
     ...(tpl === "repuestos"
       ? [
           {

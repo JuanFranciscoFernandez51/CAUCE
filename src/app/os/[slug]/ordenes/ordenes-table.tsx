@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { OrdenFacturacion } from "@/lib/vidrios";
+import { BotonWhatsApp } from "../colocaciones/acciones-orden";
 
 export type OrdenRow = {
   id: string;
@@ -51,14 +52,16 @@ export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRo
     router.refresh();
   }
 
-  // Ciclo del estado: pendiente → (confirmar con fecha) → en taller → colocado → pendiente.
+  // Seguimiento: pendiente → (fecha) en taller → colocado → entregado → pendiente.
   async function clickEstado(o: OrdenRow) {
     if (o.estado === "PENDIENTE") {
       setFecha(manana());
       setConfirmando(o.id);
       return;
     }
-    await patch(o.id, { estado: o.estado === "CONFIRMADA" ? "COLOCADO" : "PENDIENTE" });
+    const siguiente =
+      o.estado === "CONFIRMADA" ? "COLOCADO" : o.estado === "COLOCADO" ? "ENTREGADO" : "PENDIENTE";
+    await patch(o.id, { estado: siguiente });
   }
 
   async function confirmarATaller(o: OrdenRow) {
@@ -128,18 +131,22 @@ export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRo
                     disabled={ocupada === o.id}
                     title={o.estado === "PENDIENTE" ? "Confirmar y mandar al taller" : "Click para cambiar el estado"}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition hover:opacity-80 disabled:opacity-50 ${
-                      o.estado === "COLOCADO"
-                        ? "bg-success/15 text-success"
-                        : o.estado === "CONFIRMADA"
-                          ? "bg-primary/15 text-primary"
-                          : "bg-warning/15 text-warning"
+                      o.estado === "ENTREGADO"
+                        ? "bg-muted text-muted-foreground"
+                        : o.estado === "COLOCADO"
+                          ? "bg-success/15 text-success"
+                          : o.estado === "CONFIRMADA"
+                            ? "bg-primary/15 text-primary"
+                            : "bg-warning/15 text-warning"
                     }`}
                   >
-                    {o.estado === "COLOCADO"
-                      ? "✓ Colocado"
-                      : o.estado === "CONFIRMADA"
-                        ? `🔧 En taller${o.fechaColocacion ? ` · ${o.fechaColocacion.split("-").reverse().slice(0, 2).join("/")}` : ""}`
-                        : "⏳ Confirmar → Taller"}
+                    {o.estado === "ENTREGADO"
+                      ? "🚗 Entregado"
+                      : o.estado === "COLOCADO"
+                        ? "✓ Colocado"
+                        : o.estado === "CONFIRMADA"
+                          ? `🔧 En taller${o.fechaColocacion ? ` · ${o.fechaColocacion.split("-").reverse().slice(0, 2).join("/")}` : ""}`
+                          : "⏳ Confirmar → Taller"}
                   </button>
                 )}
               </td>
@@ -149,6 +156,16 @@ export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRo
                 </span>
               </td>
               <td className="px-3 py-2.5 text-right">
+                <span className="mr-1.5 inline-block align-middle">
+                  <BotonWhatsApp
+                    telefono={o.telefono}
+                    nombre={o.nombre}
+                    numero={o.numero}
+                    estado={o.estado}
+                    fecha={o.fechaColocacion}
+                    compacto
+                  />
+                </span>
                 <Link
                   href={`/os/${slug}/ordenes/${o.id}/imprimir`}
                   target="_blank"

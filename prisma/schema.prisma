@@ -1203,6 +1203,9 @@ model BazarProducto {
   compatibilidades String[] @default([]) // "Honda CG Titan 150", como lo dice el cliente
   marca            String? // marca del repuesto, no de la moto
   costo            Int? // para ver el margen desde el admin
+  // ── Vidrios (Código Auto): tres listas de precio del rubro ──
+  precioSeguro     Int? // lo que se le cobra a la compañía de seguros
+  precioSinMO      Int? // precio del vidrio sin la mano de obra de colocación
   ubicacion        String? // dónde está en el depósito
   minStock         Int      @default(0)
   liquidar         Boolean  @default(false) // fuera del nicho 110/125/150

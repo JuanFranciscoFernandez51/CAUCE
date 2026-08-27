@@ -14,6 +14,10 @@ const patchSchema = z
     categoria: z.string().trim().min(1).max(80),
     precio: z.number().int().min(0),
     precioOferta: z.number().int().min(0).nullable(),
+    // Vidrios: las tres listas del rubro.
+    precioSeguro: z.number().int().min(0).nullable(),
+    precioSinMO: z.number().int().min(0).nullable(),
+    marca: z.string().trim().max(80).nullable(),
     stock: z.number().int().min(0),
     descripcion: z.string().trim().max(4000).nullable(),
     sku: z.string().trim().max(60).nullable(),
