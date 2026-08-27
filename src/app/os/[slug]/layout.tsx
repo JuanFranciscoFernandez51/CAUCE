@@ -238,6 +238,7 @@ export default async function OsLayout({
       0,
       opsItems.length,
       { label: "Stock", href: `${base}/productos`, icon: "🪟" },
+      { label: "Importar PDF", href: `${base}/importar-stock`, icon: "📄" },
       { label: "Órdenes", href: `${base}/ordenes`, icon: "🧾" },
       { label: "Facturación", href: `${base}/facturacion`, icon: "🧮" },
       { label: "Turnos", href: `${base}/turnos`, icon: "📅" },
