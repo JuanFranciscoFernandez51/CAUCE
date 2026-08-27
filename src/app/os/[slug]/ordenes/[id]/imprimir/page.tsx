@@ -8,14 +8,14 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Boleto" };
 
 /**
- * Boleto imprimible de la orden: A4 con membrete verde, logo de la mascota,
+ * Boleto imprimible de la orden: A4 con membrete verde, el wordmark de la marca,
  * datos del negocio, detalle, seña/saldo y firma (patrón piletas/imprimir).
  */
 const VERDE = "#008000";
 const TINTA = "#0c1f0c";
 
-/** El PNG del logo vino con fondo blanco: Cloudinary lo vuelve transparente al vuelo. */
-const sinFondo = (url: string) =>
+/* El logo es tipográfico: no se usa imagen. */
+const _sinFondo = (url: string) =>
   url.includes("res.cloudinary.com") ? url.replace("/upload/", "/upload/e_make_transparent:12/") : url;
 const FONDO = "#f4faf4";
 const LINEA = "#cfe3cf";
@@ -55,12 +55,21 @@ export default async function ImprimirOrdenPage({
         {/* Membrete verde con el logo */}
         <div className="flex items-center justify-between gap-6" style={{ backgroundColor: VERDE, color: "#ffffff", padding: "10mm 16mm" }}>
           <div className="flex items-center gap-4">
-            {branding.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={sinFondo(branding.logo)} alt={branding.displayName} style={{ height: "22mm", width: "auto" }} />
-            ) : null}
             <div>
-              <p style={{ fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{branding.displayName}</p>
+              <p
+                style={{
+                  fontSize: 34,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  fontFamily: "var(--font-archivo)",
+                  fontStretch: "62.5%",
+                  fontStyle: "italic",
+                  textTransform: "uppercase",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {branding.displayName}
+              </p>
               <p style={{ fontSize: 11, opacity: 0.9, marginTop: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 {st.rubro ?? "Venta y colocación de parabrisas"}
               </p>

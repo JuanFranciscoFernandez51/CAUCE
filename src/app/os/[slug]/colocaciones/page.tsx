@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getTenantBySlug } from "@/lib/tenant";
 import { esVidrios, ordenDatos, ordenItems, totalOrden, vehiculoLinea } from "@/lib/vidrios";
-import { AvanzarOrden, BotonWhatsApp, FLUJO_LABEL } from "./acciones-orden";
+import { AvanzarOrden, BotonFacturar, BotonWhatsApp, FLUJO_LABEL } from "./acciones-orden";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Taller" };
@@ -20,7 +20,7 @@ export default async function TallerPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ m?: string }>;
+  searchParams: Promise<{ m?: string; d?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -41,7 +41,7 @@ export default async function TallerPage({
 
   const [ordenes, turnos] = await Promise.all([
     db.presupuestoDoc.findMany({
-      where: { clientId: tenant.id, estado: { in: ["CONFIRMADA", "COLOCADO"] } },
+      where: { clientId: tenant.id, estado: { in: ["CONFIRMADA", "COLOCADO", "ENTREGADO"] } },
       orderBy: { numero: "asc" },
     }),
     db.appointment.findMany({
@@ -62,6 +62,14 @@ export default async function TallerPage({
   const conDatos = ordenes.map((p) => ({ p, d: ordenDatos(p) }));
   const enTaller = conDatos.filter((x) => x.p.estado === "CONFIRMADA");
   const colocadas = conDatos.filter((x) => x.p.estado === "COLOCADO");
+  // Entregadas que todavía nadie mandó a facturar.
+  const paraFacturar = conDatos.filter((x) => x.p.estado === "ENTREGADO" && x.d.facturacion === "sin_facturar");
+
+  // Vista del día: por defecto hoy, o el que se elija en el calendario.
+  const dia = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : hoy;
+  const delDia = conDatos.filter((x) => x.d.fechaColocacion === dia);
+  const turnosDelDia = turnos.filter((t) => t.startsAt.toISOString().slice(0, 10) === dia);
+  const esHoyDia = dia === hoy;
 
   // Marcas del calendario: colocaciones del mes + turnos de agenda.
   const porDia = new Map<number, { texto: string; tono: string }[]>();
@@ -149,34 +157,123 @@ export default async function TallerPage({
               {d}
             </div>
           ))}
-          {celdas.map((dia, i) => {
-            const esHoy = dia === hoyD.getDate() && m0 === hoyD.getMonth() && anio === hoyD.getFullYear();
-            const marcas = dia ? porDia.get(dia) ?? [] : [];
+          {celdas.map((celdaDia, i) => {
+            if (!celdaDia) return <div key={i} className="min-h-[86px] bg-card p-1.5" />;
+            const esHoy = celdaDia === hoyD.getDate() && m0 === hoyD.getMonth() && anio === hoyD.getFullYear();
+            const marcas = porDia.get(celdaDia) ?? [];
+            const iso = `${anio}-${String(m0 + 1).padStart(2, "0")}-${String(celdaDia).padStart(2, "0")}`;
+            const elegido = iso === dia;
             return (
-              <div key={i} className={`min-h-[86px] bg-card p-1.5 ${esHoy ? "ring-2 ring-inset ring-primary" : ""}`}>
-                {dia ? (
-                  <>
-                    <span className={`text-[11px] ${esHoy ? "font-bold text-primary" : "text-muted-foreground"}`}>{dia}</span>
-                    <div className="mt-1 space-y-0.5">
-                      {marcas.slice(0, 3).map((mk, k) => (
-                        <p
-                          key={k}
-                          className="truncate rounded-sm border-l-2 bg-muted/50 px-1 py-0.5 text-[10px]"
-                          style={{ borderLeftColor: mk.tono }}
-                          title={mk.texto}
-                        >
-                          {mk.texto}
-                        </p>
-                      ))}
-                      {marcas.length > 3 ? <p className="text-[9px] text-muted-foreground">+{marcas.length - 3}</p> : null}
-                    </div>
-                  </>
-                ) : null}
-              </div>
+              <Link
+                key={i}
+                href={`?m=${anio}-${String(m0 + 1).padStart(2, "0")}&d=${iso}`}
+                className={`min-h-[86px] p-1.5 transition hover:bg-muted/40 ${elegido ? "bg-primary/10" : "bg-card"} ${esHoy ? "ring-2 ring-inset ring-primary" : ""}`}
+              >
+                <span className={`text-[11px] ${esHoy ? "font-bold text-primary" : "text-muted-foreground"}`}>{celdaDia}</span>
+                <div className="mt-1 space-y-0.5">
+                  {marcas.slice(0, 3).map((mk, k) => (
+                    <p
+                      key={k}
+                      className="truncate rounded-sm border-l-2 bg-muted/50 px-1 py-0.5 text-[10px]"
+                      style={{ borderLeftColor: mk.tono }}
+                      title={mk.texto}
+                    >
+                      {mk.texto}
+                    </p>
+                  ))}
+                  {marcas.length > 3 ? <p className="text-[9px] text-muted-foreground">+{marcas.length - 3}</p> : null}
+                </div>
+              </Link>
             );
           })}
         </div>
       </section>
+
+      {/* Vista del día */}
+      <section className="rounded-xl border bg-card p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-bold">
+            {esHoyDia ? "Hoy" : fechaLinda(dia)} · {delDia.length + turnosDelDia.length} en el taller
+          </h2>
+          {!esHoyDia ? (
+            <Link href={`${base}/colocaciones`} className="text-xs text-muted-foreground underline underline-offset-2">
+              Volver a hoy
+            </Link>
+          ) : null}
+        </div>
+        {delDia.length || turnosDelDia.length ? (
+          <div className="mt-3 divide-y">
+            {delDia.map(({ p, d }) => (
+              <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm">
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    #{String(p.numero).padStart(4, "0")} · {p.nombre}
+                    <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {FLUJO_LABEL[p.estado]}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {vehiculoLinea(d) || "Sin vehículo"} · {ordenItems(p).map((i) => `${i.cant}× ${i.detalle}`).join(" · ")}
+                  </p>
+                </div>
+                <span className="flex items-center gap-1.5">
+                  <BotonWhatsApp telefono={p.telefono} nombre={p.nombre} numero={p.numero} estado={p.estado} fecha={d.fechaColocacion} compacto />
+                  <AvanzarOrden slug={slug} id={p.id} estado={p.estado} fecha={d.fechaColocacion} />
+                </span>
+              </div>
+            ))}
+            {turnosDelDia.map((t) => (
+              <div key={t.id} className="flex items-center justify-between py-2.5 text-sm">
+                <span>🗓 {t.title}</span>
+                <span className="text-muted-foreground">
+                  {t.startsAt.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">Sin trabajos para este día.</p>
+        )}
+      </section>
+
+      {/* Entregados listos para facturar */}
+      {paraFacturar.length ? (
+        <section className="rounded-xl border p-4" style={{ borderColor: "var(--primary)" }}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-bold">
+              Entregados · {paraFacturar.length} para mandar a facturar
+            </h2>
+            <Link href={`${base}/facturacion`} className="text-xs underline underline-offset-2">
+              Ir a Facturación →
+            </Link>
+          </div>
+          <div className="mt-3 divide-y">
+            {paraFacturar.map(({ p, d }) => (
+              <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm">
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    #{String(p.numero).padStart(4, "0")} · {p.nombre}
+                    {d.seguro ? (
+                      <span className="ml-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                        🛡 {d.seguro.compania}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {vehiculoLinea(d) || "Sin vehículo"}
+                    {d.fechaColocacion ? ` · colocado ${fechaLinda(d.fechaColocacion)}` : ""}
+                  </p>
+                </div>
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold tabular-nums">{plata(totalOrden(p))}</span>
+                  <Link href={`${base}/ordenes/${p.id}/imprimir`} target="_blank" className="rounded-md border px-2 py-1 text-xs transition hover:bg-muted">🖨</Link>
+                  <BotonFacturar slug={slug} id={p.id} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* Cola de trabajos con seguimiento */}
       {grupos.map((g) =>

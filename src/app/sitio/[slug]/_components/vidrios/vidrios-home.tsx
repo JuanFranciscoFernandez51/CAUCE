@@ -1,5 +1,6 @@
 import type { Client } from "@prisma/client";
 import { VidriosConsulta } from "./vidrios-consulta";
+import { LogoCodigoAuto } from "./logo-codigoauto";
 
 /**
  * Web de Código Auto (Bariloche) — parabrisas, autopartes y colocación.
@@ -102,16 +103,7 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
       <header className="sticky top-0 z-40" style={{ backgroundColor: VERDE }}>
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-3">
           <a href="#top" className="shrink-0">
-            {(tenant.branding as { logo?: string } | null)?.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={((tenant.branding as { logo?: string }).logo ?? "").replace("/upload/", "/upload/e_make_transparent:12/")}
-                alt="Código Auto"
-                className="h-11 w-auto"
-              />
-            ) : (
-              <span className="text-2xl font-black uppercase italic text-white" style={btnStyle}>Código Auto</span>
-            )}
+            <LogoCodigoAuto alto={34} bajada={false} />
           </a>
           <nav className="hidden items-center gap-8 text-[15px] font-medium text-white md:flex">
             <a href="#servicios" className="transition hover:opacity-75">Servicios</a>
@@ -304,19 +296,7 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
       <footer style={{ backgroundColor: NEGRO, color: "#fff" }}>
         <div className="mx-auto grid max-w-[1280px] gap-10 px-6 py-16 md:grid-cols-4">
           <div>
-            {(tenant.branding as { logo?: string } | null)?.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={((tenant.branding as { logo?: string }).logo ?? "").replace("/upload/", "/upload/e_make_transparent:12/")}
-                alt="Código Auto"
-                className="h-12 w-auto"
-              />
-            ) : (
-              <p className="text-2xl font-black uppercase italic" style={btnStyle}>Código Auto</p>
-            )}
-            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,.45)" }}>
-              Parabrisas · Autopartes · Venta y colocación
-            </p>
+            <LogoCodigoAuto alto={42} />
           </div>
 
           <div>

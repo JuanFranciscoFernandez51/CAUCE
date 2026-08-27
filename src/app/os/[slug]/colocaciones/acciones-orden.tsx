@@ -62,6 +62,30 @@ export function BotonWhatsApp({
   );
 }
 
+/** Manda la orden a la bandeja de Facturación. */
+export function BotonFacturar({ slug, id }: { slug: string; id: string }) {
+  const router = useRouter();
+  const [ocupado, setOcupado] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        setOcupado(true);
+        await fetch(`/api/os/${slug}/ordenes/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ facturacion: "a_facturar" }),
+        });
+        setOcupado(false);
+        router.refresh();
+      }}
+      disabled={ocupado}
+      className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+    >
+      → Facturar
+    </button>
+  );
+}
+
 /** Avanza la orden al siguiente paso del seguimiento (o la reprograma). */
 export function AvanzarOrden({
   slug,
