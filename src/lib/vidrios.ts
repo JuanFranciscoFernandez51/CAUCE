@@ -24,6 +24,8 @@ export type OrdenDatos = {
   facturacion: OrdenFacturacion;
   /** Fecha de colocación acordada (YYYY-MM-DD) cuando la orden se confirma al taller. */
   fechaColocacion?: string;
+  /** Trabajo por seguro: se factura a la compañía, no al cliente. */
+  seguro?: { compania?: string; siniestro?: string };
 };
 
 /** Lee los datos de la orden con defaults seguros (datos viejos o vacíos no rompen). */
@@ -35,6 +37,7 @@ export function ordenDatos(p: Pick<PresupuestoDoc, "datos">): OrdenDatos {
     senia: typeof d.senia === "number" ? d.senia : 0,
     facturacion: d.facturacion === "a_facturar" || d.facturacion === "facturada" ? d.facturacion : "sin_facturar",
     fechaColocacion: typeof d.fechaColocacion === "string" ? d.fechaColocacion : undefined,
+    seguro: d.seguro && (d.seguro.compania || d.seguro.siniestro) ? d.seguro : undefined,
   };
 }
 

@@ -9,6 +9,7 @@ export type FacturaRow = {
   numero: number;
   nombre: string;
   vehiculo: string;
+  seguro: string | null;
   total: number;
   facturacion: OrdenFacturacion;
   fecha: string;
@@ -170,7 +171,14 @@ export function FacturacionPanel({ slug, ordenes }: { slug: string; ordenes: Fac
                     </td>
                   ) : null}
                   <td className="px-3 py-2.5 font-semibold">#{String(o.numero).padStart(4, "0")}</td>
-                  <td className="px-3 py-2.5 font-medium">{o.nombre}</td>
+                  <td className="px-3 py-2.5 font-medium">
+                    {o.nombre}
+                    {o.seguro ? (
+                      <span className="ml-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary" title="Se factura a la compañía">
+                        🛡 {o.seguro}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-3 py-2.5 text-muted-foreground">{o.vehiculo || "—"}</td>
                   <td className="px-3 py-2.5 text-xs text-muted-foreground">{o.fecha}</td>
                   <td className="px-3 py-2.5 text-right font-semibold tabular-nums">{plata(o.total)}</td>

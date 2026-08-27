@@ -17,6 +17,7 @@ export type OrdenRow = {
   facturacion: OrdenFacturacion;
   fecha: string;
   fechaColocacion: string | null;
+  seguro: string | null;
 };
 
 const FACT_TONO: Record<OrdenFacturacion, string> = {
@@ -85,7 +86,14 @@ export function OrdenesTable({ slug, ordenes }: { slug: string; ordenes: OrdenRo
             <tr key={o.id} className="transition-colors hover:bg-muted/30">
               <td className="px-3 py-2.5 font-semibold">#{String(o.numero).padStart(4, "0")}</td>
               <td className="px-3 py-2.5">
-                <p className="font-medium">{o.nombre}</p>
+                <p className="font-medium">
+                  {o.nombre}
+                  {o.seguro ? (
+                    <span className="ml-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary" title={`Trabajo por seguro: ${o.seguro}`}>
+                      🛡 {o.seguro}
+                    </span>
+                  ) : null}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {o.telefono ?? ""}
                   {o.telefono ? " · " : ""}

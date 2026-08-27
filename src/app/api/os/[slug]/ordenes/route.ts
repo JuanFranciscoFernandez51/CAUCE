@@ -31,6 +31,9 @@ const schema = z.object({
     )
     .min(1, "Cargá al menos un ítem"),
   senia: z.number().min(0).default(0),
+  seguro: z
+    .object({ compania: z.string().trim().max(120).optional(), siniestro: z.string().trim().max(80).optional() })
+    .optional(),
 });
 
 export async function POST(req: Request, ctx: { params: Promise<{ slug: string }> }) {
@@ -82,7 +85,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
       numero: (ultimo?.numero ?? 0) + 1,
       nombre: d.nombre,
       telefono: d.telefono || null,
-      datos: { tipo: "orden", vehiculo: d.vehiculo, senia: d.senia, facturacion: "sin_facturar" },
+      datos: { tipo: "orden", vehiculo: d.vehiculo, senia: d.senia, facturacion: "sin_facturar", ...(d.seguro && (d.seguro.compania || d.seguro.siniestro) ? { seguro: d.seguro } : {}) },
       items: d.items,
       estado: "PENDIENTE",
     },

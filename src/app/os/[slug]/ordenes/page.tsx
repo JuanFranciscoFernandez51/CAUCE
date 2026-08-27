@@ -49,6 +49,7 @@ export default async function OrdenesPage({
       senia: d.senia,
       estado: p.estado,
       fechaColocacion: (p.datos as { fechaColocacion?: string } | null)?.fechaColocacion ?? null,
+      seguro: (p.datos as { seguro?: { compania?: string; siniestro?: string } } | null)?.seguro?.compania ?? null,
       facturacion: d.facturacion,
       fecha: p.createdAt.toLocaleDateString("es-AR"),
     };

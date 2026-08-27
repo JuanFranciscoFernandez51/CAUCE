@@ -29,6 +29,7 @@ export default async function FacturacionPage({ params }: { params: Promise<{ sl
       id: p.id,
       numero: p.numero,
       nombre: p.nombre,
+      seguro: (p.datos as { seguro?: { compania?: string } } | null)?.seguro?.compania ?? null,
       vehiculo: vehiculoLinea(d),
       total: totalOrden(p),
       facturacion: d.facturacion,

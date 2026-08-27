@@ -90,6 +90,17 @@ export default async function ImprimirOrdenPage({
             </div>
           </div>
 
+          {d.seguro ? (
+            <div style={{ backgroundColor: "#eef4ee", border: `1px solid ${VERDE}`, borderRadius: 8, padding: "4mm 6mm", marginTop: "5mm" }}>
+              <p style={{ fontSize: 9, letterSpacing: "0.22em", color: VERDE, fontWeight: 700 }}>TRABAJO POR SEGURO</p>
+              <p style={{ fontSize: 13, fontWeight: 700, marginTop: 3 }}>
+                {d.seguro.compania || "Compañía a confirmar"}
+                {d.seguro.siniestro ? ` · Siniestro/Autorización N° ${d.seguro.siniestro}` : ""}
+              </p>
+              <p style={{ fontSize: 11, marginTop: 2, color: "#3c553c" }}>La facturación de este trabajo corresponde a la compañía aseguradora.</p>
+            </div>
+          ) : null}
+
           {/* Detalle */}
           <div className="mt-8">
             <p style={{ fontSize: 9, letterSpacing: "0.22em", color: VERDE, fontWeight: 700 }}>DETALLE</p>

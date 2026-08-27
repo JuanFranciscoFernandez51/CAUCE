@@ -27,6 +27,8 @@ export function OrdenForm({
   const [vehiculo, setVehiculo] = useState({ marca: "", modelo: "", patente: "" });
   const [items, setItems] = useState<Item[]>([{ codigo: "", detalle: "", cant: 1, unitario: 0 }]);
   const [senia, setSenia] = useState(0);
+  const [porSeguro, setPorSeguro] = useState(false);
+  const [seguro, setSeguro] = useState({ compania: "", siniestro: "" });
   const [busca, setBusca] = useState("");
   const [error, setError] = useState("");
   const [ocupado, setOcupado] = useState(false);
@@ -69,7 +71,7 @@ export function OrdenForm({
     const r = await fetch(`/api/os/${slug}/ordenes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, telefono, vehiculo, items: filas, senia }),
+      body: JSON.stringify({ nombre, telefono, vehiculo, items: filas, senia, ...(porSeguro ? { seguro } : {}) }),
     });
     setOcupado(false);
     if (!r.ok) {
@@ -112,6 +114,30 @@ export function OrdenForm({
           <input placeholder="Modelo (Gol Trend…)" value={vehiculo.modelo} onChange={(e) => setVehiculo({ ...vehiculo, modelo: e.target.value })} className={input} />
           <input placeholder="Patente" value={vehiculo.patente} onChange={(e) => setVehiculo({ ...vehiculo, patente: e.target.value.toUpperCase() })} className={input} />
         </div>
+      </section>
+
+      <section className="rounded-xl border bg-card p-4">
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" checked={porSeguro} onChange={(e) => setPorSeguro(e.target.checked)} />
+          Trabajo por seguro
+          <span className="font-normal text-muted-foreground">— la factura va a la compañía</span>
+        </label>
+        {porSeguro ? (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <input
+              placeholder="Compañía (La Segunda, Sancor…)"
+              value={seguro.compania}
+              onChange={(e) => setSeguro({ ...seguro, compania: e.target.value })}
+              className={input}
+            />
+            <input
+              placeholder="N° de siniestro / autorización"
+              value={seguro.siniestro}
+              onChange={(e) => setSeguro({ ...seguro, siniestro: e.target.value })}
+              className={input}
+            />
+          </div>
+        ) : null}
       </section>
 
       <section className="rounded-xl border bg-card p-4">
