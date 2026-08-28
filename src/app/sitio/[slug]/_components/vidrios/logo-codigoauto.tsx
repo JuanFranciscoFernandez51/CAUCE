@@ -22,6 +22,8 @@ export function LogoCodigoAuto({
   // Caja del wordmark en unidades del viewBox (la tipografía se ajusta sola).
   const W = 1000;
   const H = 190;
+  const MX = 26; // aire lateral: la itálica se escapa a la derecha
+  const MY = 16;
   const corte = H * 0.47; // dónde terminan las rayas y arranca el macizo
   const fuente = {
     fontFamily: "var(--font-archivo), 'Archivo', 'Arial Narrow', system-ui, sans-serif",
@@ -35,21 +37,21 @@ export function LogoCodigoAuto({
   return (
     <span className="inline-flex flex-col" style={{ lineHeight: 1 }}>
       <svg
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`${-MX / 2} ${-MY / 2} ${W + MX} ${H + MY}`}
         style={{ height: alto, width: "auto", display: "block" }}
         role="img"
         aria-label="Código Auto"
       >
         <defs>
           {/* Las rayas del cartel */}
-          <pattern id={`rayas-${uid}`} width="10" height="15" patternUnits="userSpaceOnUse">
+          <pattern id={`rayas-${uid}`} width="10" height="15" patternUnits="userSpaceOnUse" patternTransform="translate(0 2)">
             <rect width="10" height="7" fill={color} />
           </pattern>
           <clipPath id={`arriba-${uid}`}>
-            <rect x="0" y="0" width={W} height={corte} />
+            <rect x={-MX} y={-MY} width={W + MX * 2} height={corte + MY} />
           </clipPath>
           <clipPath id={`abajo-${uid}`}>
-            <rect x="0" y={corte} width={W} height={H - corte} />
+            <rect x={-MX} y={corte} width={W + MX * 2} height={H - corte + MY} />
           </clipPath>
         </defs>
 

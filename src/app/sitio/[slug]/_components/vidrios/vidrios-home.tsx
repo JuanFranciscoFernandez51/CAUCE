@@ -1,6 +1,7 @@
 import type { Client } from "@prisma/client";
 import { VidriosConsulta } from "./vidrios-consulta";
 import { LogoCodigoAuto } from "./logo-codigoauto";
+import { Aparece, Contador, EstilosVidrios } from "./vidrios-efectos";
 
 /**
  * Web de Código Auto (Bariloche) — parabrisas, autopartes y colocación.
@@ -35,9 +36,9 @@ function Titulo({ children, className = "", tono = NEGRO }: { children: React.Re
 function Hueco({ alto = "h-[420px]", texto, foto }: { alto?: string; texto: string; foto?: string }) {
   if (foto) {
     return (
-      <div className={`${alto} overflow-hidden`}>
+      <div className={`ca-zoom ${alto}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={foto} alt={texto} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+        <img src={foto} alt={texto} className="h-full w-full object-cover" />
       </div>
     );
   }
@@ -70,6 +71,14 @@ const PASOS_SEGURO = [
   "Conseguimos el cristal y te damos turno. La colocación lleva unas horas.",
 ];
 
+const PROMESAS = [
+  "Parabrisas de todas las marcas",
+  "Colocación profesional",
+  "Trabajamos con todos los seguros",
+  "Repuestos y accesorios",
+  "Atención en el día",
+];
+
 const DATOS = [
   { n: "25 años", d: "En el rubro en Bariloche" },
   { n: "En el día", d: "Si la pieza está en stock" },
@@ -99,6 +108,7 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
 
   return (
     <div style={{ backgroundColor: HUESO, color: NEGRO, fontFamily: "var(--font-jost)" }}>
+      <EstilosVidrios />
       {/* ── Header verde ── */}
       <header className="sticky top-0 z-40" style={{ backgroundColor: VERDE }}>
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-3">
@@ -120,44 +130,60 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
         </div>
       </header>
 
+      {/* Cinta de promesas */}
+      <div className="ca-cinta" style={{ backgroundColor: NEGRO, color: "#fff" }}>
+        <div className="ca-cinta-tira py-2.5">
+          {[...PROMESAS, ...PROMESAS, ...PROMESAS, ...PROMESAS].map((t, i) => (
+            <span key={i} className="px-6 text-[12px] font-semibold uppercase" style={{ letterSpacing: "0.16em" }}>
+              {t} <span className="pl-6" style={{ color: VERDE }}>◆</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* ── Hero negro ── */}
       <section id="top" className="relative overflow-hidden" style={{ backgroundColor: NEGRO }}>
         {fotos.hero ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={fotos.hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+            <img src={fotos.hero} alt="" className="ca-kb absolute inset-0 h-full w-full object-cover opacity-45" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(20,20,20,.94) 40%, rgba(20,20,20,.55) 100%)" }} />
           </>
         ) : null}
+        <span className="ca-brillo" style={{ left: 0 }} aria-hidden="true" />
         <div className="relative mx-auto max-w-[1280px] px-6 py-16 sm:py-24">
+          <Aparece>
           <p className="text-[12px] font-semibold uppercase tracking-[0.28em]" style={{ color: VERDE }}>
             Bariloche · Desde hace 25 años
           </p>
           <Titulo className="mt-5 max-w-[900px] text-[42px] sm:text-[76px]" tono="#ffffff">
             Te rompieron el parabrisas.<br className="hidden sm:block" /> Nosotros lo resolvemos.
           </Titulo>
+          </Aparece>
+          <Aparece delay={140}>
           <p className="mt-7 max-w-[520px] text-[17px] leading-[1.6]" style={{ color: "rgba(255,255,255,.78)" }}>
             Parabrisas, lunetas, vidrios laterales y autopartes para todas las marcas. Conseguimos el cristal, lo
             colocamos y gestionamos el trámite con tu seguro.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             {waLink ? (
-              <a href={waLink} target="_blank" rel="noreferrer" className={btn} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
+              <a href={waLink} target="_blank" rel="noreferrer" className={`${btn} ca-btn`} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
                 Pedir presupuesto
               </a>
             ) : (
-              <a href="#contacto" className={btn} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
+              <a href="#contacto" className={`${btn} ca-btn`} style={{ ...btnStyle, backgroundColor: VERDE, color: "#fff" }}>
                 Pedir presupuesto
               </a>
             )}
             <a
               href={`tel:${tel.replace(/\s/g, "")}`}
-              className={btn}
+              className={`${btn} ca-btn`}
               style={{ ...btnStyle, border: "2px solid rgba(255,255,255,.55)", color: "#fff" }}
             >
               Llamar al {tel}
             </a>
           </div>
+          </Aparece>
         </div>
 
         {/* Franja de datos */}
@@ -168,7 +194,9 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
               className="px-6 py-6"
               style={{ borderLeft: i ? "1px solid rgba(255,255,255,.28)" : undefined }}
             >
-              <p className="text-[26px] font-black italic text-white" style={btnStyle}>{d.n}</p>
+              <p className="text-[26px] font-black italic text-white" style={btnStyle}>
+                {i === 0 ? <><Contador hasta={25} /> años</> : d.n}
+              </p>
               <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "rgba(255,255,255,.85)" }}>
                 {d.d}
               </p>
@@ -179,26 +207,28 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
 
       {/* ── Servicios ── */}
       <section id="servicios" className="mx-auto max-w-[1280px] px-6 py-20">
-        <div className="flex flex-wrap items-start justify-between gap-8">
+        <Aparece className="flex flex-wrap items-start justify-between gap-8">
           <Titulo className="max-w-[540px] text-[38px] sm:text-[52px]">Todo el vidrio del automóvil</Titulo>
           <p className="max-w-[460px] text-[16px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>
             Trabajamos con cristal laminado y templado original y alternativo. Si no lo tenemos, lo pedimos.
           </p>
-        </div>
+        </Aparece>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {SERVICIOS.map((s) => (
-            <article
-              key={s.t}
-              className="bg-white p-7 transition-transform duration-300 hover:-translate-y-1.5 motion-reduce:transform-none"
-              style={{ borderTop: `4px solid ${VERDE}`, boxShadow: "0 1px 0 rgba(20,20,20,.06)" }}
-            >
-              <h3 className="text-[22px] font-black uppercase italic" style={btnStyle}>{s.t}</h3>
-              <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>{s.d}</p>
-            </article>
+          {SERVICIOS.map((s, i) => (
+            <Aparece key={s.t} delay={i * 80}>
+              <article
+                className="ca-card h-full bg-white p-7"
+                style={{ borderTop: `4px solid ${VERDE}`, color: VERDE, boxShadow: "0 1px 0 rgba(20,20,20,.06)" }}
+              >
+                <h3 className="text-[22px] font-black uppercase italic" style={{ ...btnStyle, color: NEGRO }}>{s.t}</h3>
+                <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>{s.d}</p>
+              </article>
+            </Aparece>
           ))}
 
-          <article className="p-7 transition-transform duration-300 hover:-translate-y-1.5 motion-reduce:transform-none" style={{ backgroundColor: NEGRO }}>
+          <Aparece delay={400}>
+          <article className="ca-card h-full p-7" style={{ backgroundColor: NEGRO, color: VERDE }}>
             <h3 className="text-[22px] font-black uppercase italic text-white" style={btnStyle}>
               ¿No sabés qué cristal lleva tu auto?
             </h3>
@@ -221,6 +251,7 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
               </a>
             )}
           </article>
+          </Aparece>
         </div>
       </section>
 
@@ -239,49 +270,49 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
             </p>
             <ol className="mt-8">
               {PASOS_SEGURO.map((p, i) => (
-                <li key={p} className="flex gap-5 border-t py-4" style={{ borderColor: "rgba(20,20,20,.12)" }}>
+                <Aparece key={p} delay={i * 120}>
+                <li className="ca-paso flex gap-5 py-4" style={{ color: "rgba(20,20,20,.25)" }}>
                   <span className="text-[17px] font-black italic" style={{ ...btnStyle, color: VERDE }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="text-[15px] leading-[1.6]" style={{ color: "rgba(20,20,20,.75)" }}>{p}</span>
                 </li>
+                </Aparece>
               ))}
             </ol>
           </div>
-          <Hueco alto="h-[520px]" texto="Foto: colocación en el taller" foto={fotos.siniestros} />
+          <Aparece delay={120}><Hueco alto="h-[520px]" texto="Foto: colocación en el taller" foto={fotos.siniestros} /></Aparece>
         </div>
       </section>
 
       {/* ── El taller ── */}
       <section id="taller" className="mx-auto max-w-[1280px] px-6 py-20">
-        <div className="flex flex-wrap items-start justify-between gap-8">
+        <Aparece className="flex flex-wrap items-start justify-between gap-8">
           <Titulo className="max-w-[560px] text-[38px] sm:text-[52px]">El mismo local de 9 de Julio, hace 25 años</Titulo>
           <p className="max-w-[420px] text-[16px] leading-[1.6]" style={{ color: "rgba(20,20,20,.65)" }}>
             Seis personas, taller propio y stock de las piezas que más se rompen en Bariloche.
           </p>
-        </div>
+        </Aparece>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-1">
-            <Hueco texto="Frente del local" foto={fotos.local?.[0]} />
-          </div>
-          <Hueco texto="El equipo trabajando" foto={fotos.local?.[1]} />
-          <Hueco texto="Detalle de colocación" foto={fotos.local?.[2]} />
+          <Aparece><Hueco texto="Frente del local" foto={fotos.local?.[0]} /></Aparece>
+          <Aparece delay={110}><Hueco texto="El equipo trabajando" foto={fotos.local?.[1]} /></Aparece>
+          <Aparece delay={220}><Hueco texto="Detalle de colocación" foto={fotos.local?.[2]} /></Aparece>
         </div>
       </section>
 
       {/* ── CTA verde ── */}
       <section id="contacto" style={{ backgroundColor: VERDE }}>
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-10 px-6 py-20">
-          <div className="max-w-[620px]">
+          <Aparece className="max-w-[620px]">
             <Titulo className="text-[38px] sm:text-[56px]" tono="#ffffff">
               Mandá marca, modelo y año. Te pasamos el precio hoy.
             </Titulo>
             <p className="mt-6 text-[17px]" style={{ color: "rgba(255,255,255,.85)" }}>
               Presupuesto sin cargo, por WhatsApp o por teléfono.
             </p>
-          </div>
+          </Aparece>
           {waLink ? (
-            <a href={waLink} target="_blank" rel="noreferrer" className={`${btn} px-12`} style={{ ...btnStyle, backgroundColor: "#fff", color: VERDE }}>
+            <a href={waLink} target="_blank" rel="noreferrer" className={`${btn} ca-btn px-12`} style={{ ...btnStyle, backgroundColor: "#fff", color: VERDE }}>
               Escribinos ahora
             </a>
           ) : (
@@ -358,7 +389,7 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
           target="_blank"
           rel="noreferrer"
           aria-label="Escribinos por WhatsApp"
-          className="fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-300 hover:-translate-y-1 motion-reduce:transform-none"
+          className="ca-late fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-300 hover:-translate-y-1 motion-reduce:transform-none"
           style={{ backgroundColor: "#25D366" }}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
