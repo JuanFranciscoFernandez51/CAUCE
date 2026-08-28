@@ -294,9 +294,13 @@ export function VidriosHome({ tenant }: { tenant: Client }) {
           </p>
         </Aparece>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          <Aparece><Hueco texto="Frente del local" foto={fotos.local?.[0]} /></Aparece>
-          <Aparece delay={110}><Hueco texto="El equipo trabajando" foto={fotos.local?.[1]} /></Aparece>
-          <Aparece delay={220}><Hueco texto="Detalle de colocación" foto={fotos.local?.[2]} /></Aparece>
+          <Aparece className="md:col-span-2">
+            <Hueco alto="h-[300px] sm:h-[420px]" texto="Frente del local" foto={fotos.local?.[0]} />
+          </Aparece>
+          <div className="grid gap-6">
+            <Aparece delay={110}><Hueco alto="h-[140px] sm:h-[198px]" texto="El equipo trabajando" foto={fotos.local?.[1]} /></Aparece>
+            <Aparece delay={220}><Hueco alto="h-[140px] sm:h-[198px]" texto="Detalle de colocación" foto={fotos.local?.[2]} /></Aparece>
+          </div>
         </div>
       </section>
 
