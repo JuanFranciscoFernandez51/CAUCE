@@ -45,7 +45,7 @@ export function PropuestaAcciones({ token, estado }: { token: string; estado: st
           ✓ Aceptar propuesta
         </Button>
         <a
-          href={`https://wa.me/5492915729501?text=${encodeURIComponent("Hola Cauce! Vi la propuesta y quiero charlarla.")}`}
+          href={`https://wa.me/5492915757101?text=${encodeURIComponent("Hola Cauce! Vi la propuesta y quiero charlarla.")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex h-11 items-center justify-center gap-2 rounded-md border bg-card px-5 text-sm font-medium hover:bg-muted"

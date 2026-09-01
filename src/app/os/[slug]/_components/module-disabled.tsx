@@ -24,7 +24,7 @@ export function ModuleDisabled({
         }
         action={
           <a
-            href="https://wa.me/5492914713920?text=Hola%20Cauce%2C%20quiero%20sumar%20un%20m%C3%B3dulo%20a%20mi%20sistema"
+            href="https://wa.me/5492915757101?text=Hola%20Cauce%2C%20quiero%20sumar%20un%20m%C3%B3dulo%20a%20mi%20sistema"
             className="text-sm font-medium text-primary underline"
             target="_blank"
             rel="noopener noreferrer"

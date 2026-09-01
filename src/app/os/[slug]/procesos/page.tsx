@@ -90,7 +90,7 @@ export default async function ProcesosPage({
           ¿Querés que algo funcione distinto o sumar un proceso nuevo? Escribinos y lo
           ajustamos:{" "}
           <a
-            href="https://wa.me/5492915729501?text=Hola%20Cauce%2C%20quiero%20ajustar%20un%20proceso%20de%20mi%20sistema"
+            href="https://wa.me/5492915757101?text=Hola%20Cauce%2C%20quiero%20ajustar%20un%20proceso%20de%20mi%20sistema"
             className="font-medium text-primary hover:underline"
             target="_blank"
             rel="noopener noreferrer"

@@ -49,7 +49,7 @@ async function main() {
       mrr: 350,
       contactName: "Francisco Fernández",
       email: "administracion@vespabahia.com",
-      whatsapp: "+5492914713920",
+      whatsapp: "+5492915757101",
       branding: {
         displayName: "Vespa Bahía",
         primary: "#1d4ed8",
