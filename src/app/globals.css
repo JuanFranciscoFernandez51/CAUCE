@@ -468,83 +468,129 @@ h3 {
    pixelado asomando detrás. Todo CSS, sin assets externos.
    ════════════════════════════════════════════════════════════ */
 
-/* El verde editorial de la home (solo acentos, el CTA sigue azul). */
-.menta { --verde: #2f6e46; }
-.dark .menta { --verde: #8fdcae; }
+/* El acento editorial de la home: el azul de Cauce, agua. */
+.menta { --agua: #2e6bff; --agua-hondo: #123a8f; }
+.dark .menta { --agua: #7fb0ff; --agua-hondo: #0a1f4d; }
 
-/* La palabra acentuada del titular: serif itálica en verde. */
+/* La palabra acentuada del titular: serif itálica en el azul de marca. */
 .menta .palabra-verde {
   font-family: var(--font-cormorant), Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  color: var(--verde);
+  color: var(--agua);
   letter-spacing: 0;
   padding-right: 0.08em; /* que la itálica no se recorte */
 }
 
-/* ── FondoDither: paisaje + trama + ruido, difuminado hacia la página ── */
+/* ── FondoDither: AGUA en movimiento — capas de olas que se desplazan a
+   distinta velocidad, brillo que recorre la superficie y trama dither
+   encima. Todo CSS animado (transform/opacity): no lagea en el celu.  ── */
 .fondo-dither {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   user-select: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 97%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 97%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 66%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 66%, transparent 99%);
 }
 .fondo-dither-invertida {
-  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 97%);
-  mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 97%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 66%, transparent 99%);
+  mask-image: linear-gradient(to top, #000 0%, #000 66%, transparent 99%);
 }
 .fondo-dither > div { position: absolute; inset: 0; }
 
-/* 1 · Paisaje: cielo claro, sol tenue y montañas en 3-4 verdes/oliva. */
+/* 1 · El agua: profundidad azul + reflejo de luz arriba. */
 .fd-paisaje {
   background:
-    /* halo de sol arriba a la derecha */
-    radial-gradient(42% 30% at 72% 10%, rgba(255, 253, 238, 0.9), rgba(255, 253, 238, 0) 70%),
-    /* montaña cercana izquierda (la más oscura) */
-    radial-gradient(90% 44% at 10% 102%, #2f5540 0 55%, rgba(47, 85, 64, 0) 56%),
-    /* montaña cercana derecha */
-    radial-gradient(78% 38% at 82% 103%, #3c6449 0 52%, rgba(60, 100, 73, 0) 53%),
-    /* cordón medio */
-    radial-gradient(130% 33% at 42% 104%, #567e58 0 58%, rgba(86, 126, 88, 0) 59%),
-    /* lomada lejana, casi bruma */
-    radial-gradient(170% 29% at 62% 105%, #7fa478 0 62%, rgba(127, 164, 120, 0) 63%),
-    /* cielo → valle */
-    linear-gradient(to bottom, #eef2e7 0%, #e0e9d3 38%, #c7d9b8 66%, #a7c298 100%);
+    radial-gradient(46% 34% at 74% 6%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(120% 60% at 50% 128%, #0b2f7a 0 42%, rgba(11, 47, 122, 0) 62%),
+    linear-gradient(to bottom, #e7efff 0%, #bcd6ff 30%, #7ea9f0 58%, #4a7cd8 80%, #21509f 100%);
 }
 .fondo-dither-invertida .fd-paisaje { transform: scaleY(-1); }
 
-/* 2 · Trama dither: dos grillas de puntos desfasadas, estilo halftone. */
+/* 2 · Olas: tres capas de curvas SVG que se deslizan y ondulan. */
+.fd-olas {
+  background-repeat: repeat-x;
+  background-position: bottom;
+  will-change: transform;
+}
+.fd-olas-1 {
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cpath d='M0 120 C 150 70 300 170 450 120 C 600 70 750 170 900 120 C 1050 70 1150 150 1200 120 L1200 220 L0 220 Z' fill='%233f7fe4' fill-opacity='0.7'/%3E%3C/svg%3E");
+  background-size: 1200px 60%;
+  animation: fd-deriva 26s linear infinite, fd-mecer 9s ease-in-out infinite alternate;
+}
+.fd-olas-2 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cpath d='M0 140 C 200 100 340 190 520 140 C 700 90 860 180 1020 140 C 1120 115 1170 150 1200 140 L1200 220 L0 220 Z' fill='%232360c4' fill-opacity='0.62'/%3E%3C/svg%3E");
+  background-size: 1400px 48%;
+  animation: fd-deriva-inv 34s linear infinite, fd-mecer 12s ease-in-out infinite alternate-reverse;
+}
+.fd-olas-3 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cpath d='M0 160 C 180 130 330 200 500 165 C 680 128 840 195 1010 162 C 1120 140 1170 170 1200 160 L1200 220 L0 220 Z' fill='%23123a8f' fill-opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 1000px 34%;
+  animation: fd-deriva 44s linear infinite reverse, fd-mecer 15s ease-in-out infinite alternate;
+}
+
+/* 3 · Destello que recorre la superficie, como el sol sobre el agua. */
+.fd-brillo {
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.32) 50%, transparent 62%);
+  background-size: 240% 100%;
+  animation: fd-reflejo 11s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+
+@keyframes fd-deriva {
+  from { background-position-x: 0; }
+  to { background-position-x: -1200px; }
+}
+@keyframes fd-deriva-inv {
+  from { background-position-x: -1400px; }
+  to { background-position-x: 0; }
+}
+@keyframes fd-mecer {
+  from { transform: translateY(6px) scaleY(1); }
+  to { transform: translateY(-8px) scaleY(1.03); }
+}
+@keyframes fd-reflejo {
+  0%, 100% { background-position-x: 130%; }
+  50% { background-position-x: -30%; }
+}
+
+/* 4 · Trama dither sobre el agua: la textura de revista que nos gusta. */
 .fd-trama {
   mix-blend-mode: soft-light;
-  opacity: 0.85;
+  opacity: 0.8;
   background-image:
-    radial-gradient(rgba(255, 255, 255, 0.8) 0.9px, transparent 1.25px),
-    radial-gradient(rgba(12, 32, 18, 0.9) 0.9px, transparent 1.25px);
+    radial-gradient(rgba(255, 255, 255, 0.85) 0.9px, transparent 1.25px),
+    radial-gradient(rgba(8, 24, 56, 0.9) 0.9px, transparent 1.25px);
   background-size: 5px 5px, 5px 5px;
   background-position: 0 0, 2.5px 2.5px;
 }
 
-/* 3 · Ruido de "revista escaneada": feTurbulence inline, tile chico. */
+/* 5 · Ruido de "revista escaneada": feTurbulence inline, tile chico. */
 .fd-ruido {
   mix-blend-mode: overlay;
-  opacity: 0.4;
+  opacity: 0.34;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
 
-/* 4 · En oscuro el paisaje baja el brillo y un velo lo funde con el fondo. */
+/* 6 · En oscuro el agua se hace honda y un velo la funde con el fondo. */
 .fd-oscuro { display: none; }
-.dark .menta .fd-paisaje { filter: brightness(0.45) saturate(0.72); }
-.dark .menta .fd-trama { opacity: 0.55; }
+.dark .menta .fd-paisaje { filter: brightness(0.5) saturate(0.9); }
+.dark .menta .fd-trama { opacity: 0.5; }
+.dark .menta .fd-brillo { opacity: 0.6; }
 .dark .menta .fd-oscuro {
   display: block;
-  background: linear-gradient(to bottom, rgba(11, 18, 32, 0.3), rgba(11, 18, 32, 0.62));
+  background: linear-gradient(to bottom, rgba(6, 14, 33, 0.34), rgba(6, 14, 33, 0.66));
 }
 .dark .menta .fondo-dither-invertida .fd-oscuro {
-  background: linear-gradient(to top, rgba(11, 18, 32, 0.3), rgba(11, 18, 32, 0.62));
+  background: linear-gradient(to top, rgba(6, 14, 33, 0.34), rgba(6, 14, 33, 0.66));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fd-olas-1, .fd-olas-2, .fd-olas-3, .fd-brillo { animation: none; }
 }
 
 /* ── Manifiesto (ScrollReveal): pisa los tamaños del CSS portado ── */
@@ -571,3 +617,71 @@ h3 {
 
 /* Botón especular: que el label no herede el subrayado de links. */
 .menta .specular-button { font-family: var(--font-sans); }
+
+
+/* ════════════════════════════════════════════════════════════
+   VIDA DE LA HOME (sep-2026): hovers, cinta de logos y detalles
+   con movimiento. Solo transform/opacity → no cuesta nada.
+   ════════════════════════════════════════════════════════════ */
+
+/* Las tarjetas se levantan al pasar el mouse */
+.menta .card-viva,
+.menta [data-viva="card"] {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+.menta .card-viva:hover,
+.menta [data-viva="card"]:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(12, 30, 66, 0.14);
+}
+
+/* Botones y píldoras con respuesta al mouse y al tap */
+.menta a[class*="rounded-full"],
+.menta button[class*="rounded-full"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+.menta a[class*="rounded-full"]:hover,
+.menta button[class*="rounded-full"]:hover { transform: translateY(-2px); }
+.menta a[class*="rounded-full"]:active,
+.menta button[class*="rounded-full"]:active { transform: scale(0.98); }
+
+/* La tira de negocios: se desplaza sola, como una marquesina */
+.menta .tira-logos { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.menta .tira-logos-pista {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 3rem;
+  animation: tira-corre 32s linear infinite;
+}
+.menta .tira-logos:hover .tira-logos-pista { animation-play-state: paused; }
+@keyframes tira-corre { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Subrayado que crece en los links del nav */
+.menta nav a[href^="#"],
+.menta nav a[href^="/"] { position: relative; }
+.menta nav a[href^="#"]::after,
+.menta nav a[href^="/"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.menta nav a[href^="#"]:hover::after,
+.menta nav a[href^="/"]:hover::after { transform: scaleX(1); }
+
+/* Flechas que se corren en los links de "ver más" */
+.menta .flecha-viva { display: inline-block; transition: transform 0.25s ease; }
+.menta a:hover .flecha-viva { transform: translateX(4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .menta .tira-logos-pista { animation: none; }
+  .menta .card-viva, .menta [data-viva="card"],
+  .menta a[class*="rounded-full"], .menta button[class*="rounded-full"] { transition: none; }
+  .menta .card-viva:hover, .menta [data-viva="card"]:hover,
+  .menta a[class*="rounded-full"]:hover, .menta button[class*="rounded-full"]:hover { transform: none; }
+}

@@ -248,31 +248,47 @@ export default async function LandingPage() {
             <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Negocios reales que ya fluyen con Cauce
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70 grayscale dark:opacity-90">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/casos/motos-fernandez-logo.png"
-                alt="Motos Fernández"
-                className="h-9 w-auto object-contain dark:invert"
-              />
-              <span className="font-display text-lg font-medium text-muted-foreground">
-                Vespa Bahía
-              </span>
-              <span className="font-display text-lg font-medium text-muted-foreground">
-                Vespa Club Bahía Blanca
-              </span>
-              <span className="font-display text-lg font-medium text-muted-foreground">
-                Zatiori
-              </span>
-              <span className="font-display text-lg font-medium text-muted-foreground">
-                La Base
-              </span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/avefenix/logo.png"
-                alt="Ave Fénix Publicidad"
-                className="h-8 w-auto rounded-md bg-foreground object-contain px-2 py-1"
-              />
+            {/* La tira corre sola (se duplica para el loop) y pausa en hover */}
+            <div className="tira-logos mt-6 opacity-70 grayscale dark:opacity-90">
+              <div className="tira-logos-pista">
+                {[0, 1].map((vuelta) => (
+                  <div key={vuelta} className="flex items-center gap-x-10" aria-hidden={vuelta === 1}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/casos/motos-fernandez-logo.png"
+                      alt="Motos Fernández"
+                      className="h-9 w-auto object-contain dark:invert"
+                    />
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Vespa Bahía
+                    </span>
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Vespa Club Bahía Blanca
+                    </span>
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Zatiori
+                    </span>
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      La Base
+                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/avefenix/logo.png"
+                      alt="Ave Fénix Publicidad"
+                      className="h-8 w-auto rounded-md bg-foreground object-contain px-2 py-1"
+                    />
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Jess Design
+                    </span>
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Casa Milo
+                    </span>
+                    <span className="whitespace-nowrap font-display text-lg font-medium text-muted-foreground">
+                      Código Auto
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </Reveal>
         </div>
