@@ -29,6 +29,19 @@ const DEFAULT_PRIMARY = "#0f766e";
 /** Corre todos los checks del mínimo entregable para un tenant. */
 export async function checklistEntrega(client: Client): Promise<CheckEntrega[]> {
   const s = ((client.settings as Settings | null) ?? {}) as Settings;
+
+  // settings es JSON libre: cada tenant lo llena a su manera (texto, objeto,
+  // lista). Estos helpers leen sin romper si el tipo no es el esperado.
+  const comoTexto = (v: unknown): string => {
+    if (typeof v === "string") return v.trim();
+    if (v && typeof v === "object") {
+      return Object.values(v as Record<string, unknown>)
+        .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+        .join(" · ");
+    }
+    return "";
+  };
+  const comoLista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
   const branding = (client.branding as Record<string, unknown> | null) ?? {};
   const modules = tenantModules(client);
   const checks: CheckEntrega[] = [];
@@ -54,7 +67,7 @@ export async function checklistEntrega(client: Client): Promise<CheckEntrega[]> 
   });
 
   // ── 2. Web completa ────────────────────────────────────
-  const servicios = s.servicios?.filter((x) => x?.nombre) ?? [];
+  const servicios = comoLista(s.servicios).filter((x) => (x as { nombre?: string })?.nombre);
   checks.push({
     key: "web-servicios",
     label: "Web: servicios cargados (mínimo 3)",
@@ -64,23 +77,30 @@ export async function checklistEntrega(client: Client): Promise<CheckEntrega[]> 
   checks.push({
     key: "web-sobre",
     label: "Web: quiénes somos con contenido real",
-    ok: (s.sobre ?? "").trim().length >= 120,
-    detalle: (s.sobre ?? "").trim().length >= 120 ? "Texto propio del negocio." : "Escribir el 'sobre nosotros' con el cliente (mín. 120 caracteres).",
+    ok: comoTexto(s.sobre).length >= 120,
+    detalle: comoTexto(s.sobre).length >= 120 ? "Texto propio del negocio." : "Escribir el 'sobre nosotros' con el cliente (mín. 120 caracteres).",
   });
   checks.push({
     key: "web-horarios",
     label: "Web: horarios visibles",
-    ok: Boolean(s.horarios?.trim()),
-    detalle: s.horarios?.trim() ? s.horarios : "Cargar los horarios reales de atención.",
+    ok: comoTexto(s.horarios).length > 0,
+    detalle: comoTexto(s.horarios) || "Cargar los horarios reales de atención.",
   });
-  const tieneContacto = Boolean(client.whatsapp || client.phone) && Boolean(s.datosNegocio?.direccion);
+  // La dirección puede venir en datosNegocio.direccion o suelta en settings.
+  const direccion = comoTexto(s.datosNegocio?.direccion) || comoTexto((s as { direccion?: unknown }).direccion);
+  const tieneContacto = Boolean(client.whatsapp || client.phone) && Boolean(direccion);
   checks.push({
     key: "web-contacto",
     label: "Web: teléfono/WhatsApp + dirección",
     ok: tieneContacto,
     detalle: tieneContacto ? "Datos de contacto completos." : "Cargar WhatsApp y dirección del local.",
   });
-  const fotos = s.fotos?.filter(Boolean) ?? [];
+  // Las fotos pueden ser una lista o un objeto con secciones (hero, local…).
+  const fotos = Array.isArray(s.fotos)
+    ? s.fotos.filter(Boolean)
+    : Object.values((s.fotos ?? {}) as Record<string, unknown>).flatMap((v) =>
+        Array.isArray(v) ? v.filter(Boolean) : v ? [v] : []
+      );
   checks.push({
     key: "web-fotos",
     label: "Web: fotos reales del negocio (mínimo 3)",
