@@ -79,17 +79,18 @@ export function CarruselCasos({
   const reducido = useReducido();
   const ancho = useMedia("(min-width: 640px)");
   return (
-    <div className="relative h-[300px] sm:h-[420px]">
+    <div className="relative h-[320px] sm:h-[560px]">
+      {/* Tarjetas grandes (las capturas son 1920×1200): se leen, no se adivinan. */}
       <DepthCarousel
         items={items}
-        cardWidth={ancho ? 470 : 280}
-        cardHeight={ancho ? 294 : 175}
+        cardWidth={ancho ? 760 : 300}
+        cardHeight={ancho ? 475 : 188}
         radius={16}
-        depth={ancho ? 190 : 120}
-        spread={ancho ? 74 : 48}
+        depth={ancho ? 230 : 120}
+        spread={ancho ? 96 : 48}
         tilt={12}
         visibleCards={3}
-        blur={5}
+        blur={3}
         autoplay={!reducido}
         autoplayDelay={3600}
         loop

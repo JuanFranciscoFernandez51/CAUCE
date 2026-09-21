@@ -8,11 +8,12 @@ import { PublicShell } from "@/components/public/shell";
 import { ESPEJOS, PIEZA_BASE } from "@/lib/piezas";
 import { Doors } from "@/components/public/doors";
 import { Reveal, StepsFlow } from "@/components/public/menta";
-import { Vitrina, type VitrinaItem } from "@/components/public/vitrina";
+import { CASOS_REALES } from "@/lib/casos-reales";
 import { FondoDither } from "@/components/public/fondo-dither";
 import {
   Manifiesto,
   CintaClaim,
+  CarruselCasos,
   CardGlow,
   BotonEspecular,
 } from "@/components/public/vivo";
@@ -80,19 +81,33 @@ const AREA_CHIPS = [
 
 /** Capturas REALES del producto (Cloudinary, ver casos-reales.ts). */
 
-/** Pantallas reales del sistema (public/vitrina), con los datos de los clientes tapados. */
-const VITRINA: VitrinaItem[] = [
-  { src: "/vitrina/boleto-orden.jpg", titulo: "Orden con boleto", detalle: "Código Auto · la orden de trabajo sale lista para imprimir o mandar como PDF" },
-  { src: "/vitrina/presupuesto.jpg", titulo: "Presupuesto PDF", detalle: "Piletas Bahía Blanca · presupuesto con la marca del negocio y boletos de visita" },
-  { src: "/vitrina/ficha-evento.jpg", titulo: "Ficha de evento", detalle: "Jess Design · presupuesto, cobrado y saldo de cada evento, con sus pagos" },
-  { src: "/vitrina/facturacion.jpg", titulo: "Facturación ARCA", detalle: "Código Auto · se eligen los trabajos entregados y se facturan" },
-  { src: "/vitrina/taller.jpg", titulo: "Taller y calendario", detalle: "Código Auto · calendario de ingresos con las órdenes del día" },
-  { src: "/vitrina/crm.jpg", titulo: "CRM", detalle: "Ave Fénix · cada consulta entra sola y avanza por etapas" },
-  { src: "/vitrina/stock.jpg", titulo: "Stock con precios", detalle: "Código Auto · código, marca, cantidad y tres listas de precio" },
-  { src: "/vitrina/dashboard.jpg", titulo: "Dashboard", detalle: "Vespa Bahía · turnos, clientes para fidelizar y lo que hay que resolver hoy" },
-  { src: "/vitrina/calendario.jpg", titulo: "Calendario + pendientes", detalle: "Jess Design · tareas con fecha en el calendario, sin fecha en pendientes" },
-  { src: "/vitrina/catalogo.jpg", titulo: "Catálogo grande", detalle: "Fernández Repuestos · más de 2.000 productos con buscador" },
-];
+/** Capturas completas de los casos (las mismas de /casos), listas para el carrusel 3D. */
+const shotDe = (slug: string, titulo: string) =>
+  CASOS_REALES.find((c) => c.slug === slug)?.shotsAdmin?.find((s) => s.titulo === titulo)?.url ?? null;
+const SHOTS_CARRUSEL = (
+  [
+    ["vespa-bahia", "Dashboard"],
+    ["vespa-bahia", "Órdenes de compra (boleto)"],
+    ["vespa-bahia", "Facturación (ARCA)"],
+    ["vespa-bahia", "Finanzas — resumen general"],
+    ["vespa-bahia", "Taller — órdenes de trabajo"],
+    ["vespa-bahia", "Stock por unidad física"],
+    ["vespa-bahia", "CRM / Leads"],
+    ["vespa-bahia", "Mandatos de venta"],
+    ["vespa-bahia", "Calendario"],
+    ["vespa-bahia", "Tesorería"],
+    ["motos-fernandez", "Finanzas — matriz anual"],
+    ["motos-fernandez", "Outreach — avisos por WhatsApp"],
+    ["zatiori-espejos", "Pedidos — pipeline de 6 estados"],
+  ] as const
+)
+  .map(([slug, titulo]) => {
+    const url = shotDe(slug, titulo);
+    const nombre = CASOS_REALES.find((c) => c.slug === slug)?.nombre ?? "";
+    // Cloudinary sirve la captura ya achicada al tamaño del carrusel.
+    return url ? { image: url.replace("/upload/", "/upload/w_1400,q_auto,f_auto/"), alt: `${titulo} — ${nombre}` } : null;
+  })
+  .filter((x): x is { image: string; alt: string } => x !== null);
 
 const DIA_CAUCE: [string, string, string][] = [
   ["09:02", "Un cliente sacó turno solo desde tu página", "📅"],
@@ -394,7 +409,7 @@ export default async function LandingPage() {
               Así se ve por dentro
             </p>
             <div className="mt-6">
-              <Vitrina items={VITRINA} />
+              <CarruselCasos items={SHOTS_CARRUSEL} />
             </div>
           </Reveal>
         </div>
