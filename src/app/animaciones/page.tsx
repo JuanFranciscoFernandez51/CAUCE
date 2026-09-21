@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function AnimacionesPublicas() {
   return (
     <PublicShell>
-      <section className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+      <section className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Animaciones web</p>
         <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
           Webs que se sienten vivas
