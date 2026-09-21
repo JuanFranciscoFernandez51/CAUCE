@@ -685,3 +685,12 @@ h3 {
   .menta .card-viva:hover, .menta [data-viva="card"]:hover,
   .menta a[class*="rounded-full"]:hover, .menta button[class*="rounded-full"]:hover { transform: none; }
 }
+
+
+/* ── Hero: el agua pasa por detrás de la barra flotante y la bajada se lee ── */
+/* La barra (sticky, ~4.5rem con su aire) queda flotando sobre el agua. */
+.menta .hero-agua { margin-top: calc(-1 * (3.5rem + 0.75rem + 0.75rem)); }
+@media (min-width: 640px) { .menta .hero-agua { margin-top: calc(-1 * (3.5rem + 1rem + 1rem)); } }
+/* Halo claro detrás del texto para que el tramado no lo ensucie. */
+.menta .hero-bajada { text-shadow: 0 0 18px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(255, 255, 255, 0.8); }
+.dark .menta .hero-bajada { text-shadow: 0 0 18px rgba(6, 14, 33, 0.9), 0 1px 2px rgba(6, 14, 33, 0.8); }

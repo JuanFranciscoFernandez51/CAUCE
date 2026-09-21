@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { BizArea } from "@prisma/client";
-import Image from "next/image";
 import Link from "next/link";
 import { getPricing, fmtUsd } from "@/lib/pricing";
 import { AREA_LABELS, CASOS } from "@/lib/casos";
@@ -9,10 +8,10 @@ import { PublicShell } from "@/components/public/shell";
 import { ESPEJOS, PIEZA_BASE } from "@/lib/piezas";
 import { Doors } from "@/components/public/doors";
 import { Reveal, StepsFlow } from "@/components/public/menta";
+import { Vitrina, type VitrinaItem } from "@/components/public/vitrina";
 import { FondoDither } from "@/components/public/fondo-dither";
 import {
   Manifiesto,
-  CarruselCasos,
   CintaClaim,
   CardGlow,
   BotonEspecular,
@@ -80,35 +79,19 @@ const AREA_CHIPS = [
 ];
 
 /** Capturas REALES del producto (Cloudinary, ver casos-reales.ts). */
-const SHOTS = {
-  mfDashboard:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262068/cauce/sistema/hero/yxkwcepjsbi89ow0yd0l.png",
-  mfInstagram:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262073/cauce/sistema/hero/busrdpddobawzs9vvofi.png",
-  mfOutreach:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262078/cauce/sistema/hero/l6g7ukrtktfxakiudnze.png",
-  mfTaller:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262083/cauce/sistema/hero/lmurwve5wpp40tyksszy.png",
-  vbStock:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262089/cauce/sistema/hero/exppo79knigxlmmv4dfh.png",
-  vbArca:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262094/cauce/sistema/hero/kbpruvdb425tez1a1mhi.png",
-  lbCaja:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262104/cauce/sistema/hero/kzrho8qgih7qsk2ywedn.png",
-  lbCalendario:
-    "https://res.cloudinary.com/dgtlyzyra/image/upload/v1785262114/cauce/sistema/hero/yjgjy29urlaxv33t4kti.png",
-};
 
-/** Las capturas, listas para el carrusel 3D (alt = qué hace, sin humo). */
-const SHOTS_CARRUSEL = [
-  { image: SHOTS.mfDashboard, alt: "Dashboard real de Motos Fernández en Cauce" },
-  { image: SHOTS.lbCaja, alt: "Caja en 4 monedas de La Base en Cauce" },
-  { image: SHOTS.vbArca, alt: "Facturación ARCA — Vespa Bahía" },
-  { image: SHOTS.mfOutreach, alt: "Avisos por WhatsApp — Motos Fernández" },
-  { image: SHOTS.lbCalendario, alt: "Calendario del mes — La Base" },
-  { image: SHOTS.mfInstagram, alt: "Publicar en Instagram con un botón — Motos Fernández" },
-  { image: SHOTS.mfTaller, alt: "Taller con órdenes de trabajo — Motos Fernández" },
-  { image: SHOTS.vbStock, alt: "Stock del catálogo — Vespa Bahía" },
+/** Pantallas reales del sistema (public/vitrina), con los datos de los clientes tapados. */
+const VITRINA: VitrinaItem[] = [
+  { src: "/vitrina/boleto-orden.jpg", titulo: "Orden con boleto", detalle: "Código Auto · la orden de trabajo sale lista para imprimir o mandar como PDF" },
+  { src: "/vitrina/presupuesto.jpg", titulo: "Presupuesto PDF", detalle: "Piletas Bahía Blanca · presupuesto con la marca del negocio y boletos de visita" },
+  { src: "/vitrina/ficha-evento.jpg", titulo: "Ficha de evento", detalle: "Jess Design · presupuesto, cobrado y saldo de cada evento, con sus pagos" },
+  { src: "/vitrina/facturacion.jpg", titulo: "Facturación ARCA", detalle: "Código Auto · se eligen los trabajos entregados y se facturan" },
+  { src: "/vitrina/taller.jpg", titulo: "Taller y calendario", detalle: "Código Auto · calendario de ingresos con las órdenes del día" },
+  { src: "/vitrina/crm.jpg", titulo: "CRM", detalle: "Ave Fénix · cada consulta entra sola y avanza por etapas" },
+  { src: "/vitrina/stock.jpg", titulo: "Stock con precios", detalle: "Código Auto · código, marca, cantidad y tres listas de precio" },
+  { src: "/vitrina/dashboard.jpg", titulo: "Dashboard", detalle: "Vespa Bahía · turnos, clientes para fidelizar y lo que hay que resolver hoy" },
+  { src: "/vitrina/calendario.jpg", titulo: "Calendario + pendientes", detalle: "Jess Design · tareas con fecha en el calendario, sin fecha en pendientes" },
+  { src: "/vitrina/catalogo.jpg", titulo: "Catálogo grande", detalle: "Fernández Repuestos · más de 2.000 productos con buscador" },
 ];
 
 const DIA_CAUCE: [string, string, string][] = [
@@ -200,9 +183,9 @@ export default async function LandingPage() {
   return (
     <PublicShell>
       {/* ══ HERO — tipografía gigante con UNA palabra verde serif + paisaje dither ══ */}
-      <section className="relative overflow-hidden">
+      <section className="hero-agua relative overflow-hidden">
         <FondoDither />
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 text-center sm:px-6 sm:pt-24 lg:pt-28">
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-32 text-center sm:px-6 sm:pt-44 lg:pt-48">
           <Reveal>
             <span className="inline-flex items-center rounded-full border border-border bg-card/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
               Web + sistema de gestión a medida — Bahía Blanca, Argentina
@@ -214,12 +197,10 @@ export default async function LandingPage() {
             </h1>
           </Reveal>
           <Reveal delay={190}>
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+            <p className="hero-bajada mx-auto mt-7 max-w-2xl text-lg font-medium leading-relaxed text-foreground sm:text-xl">
               Tu página web, tu gestión y tus avisos automáticos, armados como trabajás
               vos. Dejá el Excel, el cuaderno y las cosas lentas:{" "}
-              <span className="font-medium text-foreground">
-                todo en un solo lugar, simple y con tu marca.
-              </span>
+              <span className="font-semibold">todo en un solo lugar, simple y con tu marca.</span>
             </p>
           </Reveal>
           <Reveal delay={280}>
@@ -413,7 +394,7 @@ export default async function LandingPage() {
               Así se ve por dentro
             </p>
             <div className="mt-6">
-              <CarruselCasos items={SHOTS_CARRUSEL} />
+              <Vitrina items={VITRINA} />
             </div>
           </Reveal>
         </div>
