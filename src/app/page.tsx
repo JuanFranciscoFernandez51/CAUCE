@@ -81,31 +81,39 @@ const AREA_CHIPS = [
 
 /** Capturas REALES del producto (Cloudinary, ver casos-reales.ts). */
 
-/** Capturas completas de los casos (las mismas de /casos), listas para el carrusel 3D. */
-const shotDe = (slug: string, titulo: string) =>
-  CASOS_REALES.find((c) => c.slug === slug)?.shotsAdmin?.find((s) => s.titulo === titulo)?.url ?? null;
-const SHOTS_CARRUSEL = (
+/** Lo que se ve por dentro: webs vivas, eventos reales y el sistema. Mezcla, no solo admin. */
+const CLD = "https://res.cloudinary.com/dgtlyzyra/image/upload";
+const shotDe = (slug: string, titulo: string) => {
+  const c = CASOS_REALES.find((x) => x.slug === slug);
+  return c?.shotsReales?.find((s) => s.titulo === titulo)?.url ?? c?.shotsAdmin?.find((s) => s.titulo === titulo)?.url ?? null;
+};
+const encuadre = (url: string) => url.replace("/upload/", "/upload/c_fill,g_north,ar_16:10,w_1400,q_auto,f_auto/");
+const SHOTS_CARRUSEL: { image: string; alt: string }[] = (
   [
-    ["vespa-bahia", "Dashboard"],
-    ["vespa-bahia", "Órdenes de compra (boleto)"],
-    ["vespa-bahia", "Facturación (ARCA)"],
-    ["vespa-bahia", "Finanzas — resumen general"],
-    ["vespa-bahia", "Taller — órdenes de trabajo"],
-    ["vespa-bahia", "Stock por unidad física"],
-    ["vespa-bahia", "CRM / Leads"],
-    ["vespa-bahia", "Mandatos de venta"],
-    ["vespa-bahia", "Calendario"],
-    ["vespa-bahia", "Tesorería"],
-    ["motos-fernandez", "Finanzas — matriz anual"],
-    ["motos-fernandez", "Outreach — avisos por WhatsApp"],
-    ["zatiori-espejos", "Pedidos — pipeline de 6 estados"],
-  ] as const
+    // Webs vivas
+    { slug: "motos-fernandez", titulo: "Catálogo de motos online" },
+    { url: `${CLD}/v1790000958/cauce/sistema/hero/jess-trabajos.png`, alt: "Nuestros trabajos — Jess Design" },
+    { slug: "vespa-bahia", titulo: "Su web viva — home" },
+    // Eventos reales de Jess Design
+    { url: `${CLD}/v1786743411/jessdesign/sofi-paul-entrada.webp`, alt: "Boda de Sofi & Paul — Jess Design" },
+    { url: `${CLD}/v1790000963/cauce/sistema/hero/codigoauto-home.png`, alt: "Web de Código Auto — parabrisas en Bariloche" },
+    { url: `${CLD}/v1786743602/jessdesign/santi-ori-48.webp`, alt: "Boda de Santi & Ori — Jess Design" },
+    { slug: "motos-fernandez", titulo: "Su web viva — home" },
+    { url: `${CLD}/jessdesign/audi-ambientacion.png`, alt: "Lanzamiento Audi A5 — Jess Design" },
+    { slug: "vespa-club", titulo: "Su web viva — home" },
+    { url: `${CLD}/v1790000967/cauce/sistema/hero/casamilo-home.png`, alt: "Web de Casa Milo — milanesas y pollo" },
+    // El sistema
+    { slug: "vespa-bahia", titulo: "Órdenes de compra (boleto)" },
+    { slug: "zatiori-espejos", titulo: "Su web viva — home" },
+    { slug: "vespa-bahia", titulo: "Finanzas — resumen general" },
+    { slug: "motos-fernandez", titulo: "Tienda de accesorios" },
+  ] as ({ slug: string; titulo: string } | { url: string; alt: string })[]
 )
-  .map(([slug, titulo]) => {
-    const url = shotDe(slug, titulo);
-    const nombre = CASOS_REALES.find((c) => c.slug === slug)?.nombre ?? "";
-    // Cloudinary sirve la captura ya achicada al tamaño del carrusel.
-    return url ? { image: url.replace("/upload/", "/upload/w_1400,q_auto,f_auto/"), alt: `${titulo} — ${nombre}` } : null;
+  .map((it) => {
+    if ("url" in it) return { image: encuadre(it.url), alt: it.alt };
+    const url = shotDe(it.slug, it.titulo);
+    const nombre = CASOS_REALES.find((c) => c.slug === it.slug)?.nombre ?? "";
+    return url ? { image: encuadre(url), alt: `${it.titulo} — ${nombre}` } : null;
   })
   .filter((x): x is { image: string; alt: string } => x !== null);
 
