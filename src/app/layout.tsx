@@ -20,6 +20,7 @@ const plexSans = IBM_Plex_Sans({
 });
 
 const bodoni = Bodoni_Moda({
+  preload: false,
   subsets: ["latin"],
   weight: ["700", "900"],
   variable: "--font-bodoni",
@@ -27,6 +28,7 @@ const bodoni = Bodoni_Moda({
 });
 
 const archivo = Archivo({
+  preload: false,
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-archivo",
@@ -41,17 +43,20 @@ const cormorant = Cormorant_Garamond({
 });
 
 const jost = Jost({
+  preload: false,
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-jost",
   display: "swap",
 });
 
-const italiana = Italiana({ subsets: ["latin"], weight: "400", variable: "--font-italiana", display: "swap" });
-const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-montserrat", display: "swap" });
-const pinyon = Pinyon_Script({ subsets: ["latin"], weight: "400", variable: "--font-pinyon", display: "swap" });
+const italiana = Italiana({ preload: false, subsets: ["latin"], weight: "400", variable: "--font-italiana", display: "swap" });
+const montserrat = Montserrat({
+  preload: false, subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-montserrat", display: "swap" });
+const pinyon = Pinyon_Script({ preload: false, subsets: ["latin"], weight: "400", variable: "--font-pinyon", display: "swap" });
 
 const plexMono = IBM_Plex_Mono({
+  preload: false,
   variable: "--font-plex-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600"],

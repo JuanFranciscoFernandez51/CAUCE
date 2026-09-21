@@ -210,7 +210,7 @@ export default async function LandingPage() {
         <FondoDither />
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-32 text-center sm:px-6 sm:pt-44 lg:pt-48">
           <Reveal>
-            <span className="inline-flex items-center rounded-full border border-border bg-card/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+            <span className="inline-flex items-center rounded-full border border-border bg-card/80 px-4 py-1.5 text-xs font-medium text-muted-foreground md:backdrop-blur">
               Web + sistema de gestión a medida — Bahía Blanca, Argentina
             </span>
           </Reveal>
@@ -342,11 +342,11 @@ export default async function LandingPage() {
           {/* Glow de fondo */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-32 -top-40 h-[420px] w-[420px] rounded-full bg-[#2E6BFF]/30 blur-[130px]"
+            className="pointer-events-none absolute hidden md:block -right-32 -top-40 h-[420px] w-[420px] rounded-full bg-[#2E6BFF]/30 blur-[130px]"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-48 -left-32 h-[380px] w-[380px] rounded-full bg-[#7FE8FF]/15 blur-[130px]"
+            className="pointer-events-none absolute hidden md:block -bottom-48 -left-32 h-[380px] w-[380px] rounded-full bg-[#7FE8FF]/15 blur-[130px]"
           />
 
           <div className="relative mx-auto max-w-2xl text-center">
@@ -569,7 +569,7 @@ export default async function LandingPage() {
         <div className="menta-dark relative mx-auto max-w-6xl overflow-hidden rounded-[32px] px-6 py-16 sm:rounded-[40px] sm:px-10 sm:py-24 lg:px-16">
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-32 -top-40 h-[420px] w-[420px] rounded-full bg-[#2E6BFF]/25 blur-[130px]"
+            className="pointer-events-none absolute hidden md:block -left-32 -top-40 h-[420px] w-[420px] rounded-full bg-[#2E6BFF]/25 blur-[130px]"
           />
           <div className="relative mx-auto max-w-2xl text-center">
             <Reveal>

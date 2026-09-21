@@ -21,7 +21,7 @@ export function SiteHeader() {
 
   return (
     <div className="sticky top-0 z-40 px-3 pt-3 sm:px-4 sm:pt-4">
-      <header className="mx-auto max-w-5xl rounded-[28px] border border-border bg-white/90 shadow-[0_10px_36px_-12px_rgba(17,17,17,0.18)] backdrop-blur-md dark:border-white/10 dark:bg-[#101319]/90 dark:shadow-[0_10px_36px_-12px_rgba(0,0,0,0.6)]">
+      <header className="mx-auto max-w-5xl rounded-[28px] border border-border bg-white/95 shadow-[0_10px_36px_-12px_rgba(17,17,17,0.18)] md:bg-white/90 md:backdrop-blur-md dark:border-white/10 dark:bg-[#101319]/90 dark:shadow-[0_10px_36px_-12px_rgba(0,0,0,0.6)]">
         <div className="flex h-14 items-center justify-between gap-3 pl-4 pr-2.5">
           <Link href="/" className="flex items-center gap-2.5 text-lg font-bold" onClick={() => setOpen(false)}>
             <CauceMark className="h-8 w-8" />

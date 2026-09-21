@@ -44,6 +44,7 @@ const useReducido = () => useMedia("(prefers-reduced-motion: reduce)");
 export function Manifiesto({ es, en }: { es: string; en: string }) {
   const lang = useLang();
   const reducido = useReducido();
+  const ancho = useMedia("(min-width: 768px)"); // el blur palabra por palabra solo en desktop
   const texto = lang === "en" ? en : es;
 
   if (reducido) {
@@ -58,7 +59,7 @@ export function Manifiesto({ es, en }: { es: string; en: string }) {
       <ScrollReveal
         key={texto}
         baseOpacity={0.08}
-        enableBlur
+        enableBlur={ancho}
         baseRotation={2}
         blurStrength={5}
         containerClassName="!my-0"
@@ -78,19 +79,22 @@ export function CarruselCasos({
 }) {
   const reducido = useReducido();
   const ancho = useMedia("(min-width: 640px)");
+  // En el celu: imágenes a la mitad de ancho, sin desenfoque en las laterales
+  // (el filter blur es lo que más cuesta) y una tarjeta menos en escena.
+  const itemsCelu = ancho ? items : items.map((it) => ({ ...it, image: it.image.replace("w_1400", "w_720") }));
   return (
     <div className="relative h-[320px] sm:h-[560px]">
       {/* Tarjetas grandes (las capturas son 1920×1200): se leen, no se adivinan. */}
       <DepthCarousel
-        items={items}
+        items={itemsCelu}
         cardWidth={ancho ? 760 : 300}
         cardHeight={ancho ? 475 : 188}
         radius={16}
         depth={ancho ? 230 : 120}
         spread={ancho ? 96 : 48}
         tilt={12}
-        visibleCards={3}
-        blur={3}
+        visibleCards={ancho ? 3 : 2}
+        blur={ancho ? 3 : 0}
         autoplay={!reducido}
         autoplayDelay={3600}
         loop
@@ -134,12 +138,13 @@ export function CardGlow({
   className?: string;
   destacada?: boolean;
 }) {
+  const animar = useMedia("(min-width: 768px)"); // el borde animado, solo en desktop
   return (
     <BorderGlow
       glowColor="145 55 62"
       backgroundColor="var(--card)"
       borderRadius={24}
-      animated={destacada}
+      animated={destacada && animar}
       colors={["#4ade80", "#7fe8ff", "#2e6bff"]}
       className={`card-glow h-full ${className}`}
     >
@@ -150,6 +155,20 @@ export function CardGlow({
 
 // ── CTA de vidrio con brillo especular (WebGL), abre un link ──
 export function BotonEspecular({ href, children }: { href: string; children: string }) {
+  // WebGL solo con mouse y pantalla grande; en el celu es un botón común (mismo look).
+  const conMouse = useMedia("(min-width: 768px) and (pointer: fine)");
+  if (!conMouse) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex h-14 items-center justify-center rounded-full border border-white/25 bg-white/10 px-8 text-base font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,.25)] active:scale-[0.98]"
+      >
+        {children}
+      </a>
+    );
+  }
   return (
     <SpecularButton
       size="lg"

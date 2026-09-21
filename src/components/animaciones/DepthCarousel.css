@@ -128,3 +128,11 @@
   .depth-carousel__arrow,
   .depth-carousel__dot { transition: none; }
 }
+
+/* Celu: los controles sin desenfoque de fondo (cuesta más de lo que aporta). */
+@media (max-width: 767px) {
+  .depth-carousel__arrow, .depth-carousel__dots, .depth-carousel button { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  /* Sin filtros ni blend por tarjeta: la profundidad la da la opacidad y la escala. */
+  .depth-carousel__card { will-change: transform; filter: none !important; }
+  .depth-carousel__tint { display: none !important; }
+}

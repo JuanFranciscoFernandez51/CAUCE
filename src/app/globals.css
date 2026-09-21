@@ -694,3 +694,32 @@ h3 {
 /* Halo claro detrás del texto para que el tramado no lo ensucie. */
 .menta .hero-bajada { text-shadow: 0 0 18px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(255, 255, 255, 0.8); }
 .dark .menta .hero-bajada { text-shadow: 0 0 18px rgba(6, 14, 33, 0.9), 0 1px 2px rgba(6, 14, 33, 0.8); }
+
+
+/* ════════════════════════════════════════════════════════════
+   CELU LIVIANO (sep-2026): en pantallas chicas el GPU del teléfono
+   no aguanta capas a pantalla completa con blend + blur animados.
+   Se apagan las capas decorativas y quedan las olas básicas.
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .fd-ruido, .fd-brillo, .fd-olas-3 { display: none; }
+  .fd-trama { mix-blend-mode: normal; opacity: 0.22; }
+  .fd-olas { will-change: auto; transform: translateZ(0); }
+  .fd-olas-1 { animation-duration: 40s, 12s; }
+  .fd-olas-2 { animation-duration: 52s, 16s; }
+  .fondo-dither { contain: paint; }
+  /* El tramado con puntos también pesa: se agranda la trama (menos puntos). */
+  .fd-trama { background-size: 7px 7px, 7px 7px; background-position: 0 0, 3.5px 3.5px; }
+  /* Sombras y halos grandes cuestan repaint en cada scroll */
+  .menta .hero-bajada { text-shadow: 0 1px 2px rgba(255,255,255,.8); }
+  .dark .menta .hero-bajada { text-shadow: 0 1px 2px rgba(6,14,33,.8); }
+  .menta .card-viva:hover, .menta [data-viva="card"]:hover { transform: none; box-shadow: none; }
+}
+@media (max-width: 767px) {
+  /* Barra flotante: sin desenfoque de fondo en el celu (fondo casi opaco). */
+  .tienda .barra { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (max-width: 767px) {
+  /* Borde luminoso de las cards de precios: sin blend en el celu */
+  .card-glow .edge-light { display: none !important; }
+}
