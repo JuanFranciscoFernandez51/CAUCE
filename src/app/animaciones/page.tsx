@@ -11,16 +11,16 @@ export const metadata: Metadata = {
 export default function AnimacionesPublicas() {
   return (
     <PublicShell>
-      <section className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20">
+      <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 sm:py-12">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Animaciones web</p>
-        <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
+        <h1 className="mt-2 max-w-2xl text-3xl font-bold leading-tight sm:text-4xl">
           Webs que se sienten vivas
         </h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
           Estos son ejemplos reales de animaciones e interacciones que podemos sumar a tu web.
           Movelos, tocalos, probalos — así se van a sentir en tu sitio.
         </p>
-        <div className="mt-10">
+        <div className="mt-7">
           <EjemplosAnimaciones />
         </div>
         <div className="mt-12 rounded-2xl border border-border bg-card p-6 text-center">

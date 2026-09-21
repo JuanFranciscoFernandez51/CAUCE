@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // El admin muestra el código fuente de la biblioteca de animaciones: que viaje con la función.
+  outputFileTracingIncludes: {
+    "/api/admin/animaciones/codigo": ["./src/components/animaciones/**/*"],
+  },
   images: {
     // Fotos servidas optimizadas (WebP/AVIF, tamaños) desde Cloudinary y el
     // placeholder de demo. El control de acceso lo pone la app, no el CDN.
