@@ -79,9 +79,16 @@ export function DetalleAnimacion({ id, modo }: { id: string; modo: "admin" | "pu
 
       {/* Demo grande */}
       <div className="overflow-hidden rounded-2xl border border-border">
-        <PreviewViva key={recarga} pesada={a.pesada}>
-          <a.Preview />
-        </PreviewViva>
+        <div className="relative">
+          <PreviewViva key={recarga} pesada={a.pesada}>
+            <a.Preview />
+          </PreviewViva>
+          {a.categoria === "Fondos" ? (
+            <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+              Fondo de página · va detrás del contenido
+            </span>
+          ) : null}
+        </div>
         <div className="flex items-center justify-between gap-3 border-t border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
           <span>Mové el mouse, hacé click, arrastrá: la demo es real.</span>
           <button type="button" onClick={() => setRecarga((n) => n + 1)} className="rounded-md border border-border px-2.5 py-1 transition hover:bg-muted">

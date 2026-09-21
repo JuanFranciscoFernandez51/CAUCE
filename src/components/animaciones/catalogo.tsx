@@ -63,9 +63,16 @@ export function CatalogoAnimaciones({ modo }: { modo: "admin" | "publico" }) {
               href={`${base}/${a.id}`}
               className="group block overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-lg"
             >
-              <PreviewViva pesada={a.pesada}>
-                <a.Preview />
-              </PreviewViva>
+              <div className="relative">
+                <PreviewViva pesada={a.pesada}>
+                  <a.Preview />
+                </PreviewViva>
+                {a.categoria === "Fondos" ? (
+                  <span className="pointer-events-none absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+                    Fondo de página
+                  </span>
+                ) : null}
+              </div>
               <div className="flex items-center justify-between gap-3 px-3.5 py-2.5">
                 <div className="min-w-0">
                   <h2 className="truncate text-[15px] font-semibold">{a.nombre}</h2>
