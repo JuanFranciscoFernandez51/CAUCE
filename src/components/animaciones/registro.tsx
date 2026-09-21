@@ -39,23 +39,16 @@ const FOTOS = [
   "https://res.cloudinary.com/dgtlyzyra/image/upload/jessdesign/audi-ambientacion",
 ];
 
-export type Animacion = {
-  id: string;
-  nombre: string;
-  origen: string;
-  categoria: string;
-  descripcion: string;
-  /** Cómo se la vendemos al cliente, en una frase. */
-  argumento: string;
-  /** Dónde vive el código fuente en el repo. */
-  ruta: string;
-  /** Snippet de uso listo para pegar en un proyecto. */
-  uso: string;
-  /** Vista previa viva, ya configurada para lucirse en un recuadro oscuro. */
-  Preview: () => ReactNode;
-};
+import { type Animacion } from "./tipos";
+import { ENTRADAS as RB_ANIMACIONES } from "./rb/registro-animations";
+import { ENTRADAS as RB_FONDOS } from "./rb/registro-backgrounds";
+import { ENTRADAS as RB_COMPONENTES } from "./rb/registro-components";
+import { ENTRADAS as RB_MICRO } from "./rb/registro-micro";
+import { ENTRADAS as RB_TEXTOS } from "./rb/registro-textanimations";
+export type { Animacion };
 
-export const ANIMACIONES: Animacion[] = [
+/** Las 10 portadas a mano primero; después toda la biblioteca libre de React Bits. */
+const PORTADAS: Animacion[] = [
   {
     id: "depth-carousel",
     nombre: "Depth Carousel",
@@ -347,3 +340,5 @@ export const ANIMACIONES: Animacion[] = [
     ),
   },
 ];
+
+export const ANIMACIONES: Animacion[] = [...PORTADAS, ...RB_ANIMACIONES, ...RB_FONDOS, ...RB_COMPONENTES, ...RB_MICRO, ...RB_TEXTOS];
