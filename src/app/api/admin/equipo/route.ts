@@ -6,7 +6,7 @@ import { guard, parseBody, serverError } from "../_utils";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
-  username: z.string().trim().min(3).max(40).regex(/^[a-zA-Z0-9._-]+$/, "Sin espacios ni símbolos raros"),
+  username: z.string().trim().toLowerCase().min(3).max(40).regex(/^[a-zA-Z0-9._-]+$/, "Sin espacios ni símbolos raros"),
   email: z.union([z.literal(""), z.email()]).optional(),
   password: z.string().min(8, "Al menos 8 caracteres").max(100),
 });
