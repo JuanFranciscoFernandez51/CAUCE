@@ -2,6 +2,8 @@ import { getAjustes } from "@/lib/ajustes";
 import { db } from "@/lib/db";
 import { ConfigForm } from "./config-form";
 import { EquipoPanel } from "./equipo-panel";
+import { PreciosPanel } from "./precios-panel";
+import { getPrecios } from "@/lib/precios";
 import { auth } from "@/lib/auth";
 import { TablaUsuarios } from "../usuarios/tabla-usuarios";
 
@@ -13,7 +15,7 @@ export const dynamic = "force-dynamic";
  * por defecto de los presupuestos y el equipo que entra al panel.
  */
 export default async function ConfigPage() {
-  const [ajustes, equipo, session, usuarios, clientes] = await Promise.all([
+  const [ajustes, equipo, session, usuarios, clientes, precios] = await Promise.all([
     getAjustes(),
     db.user.findMany({
       where: { role: "ADMIN" },
@@ -26,6 +28,7 @@ export default async function ConfigPage() {
       select: { id: true, username: true, name: true, email: true, role: true, osRole: true, clientId: true, createdAt: true },
     }),
     db.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } }),
+    getPrecios(),
   ]);
 
   return (
@@ -36,6 +39,19 @@ export default async function ConfigPage() {
           Los datos de acá salen en las propuestas y en los documentos que mandás.
         </p>
       </div>
+
+      <PreciosPanel
+        inicial={{
+          setupBaseUsd: precios.base.setupUsd,
+          mensualBaseUsd: precios.base.monthlyUsd,
+          precioComponenteUsd: precios.componenteUsd,
+          ivaPct: precios.ivaPct,
+          baseQueIncluye: precios.base.queIncluye,
+          piezas: precios.piezas,
+          espejos: precios.espejos,
+          escala: precios.escala,
+        }}
+      />
 
       <ConfigForm inicial={ajustes} />
 

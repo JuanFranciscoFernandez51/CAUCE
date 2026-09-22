@@ -18,14 +18,10 @@ const GRUPOS: { titulo: string; nota?: string; campos: { k: keyof Ajustes; label
     ],
   },
   {
-    titulo: "Valores por defecto",
-    nota: "Con esto arranca cada presupuesto nuevo; después se ajusta por cliente.",
+    titulo: "Presupuestos",
+    nota: "Los precios se editan arriba, en Precios de la web.",
     campos: [
-      { k: "setupBaseUsd", label: "Setup base (USD)", tipo: "number" },
-      { k: "mensualBaseUsd", label: "Mensual base (USD)", tipo: "number" },
-      { k: "precioComponenteUsd", label: "Precio por componente (USD)", tipo: "number" },
       { k: "dolarArs", label: "Dólar de referencia (ARS)", tipo: "number" },
-      { k: "ivaPct", label: "IVA (%)", tipo: "number" },
       { k: "validezDias", label: "Validez de la propuesta (días)", tipo: "number" },
     ],
   },

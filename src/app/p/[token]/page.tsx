@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getPricing } from "@/lib/pricing";
 import { PROCESOS_CATALOGO } from "@/lib/procesos-catalogo";
-import { ESPEJOS, PIEZA_BASE, PIEZAS, valorHorasUsdMes, VALOR_EMPLEADO_USD_MES } from "@/lib/piezas";
+import { valorHorasUsdMes, VALOR_EMPLEADO_USD_MES } from "@/lib/piezas";
+import { getPrecios } from "@/lib/precios";
 import { shotsDeSettings, type Shot } from "@/lib/casos";
 import { CurrentLines } from "@/components/public/cauce-mark";
 import { Card } from "@/components/ui";
@@ -30,6 +31,7 @@ export default async function PropuestaPage({ params }: { params: Promise<{ toke
   }
 
   const pricing = await getPricing().catch(() => null);
+  const { base: PIEZA_BASE, piezas: PIEZAS, espejos: ESPEJOS } = await getPrecios();
   const dolar = p.dolarArs || pricing?.dolarArs || 0;
   const iva = p.conIva ? 1 : 1 + p.ivaPct / 100;
   const setup = p.setupUsd * iva;

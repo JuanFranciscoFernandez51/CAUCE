@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicShell } from "@/components/public/shell";
 import { Reveal } from "@/components/public/menta";
-import { PIEZA_BASE, PIEZAS, ESPEJOS } from "@/lib/piezas";
+import { getPrecios } from "@/lib/precios";
 
-export const metadata: Metadata = {
-  title: "Precios",
-  description:
-    "Base USD 300 + 40/mes. Cada componente, USD 40. Negocio completo real desde USD 999. Sin letra chica: lo que ves es lo que pagás.",
-};
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const p = await getPrecios();
+  const desde = Math.min(...p.espejos.map((e) => e.setupUsd));
+  return {
+    title: "Precios",
+    description: `Base USD ${p.base.setupUsd} + ${p.base.monthlyUsd}/mes. Cada componente, USD ${p.componenteUsd}. Negocio completo real desde USD ${desde}. Sin letra chica: lo que ves es lo que pagás.`,
+  };
+}
 
 const WA =
   "https://wa.me/5492915757101?text=" +
@@ -16,9 +21,12 @@ const WA =
 
 const fmt = (n: number) => `USD ${n}`;
 
-export default function PreciosPage() {
+export default async function PreciosPage() {
+  const precios = await getPrecios();
+  const { base: PIEZA_BASE, piezas: PIEZAS, espejos: ESPEJOS } = precios;
   const grandes = PIEZAS.filter((p) => !p.micro);
   const micros = PIEZAS.filter((p) => p.micro);
+  const desde = Math.min(...ESPEJOS.map((e) => e.setupUsd));
 
   return (
     <PublicShell>
@@ -57,7 +65,7 @@ export default function PreciosPage() {
                 necesita, cuando lo necesita.
               </p>
               <div className="mt-5 border-t pt-5">
-                <p className="text-2xl font-bold">{fmt(40)} <span className="text-sm font-normal text-muted-foreground">cada uno</span></p>
+                <p className="text-2xl font-bold">{fmt(precios.componenteUsd)} <span className="text-sm font-normal text-muted-foreground">cada uno</span></p>
                 <p className="text-sm text-muted-foreground">+ su mensual chico (1 a 15 USD)</p>
               </div>
             </div>
@@ -75,21 +83,18 @@ export default function PreciosPage() {
                 mostramos abajo.
               </p>
               <div className="mt-5 border-t pt-5">
-                <p className="text-2xl font-bold">desde {fmt(999)}</p>
+                <p className="text-2xl font-bold">desde {fmt(desde)}</p>
                 <p className="text-sm text-muted-foreground">de creación + mensual según armado</p>
               </div>
             </div>
           </Reveal>
           <Reveal delay={270} className="h-full">
             <div className="flex h-full flex-col rounded-[28px] border border-black/5 bg-card p-6 shadow-[0_2px_24px_-10px_rgba(17,17,17,0.1)]">
-              <h2 className="font-display text-lg font-medium tracking-tight">Escala</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Empresas grandes, integraciones especiales, varios locales o
-                volúmenes fuera de serie.
-              </p>
+              <h2 className="font-display text-lg font-medium tracking-tight">{precios.escala.titulo}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{precios.escala.texto}</p>
               <div className="mt-5 border-t pt-5">
-                <p className="text-2xl font-bold">A medida</p>
-                <p className="text-sm text-muted-foreground">lo cotizamos juntos</p>
+                <p className="text-2xl font-bold">{precios.escala.precio}</p>
+                <p className="text-sm text-muted-foreground">{precios.escala.detalle}</p>
               </div>
             </div>
           </Reveal>
@@ -103,7 +108,7 @@ export default function PreciosPage() {
             </span>
             <h2 className="title-mega mt-4 text-3xl sm:text-4xl">Armá el tuyo como un lego</h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Cada componente cuesta <strong className="text-foreground">{fmt(40)} de
+              Cada componente cuesta <strong className="text-foreground">{fmt(precios.componenteUsd)} de
               creación</strong> más un mensual chico. Sumás y restás hasta que quede
               exactamente tu negocio.
             </p>

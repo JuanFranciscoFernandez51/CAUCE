@@ -120,3 +120,17 @@ export function valorHorasUsdMes(horasSemana: number): number {
   const horasMes = horasSemana * 4.33;
   return Math.round((horasMes * VALOR_EMPLEADO_USD_MES) / HORAS_MES);
 }
+
+/** Suma base + piezas elegidas con los precios que se le pasen (los vigentes de Configuración). */
+export function calcular(precios: { base: Pieza; piezas: Pieza[] }, keys: string[]): { setupUsd: number; monthlyUsd: number } {
+  let setupUsd = precios.base.setupUsd;
+  let monthlyUsd = precios.base.monthlyUsd;
+  for (const k of keys) {
+    const p = precios.piezas.find((x) => x.key === k);
+    if (p) {
+      setupUsd += p.setupUsd;
+      monthlyUsd += p.monthlyUsd;
+    }
+  }
+  return { setupUsd, monthlyUsd };
+}

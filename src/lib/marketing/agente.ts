@@ -1,12 +1,15 @@
 import { getAnthropic, MODEL_AGENT } from "@/lib/anthropic";
-import { ESPEJOS, PIEZA_BASE, PIEZAS, VALOR_EMPLEADO_USD_MES } from "@/lib/piezas";
+import { VALOR_EMPLEADO_USD_MES } from "@/lib/piezas";
+import { getPrecios, type Precios } from "@/lib/precios";
 
 /**
  * Agente de marketing de Cauce: genera publicaciones de IG y captions de ads
  * con el contexto real del negocio (piezas, precios, casos espejo).
  */
 
-const CONTEXTO_CAUCE = `
+/** Contexto de Cauce para el agente, con los precios vigentes de Configuración. */
+function contextoCauce({ base: PIEZA_BASE, piezas: PIEZAS, espejos: ESPEJOS }: Precios): string {
+  return `
 Cauce es un estudio argentino (Bahía Blanca) que le arma a las PyMEs su sistema
 completo: página web + sistema de gestión (Cauce OS) + automatizaciones, todo junto.
 No vende "una web": vende horas recuperadas — cada módulo reemplaza trabajo manual.
@@ -25,6 +28,7 @@ Tono: argentino, directo, de dueño de negocio a dueño de negocio. Sin humo té
 hablar de tiempo ahorrado, plata y orden — no de "software" ni "digitalización".
 Contacto: cauceapp.com.ar · Bahía Blanca.
 `.trim();
+}
 
 export type PublicacionGenerada = {
   titulo: string;
@@ -42,7 +46,7 @@ export async function generarPublicaciones(
   const res = await anthropic.messages.create({
     model: MODEL_AGENT,
     max_tokens: 3000,
-    system: `Sos el responsable de marketing de Cauce. Contexto del negocio:\n\n${CONTEXTO_CAUCE}\n\nGenerás publicaciones de Instagram listas para usar. Cada una tiene:
+    system: `Sos el responsable de marketing de Cauce. Contexto del negocio:\n\n${contextoCauce(await getPrecios())}\n\nGenerás publicaciones de Instagram listas para usar. Cada una tiene:
 - titulo: nombre interno corto (para la lista del admin)
 - caption: texto final del post (300-800 caracteres, hook en la primera línea, 1-2 emojis por bloque, cierre con CTA a mandar mensaje, 5-8 hashtags al final: #cauce #bahiablanca #pymes + específicos)
 - idea: brief visual DETALLADO para diseñar la pieza (composición, textos que van sobre la imagen, colores — la marca usa azul petróleo y blanco, estilo limpio tipo SaaS). Si es carrusel, describí cada slide.
@@ -88,7 +92,7 @@ export async function sugerirCaptionAd(objetivo: string, brief?: string): Promis
   const res = await anthropic.messages.create({
     model: MODEL_AGENT,
     max_tokens: 400,
-    system: `Sos copywriter de Meta Ads para Cauce. Contexto:\n\n${CONTEXTO_CAUCE}\n\nReglas del caption de anuncio:
+    system: `Sos copywriter de Meta Ads para Cauce. Contexto:\n\n${contextoCauce(await getPrecios())}\n\nReglas del caption de anuncio:
 - 150-280 caracteres, hook con emoji al inicio
 - Beneficio concreto en horas/plata, no features
 - CTA acorde al objetivo (${OBJETIVO_LABEL[objetivo] ?? objetivo})

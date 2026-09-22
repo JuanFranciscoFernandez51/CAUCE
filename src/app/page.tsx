@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { BizArea } from "@prisma/client";
 import Link from "next/link";
-import { getPricing, fmtUsd } from "@/lib/pricing";
+import { fmtUsd } from "@/lib/pricing";
 import { AREA_LABELS, CASOS } from "@/lib/casos";
 import { catalogoPorArea } from "@/lib/procesos-catalogo";
 import { PublicShell } from "@/components/public/shell";
-import { ESPEJOS, PIEZA_BASE } from "@/lib/piezas";
+import { getPrecios } from "@/lib/precios";
 import { Doors } from "@/components/public/doors";
 import { Reveal, StepsFlow } from "@/components/public/menta";
 import { CASOS_REALES } from "@/lib/casos-reales";
@@ -155,7 +155,8 @@ function DiaCard({ className = "" }: { className?: string }) {
 }
 
 export default async function LandingPage() {
-  const pricing = await getPricing();
+  const precios = await getPrecios();
+  const [espejo] = precios.espejos;
   const byArea = catalogoPorArea();
 
   const areaCard = (area: BizArea, delay: number) => {
@@ -578,7 +579,7 @@ export default async function LandingPage() {
               </h2>
               <p className="mt-5 text-lg text-muted-foreground">
                 Pagás una base y le sumás solo las piezas que tu negocio usa. Precios en USD
-                + IVA {pricing.ivaPct}%.
+                + IVA {precios.ivaPct}%.
               </p>
             </Reveal>
           </div>
@@ -591,18 +592,18 @@ export default async function LandingPage() {
                     1 · La base (va siempre)
                   </h3>
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {PIEZA_BASE.queIncluye}
+                    {precios.base.queIncluye}
                   </p>
                   <div className="mt-5">
                     <p className="font-display text-3xl font-medium">
-                      {fmtUsd(PIEZA_BASE.setupUsd)}
+                      {fmtUsd(precios.base.setupUsd)}
                       <span className="text-sm font-normal text-muted-foreground">
                         {" "}
                         por única vez
                       </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      + {fmtUsd(PIEZA_BASE.monthlyUsd)}/mes (hosting, soporte y mejoras)
+                      + {fmtUsd(precios.base.monthlyUsd)}/mes (hosting, soporte y mejoras)
                     </p>
                   </div>
                 </div>
@@ -621,7 +622,7 @@ export default async function LandingPage() {
                   </p>
                   <div className="mt-5">
                     <p className="font-display text-3xl font-medium">
-                      {fmtUsd(40)}
+                      {fmtUsd(precios.componenteUsd)}
                       <span className="text-sm font-normal text-muted-foreground">
                         {" "}
                         por componente
@@ -644,18 +645,18 @@ export default async function LandingPage() {
                     </h3>
                   </div>
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {ESPEJOS[0].nombre}: {ESPEJOS[0].historia}
+                    {espejo.nombre}: {espejo.historia}
                   </p>
                   <div className="mt-5">
                     <p className="font-display text-3xl font-medium">
-                      desde {fmtUsd(ESPEJOS[0].setupUsd)}
+                      desde {fmtUsd(espejo.setupUsd)}
                       <span className="text-sm font-normal text-muted-foreground">
                         {" "}
                         todo armado
                       </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      + {fmtUsd(ESPEJOS[0].monthlyUsd)}/mes con soporte directo
+                      + {fmtUsd(espejo.monthlyUsd)}/mes con soporte directo
                     </p>
                   </div>
                 </div>
@@ -665,16 +666,15 @@ export default async function LandingPage() {
               <CardGlow>
                 <div className="flex h-full flex-col p-6">
                   <h3 className="font-display text-lg font-medium tracking-tight">
-                    4 · Escala
+                    4 · {precios.escala.titulo}
                   </h3>
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    Para empresas grandes: desarrollos a medida, integraciones con tus
-                    sistemas, infraestructura dedicada y equipo asignado. Lo armamos juntos.
+                    {precios.escala.texto}
                   </p>
                   <div className="mt-5">
-                    <p className="font-display text-3xl font-medium">A medida</p>
+                    <p className="font-display text-3xl font-medium">{precios.escala.precio}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      valores según el proyecto
+                      {precios.escala.detalle}
                     </p>
                   </div>
                 </div>
